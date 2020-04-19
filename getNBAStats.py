@@ -1,7 +1,7 @@
 import re
 import requests
 from bs4 import BeautifulSoup
-from googlesearch import search
+#from googlesearch import search
 import pandas as pd
 import csv
 
@@ -70,18 +70,16 @@ def appendValuesToNBALists(l):
     for i in range(0,5):
         NBA_STATS[i].append(l[i])
 
-populateNBAStatistics(all)
 bigs = pd.read_csv("bigs.csv")
-bigs['Classification'] = 'B'
 guards = pd.read_csv("guards.csv")
-guards['Classification'] = 'G'
 wings = pd.read_csv("wings.csv")
-wings['Classification'] = 'W'
-nba = pd.read_csv("all_nba_stats.csv")
-all = bigs.append(guards).append(wings)
+all = bigs.append(guards, sort=False).append(wings, sort=False)
+populateNBAStatistics(all)
+#all.drop(all.columns[[0, 1]], axis = 1, inplace = True) might be necessary? 
+nba = pd.read_csv('all_nba_stats.csv')
 all['NBA MPG'] = nba['NBA MPG']
 all['NBA WSP48'] = nba['NBA WSP48']
 all['NBA BPM'] = nba['NBA BPM']
 all['NBA VORP'] = nba['NBA VORP']
 all['NBA PLUSMINUS'] = nba['NBA PLUSMINUS']
-all.to_csv('master.csv')
+all.to_csv("master.csv")
