@@ -1,7 +1,6 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-#import statsmodels.api as sm
 
 graphFieldNames = ['label', 'x-axis', 'y-axis']
 
@@ -16,6 +15,7 @@ def main():
         columnIndexes.append(getIndexOfColumn(graphFieldName, columnCount))
     graph(master, columnIndexes)
 
+# Get CSV File to be graphed
 def getCSVFile():
     while True:
         file_name = input("What csv file would you like to graph? ").strip()
@@ -26,6 +26,7 @@ def getCSVFile():
             continue
         return master
 
+# Get the index of the column being requested - this is to pass into the graphing method
 def getIndexOfColumn(graph_part, columnCount):
     while True:
         try:
@@ -38,6 +39,7 @@ def getIndexOfColumn(graph_part, columnCount):
             continue
         return columnIndex
 
+# Produce the scatter plot using matplotlib.pyplot
 def graph(tableName, columnIndexes):
     xAxisRowIndex = int(columnIndexes[1])
     yAxisRowIndex = int(columnIndexes[2])
