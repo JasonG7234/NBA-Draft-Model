@@ -1,11 +1,8 @@
-import re
-import requests
-from bs4 import BeautifulSoup
-#from googlesearch import search
+from utils import *
+from googlesearch import search
 import pandas as pd
 import csv
 
-comm = re.compile("<!--|-->")
 CUR_YEAR = "2019-20"
 MPG = []
 WSP48 = []
@@ -14,6 +11,29 @@ VORP = []
 PLUSMINUS = []
 NBA_STATS = [MPG, WSP48, BPM, VORP, PLUSMINUS]
 
+def main():
+    all = createPlayerListFromCSVs()
+    nba = pd.read_csv('all_nba_stats.csv')
+    if (nba.empty):
+        nba = populateNBAStatistics(all)
+    addNBAStatsToMasterList(all, nba)
+
+# Import all necessary players to create one player DataFrame to work with
+def createPlayerListFromCSVs():
+    all = pd.DataFrame()
+    while True:
+        file_name = input("Enter a CSV file with player information. If you have entered all of them, enter 'stop' ").strip()
+        if (file_name == 'stop'):
+            break
+        try:
+            csv = pd.read_csv(file_name)
+            all = all.append(csv, sort=False)
+        except FileNotFoundError:
+            print("ERROR - File not found. Please try again.")
+            continue
+    return all
+
+# For each player in supplied panda dataframe, parse data through BasketballReference page
 def populateNBAStatistics(all):
     nba_stats = all[['First Name', 'Last Name']].copy()
     for index, row in all.iterrows():
@@ -41,16 +61,14 @@ def populateNBAStatistics(all):
     nba_stats['NBA PLUSMINUS'] = PLUSMINUS
     nba_stats.to_csv('all_nba_stats.csv')
 
+# Go to Google and make a basic search for "bkref + " player_name
+# Figured this was more accurate than going to bkref's page directly bc their searching is not as direct
 def searchGoogle(query):
 	for j in search(query, num=1, stop=1):
 			url = j
 	return url
 
-def findSite(url):
-	response = requests.get(url)
-	html = response.content.decode("utf-8")
-	return BeautifulSoup(re.sub("<!--|-->","", html), "html.parser")
-
+# Check the designated table for the designated datastat
 def findGivenStatOnPlayerPage(soup, table_ID, datastat_IDs):
     table = soup.find("div", {"id": table_ID})
     list = []
@@ -66,20 +84,20 @@ def findGivenStatOnPlayerPage(soup, table_ID, datastat_IDs):
             list.append("0")
     return list
 
+# For each player, add an entry to the NBA stats lists
 def appendValuesToNBALists(l):
     for i in range(0,5):
         NBA_STATS[i].append(l[i])
 
-bigs = pd.read_csv("bigs.csv")
-guards = pd.read_csv("guards.csv")
-wings = pd.read_csv("wings.csv")
-all = bigs.append(guards, sort=False).append(wings, sort=False)
-populateNBAStatistics(all)
-#all.drop(all.columns[[0, 1]], axis = 1, inplace = True) might be necessary? 
-nba = pd.read_csv('all_nba_stats.csv')
-all['NBA MPG'] = nba['NBA MPG']
-all['NBA WSP48'] = nba['NBA WSP48']
-all['NBA BPM'] = nba['NBA BPM']
-all['NBA VORP'] = nba['NBA VORP']
-all['NBA PLUSMINUS'] = nba['NBA PLUSMINUS']
-all.to_csv("master.csv")
+# Final step, add NBA stats to master list and export to CSV
+def addNBAStatsToMasterList(all, nba):
+    all['NBA MPG'] = nba['NBA MPG']
+    all['NBA WSP48'] = nba['NBA WSP48']
+    all['NBA BPM'] = nba['NBA BPM']
+    all['NBA VORP'] = nba['NBA VORP']
+    all['NBA PLUSMINUS'] = nba['NBA PLUSMINUS']
+    #all.drop(all.columns[[0, 1]], axis = 1, inplace = True) might be necessary? 
+    all.to_csv("master.csv", index=False)
+
+if __name__ == "__main__":
+    main()
