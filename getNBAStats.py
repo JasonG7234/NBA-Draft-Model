@@ -1,5 +1,4 @@
 from utils import *
-from googlesearch import search
 import pandas as pd
 import csv
 
@@ -42,7 +41,7 @@ def populateNBAStatistics(all):
             print(player_name + " is still in college.")
             appendValuesToNBALists(["?", "?", "?", "?", "?"])
             continue
-        url = searchGoogle("bkref " + player_name)
+        url = searchGoogle("bkref " + player_name, 10)
         if("basketball-reference.com/players" not in url):
             print(player_name + " has yet to record any NBA stats. Adding all zeros.")
             appendValuesToNBALists(["0", "0", "0", "0", "0"])
@@ -61,19 +60,12 @@ def populateNBAStatistics(all):
     nba_stats['NBA PLUSMINUS'] = PLUSMINUS
     nba_stats.to_csv('all_nba_stats.csv')
 
-# Go to Google and make a basic search for "bkref + " player_name
-# Figured this was more accurate than going to bkref's page directly bc their searching is not as direct
-def searchGoogle(query):
-	for j in search(query, num=1, stop=1):
-			url = j
-	return url
-
 # Check the designated table for the designated datastat
 def findGivenStatOnPlayerPage(soup, table_ID, datastat_IDs):
-    table = soup.find("div", {"id": table_ID})
+    table = soup.find('div', {'id': table_ID})
     list = []
     if table:
-        career_stats = table("tfoot")[0] #Guarantees first row in the footer (career)
+        career_stats = table('tfoot')[0] #Guarantees first row in the footer (career)
         for datastat_ID in datastat_IDs:
             stat = (career_stats.find("td", {"data-stat": datastat_ID})).getText()
             print("Found stat for " + datastat_ID + ": " + stat)
