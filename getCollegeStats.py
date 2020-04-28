@@ -10,7 +10,7 @@ currentYear = datetime.datetime.now().year
 
 def main():
     global master
-    if not(os.path.isfile('master.csv')):
+    if not(os.path.isfile('temp_master.csv')):
         addAllCollegeBasketballProspects()
         addRSCIRankAsColumn()
         while True:
@@ -68,14 +68,20 @@ def addAllCollegeBasketballProspects():
             yearDataFrame = pd.DataFrame(top100, columns=['Season', 'Rank', 'Change', 'Name', 'Height', 'Weight', 'Position', 'School', 'Class'])
         master = master.append(yearDataFrame, ignore_index=True)
         yearCounter = yearCounter + 1
-    master = master.drop(['Rank', 'Change'], axis=1) # Remove the two unnecessary columns from the NBADraft table 
+    removeNonCollegeBasketballProspects()
     print("Done! Moving onto step 2.")
+    
+def removeNonCollegeBasketballProspects():
+    
+    global master
+    
+    master = master.drop(['Rank', 'Change'], axis=1) # Remove the two unnecessary columns from the NBADraft table 
+    master = master[master.Class in ["Fr.", "So.", "Jr.", "Sr."]] # Remove all international players
+    master = master[master.School in ["JUCO", "USA"]] # Remove all players without any affiliation to a college 
 
 def addRSCIRankAsColumn():
     """Get the RSCI rank from DraftExpress and add it as a column to the master DataFrame.
-    I chose to use DraftExpress because 247sports only loads the top 50, and makes you press 'Load More'.
-    Also, might be beneficial to do some manual data cleaning in the CSV... took me like ~30 minutes to fix the names of the prospects
-    who were unranked, and also add some rankings if 247sports had them as like composite 435 or whatever..."""
+    I chose to use DraftExpress because 247sports only loads the top 50, and makes you press 'Load More'."""
 
     global master
     global currentYear
@@ -107,6 +113,21 @@ def addRSCIRankAsColumn():
                 if not(booleanVal):
                     print("Could not find a match for " + realName)
         yearCounter = yearCounter + 1
+    addRemainingRSCIRankings()
+    
+def addRemainingRSCIRankings():
+    """For every player not found on DraftExpress, let's search for their 247 Composite rankings and add that in.
+    If we can't find that, just assume they were entirely unranked."""
+    
+    global master
+    
+    print("==============================================")
+    print("STEP 2.5 - Getting the RSCI ranks of all of the remaining prospects")
+    print("==============================================")
+    
+    for index, row in master.iterrows():
+        if (not row['RSCI'] and " " not in row['Name']):
+            print(row['Name'])
 
 def addCollegeStatsFromBasketballReference():
     """Get all advanced college stats for each player by scraping the relevant table from basketballreference.
@@ -125,66 +146,57 @@ def addCollegeStatsFromBasketballReference():
         soup = getPlayersBasketballReferencePage(row)
         if (soup):
             # Step 1 -> Get advanced stats, depending on what is null
-            playerStats.extend(getAdvancedStats(soup, advancedColumnIDs))
+            playerStats.extend(getAdvancedStats(soup))
             #Step 2 -> Get ORTG and DRTG, if it exists
             lastSeason = getLastSeasonForTable(soup, 'players_per_poss')
             if (lastSeason): playerStats = getRelevantStats(lastSeason, 25, playerStats)
             else: playerStats.extend(["", ""])
-            
             # Step 3 -> Add on AST/TOV%
             playerStats.append(getASTtoTOVratio(soup))
         else:
+            # If there is no Basketball-Reference page, assume there is no page and return blank entries 
             playerStats = [""] * 27
-        print(len(playerStats))
         collegeStats.append(playerStats)
-    master = pd.concat(
-        [
-            master,
-            pd.DataFrame(
-                collegeStats,
-                index=master.index,
-                columns=['G','GS','MP','PER','TS%','eFG%','3PAr','FTr','PProd','ORB%','DRB%','TRB%','AST%',
-                    'STL%','BLK%','TOV%','USG%','OWS','DWS','WS','WS/40','OBPM','DBPM','BPM', 'ORTG', 'DRTG', 'AST/TOV']
-            )
-        ], axis=1
-    )
+    # Add the new DataFrameto the master list
+    master = pd.concat([master, pd.DataFrame(collegeStats,index=master.index,columns=COLUMN_NAMES)], axis=1)
 
 def getPlayersBasketballReferencePage(row):
-    name = row['Name'].replace("'", "").replace(" ", "-").lower()
-    playerNameInURL = checkValueInDictOfExceptions(name, playerExceptions, name)
-    indexValueInURL = checkValueInDictOfExceptions(name, indexExceptions, 1)
-    while index in range(1,6):
-        url = "https://www.sports-reference.com/cbb/players/" + playerNameInURL + "-" + str(index) + ".html"
-        soup = findSite(url)
-        if (soup.find('table', {'id':'players_advanced'})):
-            school = soup.find('div', {'itemtype': 'https://schema.org/Person'})
-            schoolNameInInfoDiv = checkValueInDictOfExceptions(row['School'], schoolExceptions, row['School'])
-            if (school and schoolNameInInfoDiv in school.getText()):
-                    return soup
-            else:
-                print("Common name?")
-                index = index + 1
-        else:
-            break # Cannot find player
+    name = row['Name'].replace("'", "").replace(" ", "-").lower() # Translate player name to how it would appear in the URL
+    playerNameInURL = checkValueInDictOfExceptions(name, PLAYER_EXCEPTIONS, name)
+    indexValueInURL = checkValueInDictOfExceptions(name, INDEX_EXCEPTIONS, 1)
+    if(indexValueInURL == 1):
+        while index in range(1,5): # We check first five profiles of each name
+            url = "https://www.sports-reference.com/cbb/players/" + playerNameInURL + "-" + str(index) + ".html"
+            soup = findSite(url)
+            if (soup.find('table', {'id':'players_advanced'})): # If there is an advanced table (some older profiles don't have them)
+                school = soup.find('div', {'itemtype': 'https://schema.org/Person'}) # Find the div that holds the player's school
+                schoolNameInInfoDiv = checkValueInDictOfExceptions(row['School'], SCHOOL_EXCEPTIONS, row['School']) # Get the school name
+                if (school and schoolNameInInfoDiv in school.getText()): # If the expected school name is in the school div
+                    return soup # We found the right player and can return
+                else: # Otherwise, we found the wrong player, let's try again with the next player
+                    print("Common name?")
+                    index = index + 1
+    else:
+        url = "https://www.sports-reference.com/cbb/players/" + playerNameInURL + "-" + str(indexValueInURL) + ".html"
+        return findSite(url)
     print("Sorry, we couldn't find any college stats for : " +row['Name'])
     return None
 
 def checkValueInDictOfExceptions(name, exceptionsDict, default):
-    if (name in exceptionsDict):
-        return exceptionsDict.get(name)
-    return default
+    """Performs a dictionary lookup to try to map the player's name/school to the correct Basketball-Reference page."""
+    return exceptionsDict.get(name, default)
 
-def getAdvancedStats(soup, advancedColumnIDs):
+def getAdvancedStats(soup):
     playerAdvancedStats = [] #Initialize empty table to store stats
     lastSeason = getLastSeasonForTable(soup, 'players_advanced')
     stats = lastSeason.findChildren('td')[2:]
     statsIndex = 0 # Index of which stat we are on in the player's Advanced table
     allIndex = 0 # Index of which stat we SHOULD be on, according to all possible stats in the Advanced table
-    while allIndex in range(0, len(advancedColumnIDs)): 
+    while allIndex in range(0, len(ADVANCED_COLUMN_IDS)): 
         try:
             td = stats[statsIndex] # Get the stat from the given index in the player's Advanced table
             if (td.getText()): # If the stat we are at (the td element) has content and is not blank...
-                if (td['data-stat'] == advancedColumnIDs[allIndex]): # Check if that is the stat we are expecting to see!
+                if (td['data-stat'] == ADVANCED_COLUMN_IDS[allIndex]): # Check if that is the stat we are expecting to see!
                     # This is because in Basketball-Reference, for older players some columns won't even show up, like PER
                     playerAdvancedStats.append(td.getText()) 
                     statsIndex = statsIndex + 1
@@ -198,7 +210,7 @@ def getAdvancedStats(soup, advancedColumnIDs):
                     playerAdvancedStats.append("")
                     statsIndex = statsIndex + 1
         except IndexError: # However, if we finish indexing through the table but there are still advanced stats to be added...
-           if not(advancedColumnIDs[allIndex] == 'bpm-dum'):
+           if not(ADVANCED_COLUMN_IDS[allIndex] == 'bpm-dum'):
                 playerAdvancedStats.append("") # Just add a blank stat
         allIndex = allIndex + 1 # Iterate the index to pull the next stat we expect to see 
     return playerAdvancedStats
@@ -225,16 +237,12 @@ def getRelevantStats(seasonRow, columnIndex, playerStats):
     return playerStats
 
 def addCollegeStatsFromHoopMath():
-    print("Here is where we will add stats from hoopmath")
+    print("==============================================")
+    print("STEP 4 - Getting the last year's Hoop-Math data for all the prospects")
+    print("==============================================")
 
 def fixMasterBeforeExporting():
-    class_list = ["Fr.", "So.", "Jr.", "Sr."]
     global master
-
-    master = master[np.equal(master.Class, class_list[0])
-    | np.equal(master.Class, class_list[1])
-     | np.equal(master.Class, class_list[2])
-      | np.equal(master.Class, class_list[3])]
     master.to_csv('temp_master.csv', index=False)
 
 

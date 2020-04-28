@@ -6,7 +6,7 @@ import urllib
 
 comm = re.compile("<!--|-->")
 
-playerExceptions = {
+PLAYER_EXCEPTIONS = {
 	"e'twaun-moore" : "etwaun-moore",
     "wendell-carter" : "wendell-carterjr",
     "marvin-bagley" : "marvin-bagleyiii",
@@ -50,7 +50,7 @@ playerExceptions = {
 	"obi-toppin" : "obadiah-toppin"
 }
 
-indexExceptions = {
+INDEX_EXCEPTIONS = {
     "gary-payton" : 2,
     "kyle-anderson" : 3,
     "thomas-robinson" : 2,
@@ -66,19 +66,22 @@ indexExceptions = {
 	"chris-smith" : 19
 }
 
-schoolExceptions = {
+SCHOOL_EXCEPTIONS = {
 	"North Carolina" : "UNC",
 	"Arizona St." : "Arizona State",
 	"Central Florida" : "UCF",
 	"Illinois-Chicago" : "UIC",
 	"Louisiana Lafayette" : "Louisiana",
 	"UAB" : "Alabama-Birmingham",
-	"Southern Miss." : "Southern Miss"
+	"Southern Miss." : "Southern Miss",
+	"Massachusetts" : "UMass"
 }
 
-advancedColumnIDs = ['g','gs','mp','per','ts_pct','efg_pct','fg3a_per_fga_pct','fta_per_fga_pct','pprod','orb_pct','drb_pct','trb_pct','ast_pct',
+ADVANCED_COLUMN_IDS = ['g','gs','mp','per','ts_pct','efg_pct','fg3a_per_fga_pct','fta_per_fga_pct','pprod','orb_pct','drb_pct','trb_pct','ast_pct',
     'stl_pct','blk_pct','tov_pct','usg_pct','ws-dum','ows','dws','ws','ws_per_40','bpm-dum','obpm','dbpm','bpm']  
     
+COLUMN_NAMES = ['G','GS','MP','PER','TS%','eFG%','3PAr','FTr','PProd','ORB%','DRB%','TRB%','AST%',
+                    'STL%','BLK%','TOV%','USG%','OWS','DWS','WS','WS/40','OBPM','DBPM','BPM', 'ORTG', 'DRTG', 'AST/TOV']
 
 def findSite(url):
 	"""Use BeautifulSoup to head to designated URL and return BeautifulSoup object.
