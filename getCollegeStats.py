@@ -152,13 +152,14 @@ def addCollegeStatsFromBasketballReference():
 def getPlayersBasketballReferencePage(row):
     name = row['Name'].replace("'", "").replace(" ", "-").lower()
     playerNameInURL = checkValueInDictOfExceptions(name, playerExceptions, name)
-    index = checkValueInDictOfExceptions(name, indexExceptions, 1)
+    indexValueInURL = checkValueInDictOfExceptions(name, indexExceptions, 1)
     while index in range(1,6):
         url = "https://www.sports-reference.com/cbb/players/" + playerNameInURL + "-" + str(index) + ".html"
         soup = findSite(url)
         if (soup.find('table', {'id':'players_advanced'})):
             school = soup.find('div', {'itemtype': 'https://schema.org/Person'})
-            if (school and row['School'] in school.getText()):
+            schoolNameInInfoDiv = checkValueInDictOfExceptions(row['School'], schoolExceptions, row['School'])
+            if (school and schoolNameInInfoDiv in school.getText()):
                     return soup
             else:
                 print("Common name?")

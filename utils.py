@@ -7,6 +7,7 @@ import urllib
 comm = re.compile("<!--|-->")
 
 playerExceptions = {
+	"e'twaun-moore" : "etwaun-moore",
     "wendell-carter" : "wendell-carterjr",
     "marvin-bagley" : "marvin-bagleyiii",
     "fuquan-edwin" : "edwin-fuquan",
@@ -35,7 +36,18 @@ playerExceptions = {
 	"bam-adebayo" : "edrice-adebayo",
 	"dennis-smith" : "dennis-smithjr",
 	"yogi-ferrell" : "kevin-farrell",
-	"anthony-barber" : "anthony-cat-barber"
+	"anthony-barber" : "anthony-cat-barber",
+	"christ-koumadje" : "jeanmarc-koumadje",
+	"dewan-hernandez" : "dewan-huell",
+	"dez-wells" : "dezmine-wells",
+	"bryce-dejean-jones" : "bryce-jones",
+	"ronald-roberts" : "ronald-roberts-",
+	"ed-daniel" : "edward-daniel",
+	"cam-long" : "cameron-long",
+	"art-parakhouski" : "artsiom-parakhouski",
+	"landers-nolley" : "landers-nolleyii",
+	"terrence-shannon" : "terrence-shannonjr",
+	"obi-toppin" : "obadiah-toppin"
 }
 
 indexExceptions = {
@@ -47,7 +59,21 @@ indexExceptions = {
 	"aj-lawson" : 12,
 	"reggie-perry" : 2,
 	"lonnie-walker" : 2,
-	"eric-mika" : 2
+	"chris-walker" : 6,
+  	"eric-mika" : 2,
+	"charlie-brown" : 2,
+	"ronald-williams" : 3,
+	"chris-smith" : 19
+}
+
+schoolExceptions = {
+	"North Carolina" : "UNC",
+	"Arizona St." : "Arizona State",
+	"Central Florida" : "UCF",
+	"Illinois-Chicago" : "UIC",
+	"Louisiana Lafayette" : "Louisiana",
+	"UAB" : "Alabama-Birmingham",
+	"Southern Miss." : "Southern Miss"
 }
 
 advancedColumnIDs = ['g','gs','mp','per','ts_pct','efg_pct','fg3a_per_fga_pct','fta_per_fga_pct','pprod','orb_pct','drb_pct','trb_pct','ast_pct',
