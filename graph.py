@@ -1,3 +1,4 @@
+from utils as *
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -5,7 +6,7 @@ import matplotlib.pyplot as plt
 graphFieldNames = ['label', 'x-axis', 'y-axis']
 
 def main():
-    master = getCSVFile()
+    master = getCSVFile("graph? ")
     columnCount = 0
     for col in master.columns:
         print("At index " + str(columnCount) + ", the column name is " + col)
@@ -14,17 +15,6 @@ def main():
     for graphFieldName in graphFieldNames:
         columnIndexes.append(getIndexOfColumn(graphFieldName, columnCount))
     graph(master, columnIndexes)
-
-# Get CSV File to be graphed
-def getCSVFile():
-    while True:
-        file_name = input("What csv file would you like to graph? ").strip()
-        try:
-            master = pd.read_csv(file_name)
-        except FileNotFoundError:
-            print("ERROR - File not found. Please try again.")
-            continue
-        return master
 
 # Get the index of the column being requested - this is to pass into the graphing method
 def getIndexOfColumn(graph_part, columnCount):
