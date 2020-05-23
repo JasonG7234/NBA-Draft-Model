@@ -13,22 +13,23 @@ def main():
 def performLogReg(dataframe):
     X = pd.DataFrame()
     # Update if new stats are added
-    dataframe = dataframe[LOG_REG_COLUMNS] # Features
+    Y = pd.DataFrame(index=np.arange(len(dataframe)), columns=['Result'])
     dataframe = dataframe.replace('', np.nan)
     for index, row in dataframe.iterrows():
-        if (row.isnull().values.all()):
+        if (row.isnull().values.all() or row['NBA GP'] == '?'):
             dataframe = dataframe.drop(index)
+            Y = Y.drop(index)
+            continue
         elif (row.isnull().values.any()):
             dataframe = dataframe.fillna(dataframe.mean())
-    X = dataframe
-    Y = pd.DataFrame(index=np.arange(len(X)), columns=np.arange(0))
-    Y['Result'] = '' # Target Variable
-
-    printEveryElement(X)
+        returnVal = isNBAPlayer(row)
+        Y.loc[index, 'Result'] = returnVal
+    X = dataframe[LOG_REG_COLUMNS] # Features
+    Y = Y.astype('int')
 
     X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2, shuffle=True)
     logreg = LogisticRegression()
-
+    
     logreg.fit(X_train, Y_train.values.ravel())  # Fits model with data
     Y_pred = logreg.predict(X_test)
 
@@ -59,11 +60,6 @@ def performLogReg(dataframe):
 
     return logreg
 
-def printEveryElement(dataframe):
-    for index, row in dataframe.iterrows():
-        for col in LOG_REG_COLUMNS:
-            if(row[col] == ''):
-                print("Here is a possible culprit! Index " + str(index) + " Column " + col)
 
 if __name__ == "__main__":
     main()

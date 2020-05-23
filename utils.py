@@ -1,6 +1,8 @@
+import datetime
 import re
 import requests
 import string
+import unidecode
 import urllib
 import pandas as pd
 from bs4 import BeautifulSoup
@@ -8,6 +10,33 @@ from googlesearch import search
 
 comm = re.compile("<!--|-->")
 pattern = re.compile('[\W_]+')
+
+OVERALL_NAME_EXCEPTIONS = {
+	"Moe Harkless" : "Maurice Harkless",
+	"Cameron Reddish" : "Cam Reddish",
+	"James McAdoo" : "James Michael McAdoo",
+	"Cam Long" : "Cameron Long",
+	"Simi Shittu" : "Simisola Shittu",
+	"Kevin Porter" : "Kevin Porter Jr.",
+	"Gary Trent" : "Gary Trent Jr.",
+	"Dennis Smith" : "Dennis Smith Jr.",
+	"Tashawn Thomas" : "TaShawn Thomas",
+	"DeShaun Thomas" : "Deshaun Thomas",
+	"Glen Rice" : "Glen Rice Jr."
+}
+
+OVERALL_COLLEGE_EXCEPTIONS = {
+	"PJ Hairston" : "UNC",
+    "Glen Rice" : "Georgia Tech",
+    "Nick Barbour" : "High Point",
+	"Charlie Westbrook" : "South Dakota"
+}
+
+OVERALL_SCHOOL_EXCEPTIONS = {
+	"St. Mary's" : "Saint Mary's", 
+	"Massachusetts" : "UMass",
+	"North Carolina" : "UNC",
+}
 
 COMMON_NAMES = [
 	"Tony Mitchell",
@@ -21,23 +50,28 @@ COMMON_NAMES = [
 	"Mike Scott",
 	"Chris Wright",
 	"Gary Clark",
-	"Chris Smith"
+	"Chris Smith",
+	"James Johnson",
+	"Marcus Thornton"
 ]
 
 OVERALL_RSCI_EXCEPTIONS = {
-	"Marcus Johnson" : 221
-}
-
-OVERALL_NAME_EXCEPTIONS = {
-	"Moe Harkless" : "Maurice Harkless",
-	"Cameron Reddish" : "Cam Reddish",
-	"James McAdoo" : "James Michael McAdoo"
-}
-
-OVERALL_SCHOOL_EXCEPTIONS = {
-	"St. Mary's" : "Saint Mary's", 
-	"Massachusetts" : "UMass",
-	"North Carolina" : "UNC",
+	"Marcus Johnson" : 51,
+	"Zach Norvell" : 103,
+	"Vince Edwards" : 121,
+	"James Blackmon" : 20,
+	"Andrew White" : 54,
+	"Justin Jackson" : 9,
+	"Caris LeVert" : 239,
+	"Tu Holloway" : 181,
+	"Jeff Allen" : 83,
+	"Darington Hobson" : 146,
+	"Manny Harris" : 37,
+	"DeSean Butler" : 107,
+	"Tiny Gallon" : 10,
+	"Dar Tucker" : 46,
+	"Jeffery Taylor" : 48,
+	"Raymond Spalding" : 42
 }
 
 COLLEGE_NAME_EXCEPTIONS = {
@@ -51,7 +85,7 @@ COLLEGE_NAME_EXCEPTIONS = {
     "tim-hardaway" : "tim-hardaway-jr",
     "tu-holloway" : "terrell-holloway",
     "bernard-james" : "bernard-james-",
-	"gary-trent" : "gary-trentjr",
+	"gary-trent-jr" : "gary-trentjr",
 	"simi-shittu" : "simisola-shittu",
 	"kira-lewis" : "kira-lewisjr",
 	"stephen-zimmerman" : "stephen-zimmermanjr",
@@ -59,7 +93,7 @@ COLLEGE_NAME_EXCEPTIONS = {
 	"rob-gray" : "robert-grayjr",
 	"vernon-carey" : "vernon-careyjr",
 	"zach-norvell" : "zach-norvelljr",
-	"kevin-porter" : "kevin-porterjr",
+	"kevin-porter-jr" : "kevin-porterjr",
 	"kz-okpala" : "kezie-okpala",
 	"ja-morant" : "temetrius-morant",
 	"jo-lual-acuil" : "jo-acuil",
@@ -114,6 +148,12 @@ NBA_NAME_EXCEPTIONS = {
 	"BJ Mullens" : "Byron Mullens",
 	"Patrick Mills" : "Patty Mills",
 	"Jeffery Taylor" : "Jeff Taylor",
+	"Jahmius Ramsey" : "Jahmi'us Ramsey",
+	"Simi Shittu" : "Simisola Shittu",
+	"Mohamed Bamba" : "Mo Bamba",
+	"Raymond Spalding" : "Ray Spalding",
+	"Joseph Young" : "Joe Young",
+	"Kahlil Felder" : "Kay Felder"
 }
 
 NBA_INDEX_EXCEPTIONS = {
@@ -121,18 +161,30 @@ NBA_INDEX_EXCEPTIONS = {
 	"Derrick Brown" : 4,
 	"Darius Johnson-Odom" : 3,
 	"Brandon Knight" : 3,
-	"Marcus Morris" : 3
+	"Marcus Morris" : 3,
+	"Dennis Smith Jr" : 3,
+	"Chris Johnson" : 3,
+	"Robert Williams" : 4,
+	"Jeff Taylor" : 3,
+	"Kenrich Williams" : 4,
+	"Johnathan Williams" : 4,
+	"Keldon Johnson" : 4,
+	"Andre Roberson" : 3,
+	"Damian Jones" : 3,
+	"Stanley Johnson" : 4
 }
 
 NBA_SCHOOL_EXCEPTIONS = {
 	"Louisiana Lafayette" : "LA-Lafayette",
 	"VCU" : "Virginia Commonwealth",
 	"Long Beach State" : "Cal State Long Beach",
-	"UT-Martin" : "University of Tennessee at Martin",
+	"Tennessee-Martin" : "University of Tennessee at Martin",
 	"UCSB" : "UC Santa Barbara",
 	"Illinois-Chicago" : "University of Illinois at Chicago",
 	"UAB" : "University of Alabama at Birmingham",
-	"Southern Miss." : "University of Southern Mississippi"
+	"Southern Miss." : "University of Southern Mississippi",
+	"Pittsburgh" : "Pitt",
+	"St. Johns" : "St. John's"
 }
 
 ADVANCED_COLUMN_IDS = ['g','gs','mp','per','ts_pct','efg_pct','fg3a_per_fga_pct','fta_per_fga_pct','pprod','orb_pct','drb_pct','trb_pct','ast_pct',
@@ -143,7 +195,7 @@ COLUMN_NAMES = ['G','GS','MP','PER','TS%','eFG%','3PAr','FTr','PProd','ORB%','DR
 
 LOG_REG_COLUMNS = ['TS%','eFG%','3PAr','FTr','TRB%','AST%','BLK%','TOV%','USG%','OWS','DWS','WS','WS/40','AST/TOV']
 
-USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36"
+USER_AGENT = "Mozilla/5.0 (Android 4.4; Mobile; rv:41.0) Gecko/41.0 Firefox/41.0"
 HEADERS = { 'User-Agent': USER_AGENT}
 
 def findSite(url):
@@ -179,14 +231,42 @@ def getCSVFile(objective):
         return master
 
 def getBasketballReferencePlayerInfo(soup):
-	return soup.find('div', {'itemtype': 'https://schema.org/Person'})
+	playerInfo =  soup.find('div', {'itemtype': 'https://schema.org/Person'})
+	if (not playerInfo): return None
+	return unidecode.unidecode(playerInfo.getText())
 		
-def getBasketballReferenceFormattedSchool(school, exceptions):
-	return checkValueInDictOfExceptions(school, exceptions, school)
+def getBasketballReferenceFormattedSchool(school, exceptions, default):
+	return checkValueInDictOfExceptions(school, exceptions, default)
 
 def getBasketballReferenceFormattedName(name, exceptions):
-	return re.sub(r'[^A-Za-z0-9- ]+', '', checkValueInDictOfExceptions(name, exceptions, name))
+	return removeCharactersThatWouldNotBeInAName(checkValueInDictOfExceptions(name, exceptions, name))
 
 def getBasketballReferenceFormattedURL(name):
 	urlName = name.replace("'", "").replace(".", "").replace(" ", "-").lower() # Translate player name to how it would appear in the URL
 	return checkValueInDictOfExceptions(urlName, COLLEGE_NAME_EXCEPTIONS, urlName)
+
+def removeCharactersThatWouldNotBeInAName(name):
+	return unidecode.unidecode(re.sub(r'[^A-Za-z- ]+', '', name))
+
+def getCurrentYear():
+	return datetime.datetime.now().year
+
+def getSeasonFromYear(year):
+	return str(year-1) + "-" + str(year)[2:4]
+
+def isNBAPlayer(player):
+	isRecentSeason = int(player['Season'][0:4]) >= getCurrentYear() - 3
+	gamesPlayed = int(player['NBA GP'])
+	minutesPlayed = float(player['NBA MPG'])
+	if (isRecentSeason):
+		if (gamesPlayed >= 82): 
+			return 1
+		if (gamesPlayed >= 41 and minutesPlayed >= 12): 
+			return 1
+		return 0
+	else:
+		if (gamesPlayed >= 123): 
+			return 1
+		if (gamesPlayed >= 82 and minutesPlayed >= 18): 
+			return 1
+		return 0

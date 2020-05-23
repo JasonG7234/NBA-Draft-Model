@@ -1,8 +1,8 @@
 from utils import *
 import pandas as pd
+import sys
 import csv
 
-CUR_YEAR = "2019-20"
 GP = []
 MPG = []
 WS = []
@@ -14,32 +14,19 @@ NBA_STATS = [GP, MPG, WS, WSP48, BPM, VORP, PLUSMINUS]
 
 def main():
     all = getCSVFile("add NBA stats? ")
-    populateNBAAllStatistics(all)
-
-# Import all necessary players to create one player DataFrame to work with
-def createPlayerListFromCSVs():
-    all = pd.DataFrame()
-    while True:
-        file_name = input("Enter a CSV file with player information.").strip()
-        if (file_name == 'stop'):
-            break
-        try:
-            csv = pd.read_csv(file_name)
-            all = all.append(csv, sort=False)
-        except FileNotFoundError:
-            print("ERROR - File not found. Please try again.")
-            continue
-    return all
+    all = populateNBAAllStatistics(all)
+    addNBAStatsToMasterList(pd.read_csv('master.csv'), all)
 
 def populateNBAAllStatistics(all):
     couldNotFindList = []
-    nba_stats = all[['Name']].copy()
+    nba_stats = all[['Season','Name']].copy()
     base_url = "https://www.basketball-reference.com/players"
     for index, row in all.iterrows():
-        if(row['Season'] == CUR_YEAR):
+        if(row['Season'] == getSeasonFromYear(getCurrentYear())):
             print(row['Name'] + " is still in college.")
-            appendValuesToNBALists(["?", "?", "?", "?", "?"])
+            appendValuesToNBALists(["?", "?", "?", "?", "?", "?", "?"])
             continue
+        bkrefCorrectPage = True
         bkrefIdentifier, bkrefIndex, bkrefName = getBKRefIdentifierAndIndex(row['Name'])
         while True:
             url = base_url + bkrefIdentifier + "0" + str(bkrefIndex) + ".html"
@@ -48,27 +35,33 @@ def populateNBAAllStatistics(all):
             if (soup):
                 if (soup.find('div', {'class': 'index reading'}) or not soup.find('table')):
                     print("Reached 404 page - assuming there are no stats for " + row['Name'])
-                    appendValuesToNBALists(["0", "0", "0", "0", "0"])
+                    appendValuesToNBALists(["0", "0", "0", "0", "0", "0", "0"])
                     break
                 quickBKRefPlayerInfoDiv = getBasketballReferencePlayerInfo(soup)
                 if (quickBKRefPlayerInfoDiv):
                     if (isOnCorrectPlayerPage(bkrefName, row['School'], quickBKRefPlayerInfoDiv)):
-                        if (soup.find('table')['id'] == 'all_college_stats'):
+                        try:
+                            tableID = soup.find('table')['id']
+                        except KeyError:
+                            tableID = None
+                        if (not tableID or tableID == 'all_college_stats'):
                             print("Could not find an NBA Basketball Reference page for " + row['Name'])
                             bkrefIndex = bkrefIndex + 1
+                            bkrefCorrectPage = False
                             continue
                         else:
                             print("Found NBA player page for " + row['Name'])
                             populateNBAPlayerStatistics(soup)
                             break
                     else:
-                        if (bkrefIndex == 1):
+                        if (bkrefCorrectPage == True):
                             bkrefIndex = bkrefIndex + 1
+                            bkrefCorrectPage = False
                             continue
                         else: 
                             print("Could not find a correct NBA player page for " + row['Name'])
                             couldNotFindList.append(index)
-                            appendValuesToNBALists(["0", "0", "0", "0", "0"])
+                            appendValuesToNBALists(["0", "0", "0", "0", "0", "0", "0"])
                             bkrefIndex = bkrefIndex + 1
                             break
                 else:
@@ -83,21 +76,19 @@ def populateNBAAllStatistics(all):
     nba_stats['NBA BPM'] = BPM
     nba_stats['NBA VORP'] = VORP
     nba_stats['NBA PLUSMINUS'] = PLUSMINUS
-    nba_stats.to_csv('all_nba_stats.csv')
-    print(couldNotFindList)
+    nba_stats.to_csv('all_nba_stats.csv', index=False)
+    return nba_stats
 
 def getBKRefIdentifierAndIndex(name):
     bkrefName = getBasketballReferenceFormattedName(name, NBA_NAME_EXCEPTIONS)
-    print(bkrefName)
-    firstName, lastName = bkrefName.rsplit(' ', 1)
+    firstName, lastName = bkrefName.replace("-", "").split(' ', 1)
     bkrefIdentifier = ("/" + lastName[0] + "/" + lastName[:5] + firstName[:2]).lower()
     bkrefIndex = checkValueInDictOfExceptions(bkrefName, NBA_INDEX_EXCEPTIONS, 1)
     return bkrefIdentifier, bkrefIndex, bkrefName
 
 def isOnCorrectPlayerPage(name, school, playerInfo):
-    school = getBasketballReferenceFormattedSchool(school, NBA_SCHOOL_EXCEPTIONS)
-    playerInfoText = playerInfo.getText().replace(".", "")
-    return name in playerInfoText and school in playerInfoText       
+    school = getBasketballReferenceFormattedSchool(school, NBA_SCHOOL_EXCEPTIONS, school)
+    return name.lower() in playerInfo.replace("'", "").lower() and school in playerInfo       
 
 def populateNBAPlayerStatistics(soup):
     statValueList = []
@@ -114,7 +105,6 @@ def findGivenStatOnPlayerPage(soup, table_ID, datastat_IDs):
         career_stats = table('tfoot')[0] #Guarantees first row in the footer (career)
         for datastat_ID in datastat_IDs:
             stat = (career_stats.find("td", {"data-stat": datastat_ID})).getText()
-            print("Found stat for " + datastat_ID + ": " + stat)
             list.append(stat)
     else:
         for datastat_ID in datastat_IDs:
@@ -124,7 +114,7 @@ def findGivenStatOnPlayerPage(soup, table_ID, datastat_IDs):
 
 # For each player, add an entry to the NBA stats lists
 def appendValuesToNBALists(l):
-    for i in range(0,5):
+    for i in range(0,7):
         NBA_STATS[i].append(l[i])
 
 # Final step, add NBA stats to master list and export to CSV

@@ -1,12 +1,10 @@
 from utils import *
-import datetime
 import pandas as pd
 import numpy as np
 import os.path
 import sys
 
 master = pd.DataFrame()
-currentYear = datetime.datetime.now().year
 
 def main():
     global master
@@ -23,7 +21,7 @@ def main():
                 print("Okay! Continuing with the script.")
                 break
             else:
-                print("ERROR - That is not a valid input. Please try again.")    
+                print("ERROR - That is not a valid input. Please try again.")
     else:
         while True:
             continueScript = input("Seems like you already have a master.csv file. Do you want to pick up from step 3? Enter 'yes' or 'no': ").strip()
@@ -46,15 +44,14 @@ def addAllCollegeBasketballProspects():
     their rankings are generally questionable but I'm dropping their rankings anyway."""
     
     global master
-    global currentYear
 
     print("==============================================")
     print("STEP 1 - Getting the names of all the prospects")
     print("==============================================")
     yearCounter = 2009 # The first year nbadraft.net has their top100
-    while yearCounter <= currentYear:
+    while yearCounter <= getCurrentYear():
         top100 = []
-        season = str(yearCounter-1) + "-" + str(yearCounter)[2:4] # Turn the year 
+        season = getSeasonFromYear(yearCounter)
         print("Getting players from the " + season + " season")
         soup = findSite("https://www.nbadraft.net/ranking/bigboard/?year-ranking=" + str(yearCounter))
         if (soup):
@@ -86,15 +83,19 @@ def removeNonCollegeBasketballProspects():
       | (master.Class == "Jr.")
        | (master.Class == "Sr.")] # Remove all international players
     master = master[(master.School != "JUCO")
-     & (master.Class != "USA") 
-      & (master.Class != "Augusta St.")] # Remove all players without any affiliation to a D1 school 
+     & (master.School != "USA") 
+       & (master.School != "")] # Remove all players without any affiliation to a D1 school 
+    master = master[(master.Name != "Enes Kanter")
+     & (master.Name != "Garrett Siler")]
+      & (master.Name != "Ricardo Ledo")] # Remove players who did not play for a D1 school
 
 def reformatRemainingCollegeBasketballProspects():
     global master
     
     for index, row in master.iterrows():
         row['Name'] = getBasketballReferenceFormattedName(row['Name'], OVERALL_NAME_EXCEPTIONS)
-        row['School'] = getBasketballReferenceFormattedSchool(row['School'], OVERALL_SCHOOL_EXCEPTIONS)
+        school = getBasketballReferenceFormattedSchool(row['School'], OVERALL_SCHOOL_EXCEPTIONS, row['School'])
+        row['School'] = getBasketballReferenceFormattedSchool(row['Name'], OVERALL_COLLEGE_EXCEPTIONS, school)
         if (row['School'][-3:] == "St."):
             row['School'] = row['School'][:-1] + "ate"
 
@@ -102,7 +103,6 @@ def addRSCIRankAsColumn():
     """Get the RSCI rank from 247Sports and add it as a column to the master DataFrame."""
 
     global master
-    global currentYear
 
     print("==============================================")
     print("STEP 2 - Getting the RSCI ranks of all the prospects")
@@ -110,7 +110,7 @@ def addRSCIRankAsColumn():
     
     yearCounter = 2004
     master['RSCI'] = ""
-    while yearCounter < currentYear:
+    while yearCounter < getCurrentYear():
         print("Getting RSCI rank for players from the class of " + str(yearCounter))
         page = 1
         while page <= 8: # Stopping at 8 pages because I think RSCI rank 400 is a good maximum value
@@ -119,15 +119,15 @@ def addRSCIRankAsColumn():
             soup = findSite(base_url + params)
             trs = soup.find_all('li', {'class':'rankings-page__list-item'})
             for player in trs:
-                name = player.find('a').getText()
+                name = removeCharactersThatWouldNotBeInAName(player.find('a').getText()).lower()
                 for index, row in master.iterrows():
-                    if (name == row['Name'] and row['RSCI'] == ""):
+                    if (name in row['Name'].lower() and row['RSCI'] == ""):
                         if (name in COMMON_NAMES):
                              college = player.find('div', {'class':'status'}).find('img')['alt']
                              if (college != row['School']):
                                  continue
                         rank = player.find('div', {'class':'primary'}).getText().split()[0]
-                        print("Found a match for " + name + ": " + rank)
+                        print("Found a match for " + row['Name'] + ": " + rank)
                         master.at[index, 'RSCI'] = rank
                         break
             page = page + 1
@@ -196,12 +196,12 @@ def getPlayersBasketballReferencePage(row):
             soup = findSite(url)
             if (soup.find('table', {'id':'players_advanced'})): # If there is an advanced table (some older profiles don't have them)
                 quickBKRefPlayerInfoDiv = getBasketballReferencePlayerInfo(soup)
-                expectedSchoolNameInInfoDiv = getBasketballReferenceFormattedSchool(row['School'], COLLEGE_SCHOOL_EXCEPTIONS)
+                expectedSchoolNameInInfoDiv = getBasketballReferenceFormattedSchool(row['School'], COLLEGE_SCHOOL_EXCEPTIONS, row['School'])
                 if (quickBKRefPlayerInfoDiv and expectedSchoolNameInInfoDiv in quickBKRefPlayerInfoDiv.getText()): # If the expected school name is in the school div
                     return soup # We found the right player and can return
                 else: # Otherwise, we found the wrong player, let's try again with the next player
                     print("Common name?")
-                    index = index + 1
+                    indexValueInURL = indexValueInURL + 1
     else:
         url = "https://www.sports-reference.com/cbb/players/" + playerNameInURL + "-" + str(indexValueInURL) + ".html"
         return findSite(url)
@@ -262,7 +262,7 @@ def addCollegeStatsFromHoopMath():
     print("==============================================")
     print("STEP 4 - Getting the last year's Hoop-Math data for all the prospects")
     print("==============================================")
-    #Still a work in progress... wondering if this is necessary... right now leaning towards no
+    # Still a work in progress... wondering if this is necessary... right now leaning towards no
 
 def exportMaster():
     global master
