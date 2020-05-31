@@ -86,7 +86,7 @@ def removeNonCollegeBasketballProspects():
      & (master.School != "USA") 
        & (master.School != "")] # Remove all players without any affiliation to a D1 school 
     master = master[(master.Name != "Enes Kanter")
-     & (master.Name != "Garrett Siler")]
+     & (master.Name != "Garrett Siler")
       & (master.Name != "Ricardo Ledo")] # Remove players who did not play for a D1 school
 
 def reformatRemainingCollegeBasketballProspects():
@@ -197,7 +197,7 @@ def getPlayersBasketballReferencePage(row):
             if (soup.find('table', {'id':'players_advanced'})): # If there is an advanced table (some older profiles don't have them)
                 quickBKRefPlayerInfoDiv = getBasketballReferencePlayerInfo(soup)
                 expectedSchoolNameInInfoDiv = getBasketballReferenceFormattedSchool(row['School'], COLLEGE_SCHOOL_EXCEPTIONS, row['School'])
-                if (quickBKRefPlayerInfoDiv and expectedSchoolNameInInfoDiv in quickBKRefPlayerInfoDiv.getText()): # If the expected school name is in the school div
+                if (quickBKRefPlayerInfoDiv and expectedSchoolNameInInfoDiv in quickBKRefPlayerInfoDiv): # If the expected school name is in the school div
                     return soup # We found the right player and can return
                 else: # Otherwise, we found the wrong player, let's try again with the next player
                     print("Common name?")
