@@ -266,6 +266,7 @@ def addCollegeStatsFromHoopMath():
 
 def exportMaster():
     global master
+    master = reorderColumns(master)
     master.to_csv('temp_master.csv', index=False)
 
 if __name__ == "__main__":

@@ -126,6 +126,7 @@ def addNBAStatsToMasterList(all, nba):
     all['NBA BPM'] = nba['NBA BPM']
     all['NBA VORP'] = nba['NBA VORP']
     all['NBA PLUSMINUS'] = nba['NBA PLUSMINUS']
+    all = reorderColumns(all)
     all.to_csv("master.csv", index=False)
 
 if __name__ == "__main__":
