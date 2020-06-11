@@ -24,6 +24,12 @@ Once you have the master.csv file populated, you can plot some simple scatter pl
 
 ![Image of Graph](https://i.imgur.com/KO5MKXJ.png)
 
+### Logistic Regression
+
+You can also give the predictive model a try by calling `py logreg.py` and inputting the master.csv file. It only has around 66% accuracy currently, so there is a lot of improvement to be made. Unfortunately, I'm not a master of AI/ML, so I think for now I'm not going to focus on improving that number. I am currently in the process of testing out tensorflow to see how I can use their algorithm to improve my results. For now, here are the coefficients and confusion matrix:
+
+![Metrics](pictures/metrics.png)
+
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
