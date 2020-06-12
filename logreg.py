@@ -1,6 +1,5 @@
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
-from sklearn import metrics, preprocessing
 from utils import *
 import pandas as pd
 import numpy as np
@@ -36,50 +35,15 @@ def performLogReg(dataframe):
     logreg.fit(X_train, Y_train.values.ravel())  # Fits model with data
     Y_pred = logreg.predict(X_test) # Make predictions on test data to get baseline accuracy
     
-    makePredictionsForUpcomingNBAProspects(logreg, prospectStatsForUpcomingNBADraft, prospectsForUpcomingNBADraft)
+    makePredictionsForUpcomingNBAProspects(logreg, prospectStatsForUpcomingNBADraft, prospectsForUpcomingNBADraft, False)
     printCoefficientInformation(logreg)
     printConfusionMatrixForTestData(Y_test, Y_pred)
 
     return logreg
 
-def populateDataFrameWithAverageValues(df):
-    df = df.replace('', np.nan)
-    return df.fillna(df.mean())
-
 def getTrainTestSplit(X, Y):
-    X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.5, shuffle=False)
+    X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.8, shuffle=False)
     return X_train, X_test, Y_train, Y_test
-
-def makePredictionsForUpcomingNBAProspects(logreg, prospectStats, prospects):
-    predictions = logreg.predict(prospectStats)
-    prospects['NBA Player?'] = predictions
-    prospects.to_csv('upcomingProspects.csv', index=False)
-
-def printCoefficientInformation(logreg):
-    print('Coefficient Information:')
-
-    for i in range(len(LOG_REG_COLUMNS)):  # Prints each feature next to its corresponding coefficient in the model
-
-        logregCoefficients = logreg.coef_
-
-        currentFeature = LOG_REG_COLUMNS[i]
-        currentCoefficient = logregCoefficients[0][i]
-
-        print(currentFeature + ': ' + str(currentCoefficient))
-
-def printConfusionMatrixForTestData(test, pred):
-    confusionMatrix = metrics.confusion_matrix(test, pred)  # Diagonals tell you correct predictions
-    
-    print('----------------------------------')
-
-    print("Accuracy:", metrics.accuracy_score(test, pred))
-    print("Precision:", metrics.precision_score(test, pred))
-    print("Recall:", metrics.recall_score(test, pred))
-
-    print('----------------------------------')
-
-    print('Confusion Matrix:')
-    print(confusionMatrix)
 
 if __name__ == "__main__":
     main()

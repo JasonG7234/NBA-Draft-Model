@@ -4,9 +4,11 @@ import requests
 import string
 import unidecode
 import urllib
+import numpy as np
 import pandas as pd
 from bs4 import BeautifulSoup
 from googlesearch import search
+from sklearn import metrics
 
 comm = re.compile("<!--|-->")
 pattern = re.compile('[\W_]+')
@@ -254,19 +256,64 @@ def getCurrentYear():
 def getSeasonFromYear(year):
 	return str(year-1) + "-" + str(year)[2:4]
 
+def reorderColumns(master):
+    cols_to_order = ['Name', 'Season']
+    new_columns = cols_to_order + (master.columns.drop(cols_to_order).tolist())
+    return master[new_columns]
+
 def isNBAPlayer(player):
 	isRecentSeason = int(player['Season'][0:4]) >= getCurrentYear() - 3
 	gamesPlayed = int(player['NBA GP'])
 	minutesPlayed = float(player['NBA MPG'])
 	if (isRecentSeason):
 		if (gamesPlayed >= 82): 
-			return 1
+			return float(1)
 		if (gamesPlayed >= 41 and minutesPlayed >= 12): 
-			return 1
-		return 0
+			return float(1)
+		return float(0)
 	else:
 		if (gamesPlayed >= 123): 
-			return 1
+			return float(1)
 		if (gamesPlayed >= 82 and minutesPlayed >= 18): 
-			return 1
-		return 0
+			return float(1)
+		return float(0)
+
+def populateDataFrameWithAverageValues(df):
+    df = df.replace('', np.nan)
+    return df.fillna(df.mean())
+
+def makePredictionsForUpcomingNBAProspects(logreg, prospectStats, prospects, isFlatten):
+    predictions = logreg.predict(prospectStats)
+    if (isFlatten):
+        predictions = predictions.flatten()
+    print(predictions)
+	#df = pd.DataFrame(data=predictions, index=['Result'])
+	#df.to_csv('predictions.csv', index=False)
+    prospects.to_csv('upcomingProspects.csv', index=False)
+
+def printCoefficientInformation(logreg):
+    print('Coefficient Information:')
+
+    for i in range(len(LOG_REG_COLUMNS)):  # Prints each feature next to its corresponding coefficient in the model
+
+        logregCoefficients = logreg.coef_
+
+        currentFeature = LOG_REG_COLUMNS[i]
+        currentCoefficient = logregCoefficients[0][i]
+
+        print(currentFeature + ': ' + str(currentCoefficient))
+
+def printConfusionMatrixForTestData(test, pred):
+    confusionMatrix = metrics.confusion_matrix(test, pred)  # Diagonals tell you correct predictions
+    
+    print('----------------------------------')
+
+    print("Accuracy:", metrics.accuracy_score(test, pred))
+    print("Precision:", metrics.precision_score(test, pred))
+    print("Recall:", metrics.recall_score(test, pred))
+
+    print('----------------------------------')
+
+    print('Confusion Matrix:')
+    print(confusionMatrix)
+
