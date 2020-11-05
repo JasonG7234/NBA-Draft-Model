@@ -72,25 +72,8 @@ def add_all_college_basketball_prospects():
             yearDataFrame = pd.DataFrame(top100, columns=['Season', 'Name', 'Height', 'Weight', 'Position', 'School', 'Class'])
         master = master.append(yearDataFrame, ignore_index=True)
         year_counter = year_counter + 1
-    remove_non_college_basketball_prospects()
-    reformat_remaining_college_basketball_prospects()
-    
-def remove_non_college_basketball_prospects():
-    global master
-    
-    master = remove_international_prospects(master)
-    master = remove_non_d1_prospects(master)
-    master = remove_individual_prospects(master)
-
-def reformat_remaining_college_basketball_prospects():
-    global master
-    
-    for index, row in master.iterrows():
-        row['Name'] = get_basketball_reference_formatted_name(row['Name'], OVERALL_PLAYER_NAME_EXCEPTIONS)
-        school = get_basketball_reference_formatted_school(row['School'], OVERALL_SCHOOL_NAME_EXCEPTIONS, row['School'])
-        row['School'] = get_basketball_reference_formatted_school(row['Name'], OVERALL_PLAYER_SCHOOL_EXCEPTIONS, school)
-        if (row['School'][-3:] == "St."):
-            row['School'] = row['School'][:-1] + "ate"
+    master = remove_non_college_basketball_prospects(master)
+    master = reformat_remaining_college_basketball_prospects(master)
 
 def add_rsci_rank_as_column():
     """Get the RSCI rank from 247Sports and add it as a column to the master DataFrame."""
@@ -132,10 +115,6 @@ def add_remaining_rsci_rankings():
     
     global master
     
-    print("==============================================")
-    print("STEP 2.5 - Getting the RSCI ranks of all of the remaining prospects")
-    print("==============================================")
-    
     for index, row in master.iterrows():
         rank_in_dictionary = get_rsci_rank_from_dictionary(row['Name'])
         if (pd.isna(row['RSCI']) and rank_in_dictionary != 0):
@@ -171,7 +150,7 @@ def add_college_stats_from_basketball_reference():
     master = pd.concat([master, pd.DataFrame(collegeStats,index=master.index,columns=COLUMN_NAMES)], axis=1)
 
 def get_players_basketball_reference_page(row):
-    """Get the players Basketall-Reference page. This includes pulling the right name and index from the respective dictionaries.
+    """Get the player's Basketall-Reference page. This includes pulling the right name and index from the respective dictionaries.
     Once we have the URL, we check if it is right by checking the player's quick info."""
 
     player_name_in_url = get_basketball_reference_formatted_url(row['Name'])
@@ -195,6 +174,8 @@ def get_players_basketball_reference_page(row):
     return None
 
 def get_advanced_stats(soup_html):
+    """Get the player's advanced stats from their table. This is a complicated process because of the differences in the format 
+    of the advanced table through the years, along with some dummy columns that are always blank for some reason."""
     player_advanced_stats = [] 
     last_season_stats = get_last_season_stat_row(soup_html, 'players_advanced')
     stats = last_season_stats.findChildren('td')[2:]
@@ -220,7 +201,6 @@ def get_advanced_stats(soup_html):
                 player_advanced_stats.append("") 
         all_index = all_index + 1
     return player_advanced_stats
-
 
 def add_college_stats_from_hoopmath():
     print("==============================================")

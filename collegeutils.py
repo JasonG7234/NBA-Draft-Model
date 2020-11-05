@@ -8,6 +8,11 @@ PAGE_OF_RSCI_RANK_CUTOFF = 8
 INDEX_OF_POSSESSION_STATS_IN_TABLE = 25
 MAX_PROFILES_TO_SEARCH_BY_NAME = 5
 
+def remove_non_college_basketball_prospects(master):
+    master = remove_international_prospects(master)
+    master = remove_non_d1_prospects(master)
+    master = remove_individual_prospects(master)
+
 def remove_international_prospects(master):
     return master[(master.Class == "Fr.")
      | (master.Class == "So.")
@@ -23,6 +28,14 @@ def remove_individual_prospects(master):
     return master[(master.Name != "Enes Kanter")
      & (master.Name != "Garrett Siler")
       & (master.Name != "Ricardo Ledo")]
+
+def reformat_remaining_college_basketball_prospects(master):
+    for index, row in master.iterrows():
+        row['Name'] = get_basketball_reference_formatted_name(row['Name'], OVERALL_PLAYER_NAME_EXCEPTIONS)
+        school = get_basketball_reference_formatted_school(row['School'], OVERALL_SCHOOL_NAME_EXCEPTIONS, row['School'])
+        row['School'] = get_basketball_reference_formatted_school(row['Name'], OVERALL_PLAYER_SCHOOL_EXCEPTIONS, school)
+        if (row['School'][-3:] == "St."):
+            row['School'] = row['School'][:-1] + "ate"
 
 def get_rsci_rank_from_dictionary(name):
     return check_value_in_dictionary_of_exceptions(name, OVERALL_RSCI_EXCEPTIONS, 0) 
