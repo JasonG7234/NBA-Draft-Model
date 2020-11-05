@@ -5,7 +5,7 @@ import pandas as pd
 import numpy as np
 
 def main():
-    master = getCSVFile("perform logistic regression on? ")
+    master = get_csv_file("perform logistic regression on? ")
     performLogReg(master)
 
 # Creates the logistic regression model and tests accuracy
@@ -14,7 +14,7 @@ def performLogReg(dataframe):
     X = pd.DataFrame() # Create main dataframe
     Y = pd.DataFrame(index=np.arange(len(dataframe)), columns=['Result']) # Create result dataframe
     
-    dataframe = populateDataFrameWithAverageValues(dataframe)
+    dataframe = populate_dataframe_with_average_values(dataframe)
 
     prospectsForUpcomingNBADraft = dataframe.loc[dataframe['NBA GP'] == '?'] # Create prospect dataframe
     for index, row in dataframe.iterrows():
@@ -22,7 +22,7 @@ def performLogReg(dataframe):
             dataframe = dataframe.drop(index)
             Y = Y.drop(index)
             continue
-        Y.loc[index, 'Result'] = isNBAPlayer(row)
+        Y.loc[index, 'Result'] = is_nba_player(row)
 
     X = dataframe[LOG_REG_COLUMNS] # Tie only necessary stats to algorithm
     prospectStatsForUpcomingNBADraft = prospectsForUpcomingNBADraft[LOG_REG_COLUMNS]

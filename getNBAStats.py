@@ -13,7 +13,7 @@ PLUSMINUS = []
 NBA_STATS = [GP, MPG, WS, WSP48, BPM, VORP, PLUSMINUS]
 
 def main():
-    all = getCSVFile("add NBA stats? ")
+    all = get_csv_file("add NBA stats? ")
     all = populateNBAAllStatistics(all)
     addNBAStatsToMasterList(pd.read_csv('master.csv'), all)
 
@@ -22,7 +22,7 @@ def populateNBAAllStatistics(all):
     nba_stats = all[['Season','Name']].copy()
     base_url = "https://www.basketball-reference.com/players"
     for index, row in all.iterrows():
-        if(row['Season'] == getSeasonFromYear(getCurrentYear())):
+        if(row['Season'] == get_season_from_year(get_current_year())):
             print(row['Name'] + " is still in college.")
             appendValuesToNBALists(["?", "?", "?", "?", "?", "?", "?"])
             continue
@@ -31,13 +31,13 @@ def populateNBAAllStatistics(all):
         while True:
             url = base_url + bkrefIdentifier + "0" + str(bkrefIndex) + ".html"
             print(url)
-            soup = findSite(url)   
+            soup = find_site(url)   
             if (soup):
                 if (soup.find('div', {'class': 'index reading'}) or not soup.find('table')):
                     print("Reached 404 page - assuming there are no stats for " + row['Name'])
                     appendValuesToNBALists(["0", "0", "0", "0", "0", "0", "0"])
                     break
-                quickBKRefPlayerInfoDiv = getBasketballReferencePlayerInfo(soup)
+                quickBKRefPlayerInfoDiv = get_basketball_reference_player_info(soup)
                 if (quickBKRefPlayerInfoDiv):
                     if (isOnCorrectPlayerPage(bkrefName, row['School'], quickBKRefPlayerInfoDiv)):
                         try:
@@ -80,14 +80,14 @@ def populateNBAAllStatistics(all):
     return nba_stats
 
 def getBKRefIdentifierAndIndex(name):
-    bkrefName = getBasketballReferenceFormattedName(name, NBA_NAME_EXCEPTIONS)
+    bkrefName = get_basketball_reference_formatted_name(name, NBA_PLAYER_NAME_EXCEPTIONS)
     firstName, lastName = bkrefName.replace("-", "").split(' ', 1)
     bkrefIdentifier = ("/" + lastName[0] + "/" + lastName[:5] + firstName[:2]).lower()
-    bkrefIndex = checkValueInDictOfExceptions(bkrefName, NBA_INDEX_EXCEPTIONS, 1)
+    bkrefIndex = check_value_in_dictionary_of_exceptions(bkrefName, NBA_INDEX_EXCEPTIONS, 1)
     return bkrefIdentifier, bkrefIndex, bkrefName
 
 def isOnCorrectPlayerPage(name, school, playerInfo):
-    school = getBasketballReferenceFormattedSchool(school, NBA_SCHOOL_EXCEPTIONS, school)
+    school = get_basketball_reference_formatted_school(school, NBA_SCHOOL_NAME_EXCEPTIONS, school)
     return name.lower() in playerInfo.replace("'", "").lower() and school in playerInfo       
 
 def populateNBAPlayerStatistics(soup):
@@ -126,7 +126,7 @@ def addNBAStatsToMasterList(all, nba):
     all['NBA BPM'] = nba['NBA BPM']
     all['NBA VORP'] = nba['NBA VORP']
     all['NBA PLUSMINUS'] = nba['NBA PLUSMINUS']
-    all = reorderColumns(all)
+    all = reorder_columns(all)
     all.to_csv("master.csv", index=False)
 
 if __name__ == "__main__":

@@ -1,5 +1,0 @@
-#LWP-Cookies-2.0
-Set-Cookie3: 1P_JAR="2020-04-26-19"; path="/"; domain=".google.com"; path_spec; domain_dot; secure; expires="2020-05-26 19:02:48Z"; version=0
-Set-Cookie3: NID="202=DPUPnszkEP7IwWx8zCfaRPvB1PteuPv1lsl4V434VSANFzPlHlprS125AXySps-LQ8ORXKPYkPUzzaEtSIAsGz5LwKT9nxM6oZ3rA-JgvjlfFo9t5CJc3lZGm7H3AmpZWr6BOfYGoVVnO6sP1J3loTbkZrXgy-GnKlzprUfkLsg"; path="/"; domain=".google.com"; path_spec; domain_dot; expires="2020-10-18 17:50:09Z"; HttpOnly=None; version=0
-Set-Cookie3: CGIC=""; path="/complete/search"; domain=".google.com"; path_spec; domain_dot; expires="2020-10-15 17:50:09Z"; HttpOnly=None; version=0
-Set-Cookie3: CGIC=""; path="/search"; domain=".google.com"; path_spec; domain_dot; expires="2020-10-15 17:50:09Z"; HttpOnly=None; version=0

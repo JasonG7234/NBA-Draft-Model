@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 graphFieldNames = ['label', 'x-axis', 'y-axis']
 
 def main():
-    master = getCSVFile("graph? ")
+    master = get_csv_file("graph? ")
     columnCount = 0
     for col in master.columns:
         print("At index " + str(columnCount) + ", the column name is " + col)

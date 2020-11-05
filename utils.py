@@ -13,7 +13,7 @@ from sklearn import metrics
 comm = re.compile("<!--|-->")
 pattern = re.compile('[\W_]+')
 
-OVERALL_NAME_EXCEPTIONS = {
+OVERALL_PLAYER_NAME_EXCEPTIONS = {
 	"Moe Harkless" : "Maurice Harkless",
 	"Cameron Reddish" : "Cam Reddish",
 	"James McAdoo" : "James Michael McAdoo",
@@ -27,14 +27,14 @@ OVERALL_NAME_EXCEPTIONS = {
 	"Glen Rice" : "Glen Rice Jr."
 }
 
-OVERALL_COLLEGE_EXCEPTIONS = {
+OVERALL_PLAYER_SCHOOL_EXCEPTIONS = {
 	"PJ Hairston" : "UNC",
     "Glen Rice" : "Georgia Tech",
     "Nick Barbour" : "High Point",
 	"Charlie Westbrook" : "South Dakota"
 }
 
-OVERALL_SCHOOL_EXCEPTIONS = {
+OVERALL_SCHOOL_NAME_EXCEPTIONS = {
 	"St. Mary's" : "Saint Mary's", 
 	"Massachusetts" : "UMass",
 	"North Carolina" : "UNC",
@@ -76,7 +76,7 @@ OVERALL_RSCI_EXCEPTIONS = {
 	"Raymond Spalding" : 42
 }
 
-COLLEGE_NAME_EXCEPTIONS = {
+COLLEGE_PLAYER_NAME_EXCEPTIONS = {
     "wendell-carter" : "wendell-carterjr",
     "marvin-bagley" : "marvin-bagleyiii",
     "fuquan-edwin" : "edwin-fuquan",
@@ -136,7 +136,7 @@ COLLEGE_INDEX_EXCEPTIONS = {
 	"chris-smith" : 19
 }
 
-COLLEGE_SCHOOL_EXCEPTIONS = {
+COLLEGE_SCHOOL_NAME_EXCEPTIONS = {
 	"Central Florida" : "UCF",
 	"Illinois-Chicago" : "UIC",
 	"Louisiana Lafayette" : "Louisiana",
@@ -146,7 +146,7 @@ COLLEGE_SCHOOL_EXCEPTIONS = {
 	"Texas A&M Corpus Christi" : "Texas A&M-Corpus Christi",
 }
 
-NBA_NAME_EXCEPTIONS = {
+NBA_PLAYER_NAME_EXCEPTIONS = {
 	"BJ Mullens" : "Byron Mullens",
 	"Patrick Mills" : "Patty Mills",
 	"Jeffery Taylor" : "Jeff Taylor",
@@ -176,7 +176,7 @@ NBA_INDEX_EXCEPTIONS = {
 	"Stanley Johnson" : 4
 }
 
-NBA_SCHOOL_EXCEPTIONS = {
+NBA_SCHOOL_NAME_EXCEPTIONS = {
 	"Louisiana Lafayette" : "LA-Lafayette",
 	"VCU" : "Virginia Commonwealth",
 	"Long Beach State" : "Cal State Long Beach",
@@ -200,7 +200,7 @@ LOG_REG_COLUMNS = ['TS%','eFG%','3PAr','FTr','TRB%','AST%','BLK%','TOV%','USG%',
 USER_AGENT = "Mozilla/5.0 (Android 4.4; Mobile; rv:41.0) Gecko/41.0 Firefox/41.0"
 HEADERS = { 'User-Agent': USER_AGENT}
 
-def findSite(url):
+def find_site(url):
 	"""Use BeautifulSoup to head to designated URL and return BeautifulSoup object.
 	It's very important to decode + sub out all comments! (Basketball-Reference's HTML comments throw everything out of wack)"""
 	
@@ -208,21 +208,11 @@ def findSite(url):
 	html = response.content.decode("utf-8")
 	return BeautifulSoup(re.sub("<!--|-->","", html), "html.parser")
 
-def searchGoogle(query, waitTime, index):
-	"""Go to Google and make a basic search for the provided query, returning the first provided result.
-	This is used primarily for replacing bad site-specific search bars"""
-	
-	try:
-		for j in search(query, num=1, stop=1, pause=waitTime, user_agent=USER_AGENT):
-			return j
-	except urllib.error.HTTPError:
-		return searchGoogle(query, 10 * (index + 1))
-
-def checkValueInDictOfExceptions(name, exceptionsDict, default):
+def check_value_in_dictionary_of_exceptions(name, exceptionsDict, default):
     """Performs a dictionary lookup to try to map the player's name/school to the correct Basketball-Reference page."""
     return exceptionsDict.get(name, default)
 
-def getCSVFile(objective):
+def get_csv_file(objective):
     while True:
         file_name = input("What csv file would you like to " + objective).strip()
         try:
@@ -232,53 +222,53 @@ def getCSVFile(objective):
             continue
         return master
 
-def getBasketballReferencePlayerInfo(soup):
+def get_basketball_reference_player_info(soup):
 	playerInfo =  soup.find('div', {'itemtype': 'https://schema.org/Person'})
 	if (not playerInfo): return None
 	return unidecode.unidecode(playerInfo.getText())
 		
-def getBasketballReferenceFormattedSchool(school, exceptions, default):
-	return checkValueInDictOfExceptions(school, exceptions, default)
+def get_basketball_reference_formatted_school(school, exceptions, default):
+	return check_value_in_dictionary_of_exceptions(school, exceptions, default)
 
-def getBasketballReferenceFormattedName(name, exceptions):
-	return removeCharactersThatWouldNotBeInAName(checkValueInDictOfExceptions(name, exceptions, name))
+def get_basketball_reference_formatted_name(name, exceptions):
+	return remove_non_alphabetic_characters(check_value_in_dictionary_of_exceptions(name, exceptions, name))
 
-def getBasketballReferenceFormattedURL(name):
+def get_basketball_reference_formatted_url(name):
 	urlName = name.replace("'", "").replace(".", "").replace(" ", "-").lower() # Translate player name to how it would appear in the URL
-	return checkValueInDictOfExceptions(urlName, COLLEGE_NAME_EXCEPTIONS, urlName)
+	return check_value_in_dictionary_of_exceptions(urlName, COLLEGE_PLAYER_NAME_EXCEPTIONS, urlName)
 
-def removeCharactersThatWouldNotBeInAName(name):
+def remove_non_alphabetic_characters(name):
 	return unidecode.unidecode(re.sub(r'[^A-Za-z- ]+', '', name))
 
-def getCurrentYear():
+def get_current_year():
 	return datetime.datetime.now().year
 
-def getSeasonFromYear(year):
+def get_season_from_year(year):
 	return str(year-1) + "-" + str(year)[2:4]
 
-def reorderColumns(master):
+def reorder_columns(master):
     cols_to_order = ['Name', 'Season']
     new_columns = cols_to_order + (master.columns.drop(cols_to_order).tolist())
     return master[new_columns]
 
-def isNBAPlayer(player):
-	isRecentSeason = int(player['Season'][0:4]) >= getCurrentYear() - 3
-	gamesPlayed = int(player['NBA GP'])
-	minutesPlayed = float(player['NBA MPG'])
-	if (isRecentSeason):
-		if (gamesPlayed >= 82): 
+def is_nba_player(player):
+	is_recent_season = int(player['Season'][0:4]) >= get_current_year() - 3
+	games_played = int(player['NBA GP'])
+	minutes_played = float(player['NBA MPG'])
+	if (is_recent_season):
+		if (games_played >= 82): 
 			return float(1)
-		if (gamesPlayed >= 41 and minutesPlayed >= 12): 
+		if (games_played >= 41 and minutes_played >= 12): 
 			return float(1)
 		return float(0)
 	else:
-		if (gamesPlayed >= 123): 
+		if (games_played >= 123): 
 			return float(1)
-		if (gamesPlayed >= 82 and minutesPlayed >= 18): 
+		if (games_played >= 82 and minutes_played >= 18): 
 			return float(1)
 		return float(0)
 
-def populateDataFrameWithAverageValues(df):
+def populate_dataframe_with_average_values(df):
     df = df.replace('', np.nan)
     return df.fillna(df.mean())
 

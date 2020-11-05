@@ -10,7 +10,7 @@ from tensorflow.keras import layers
 
 
 def main():
-    master = getCSVFile("perform logistic regression on? ")
+    master = get_csv_file("perform logistic regression on? ")
     performLogReg(master)
 
 # Creates the logistic regression model and tests accuracy using tensorflow
