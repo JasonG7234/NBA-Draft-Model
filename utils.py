@@ -251,6 +251,10 @@ def reorder_columns(master):
     new_columns = cols_to_order + (master.columns.drop(cols_to_order).tolist())
     return master[new_columns]
 
+def populate_dataframe_with_average_values(df):
+    df = df.replace('', np.nan)
+    return df.fillna(df.mean())
+
 def is_nba_player(player):
 	is_recent_season = int(player['Season'][0:4]) >= get_current_year() - 3
 	games_played = int(player['NBA GP'])
@@ -268,42 +272,9 @@ def is_nba_player(player):
 			return float(1)
 		return float(0)
 
-def populate_dataframe_with_average_values(df):
-    df = df.replace('', np.nan)
-    return df.fillna(df.mean())
-
-def makePredictionsForUpcomingNBAProspects(logreg, prospectStats, prospects, isFlatten):
-    predictions = logreg.predict(prospectStats)
+def make_predictions_for_upcoming_nba_prospects(logreg, prospect_stats, prospects, isFlatten):
+    predictions = logreg.predict(prospect_stats)
     if (isFlatten):
         predictions = predictions.flatten()
     print(predictions)
-	#df = pd.DataFrame(data=predictions, index=['Result'])
-	#df.to_csv('predictions.csv', index=False)
-    prospects.to_csv('upcomingProspects.csv', index=False)
-
-def printCoefficientInformation(logreg):
-    print('Coefficient Information:')
-
-    for i in range(len(LOG_REG_COLUMNS)):  # Prints each feature next to its corresponding coefficient in the model
-
-        logregCoefficients = logreg.coef_
-
-        currentFeature = LOG_REG_COLUMNS[i]
-        currentCoefficient = logregCoefficients[0][i]
-
-        print(currentFeature + ': ' + str(currentCoefficient))
-
-def printConfusionMatrixForTestData(test, pred):
-    confusionMatrix = metrics.confusion_matrix(test, pred)  # Diagonals tell you correct predictions
-    
-    print('----------------------------------')
-
-    print("Accuracy:", metrics.accuracy_score(test, pred))
-    print("Precision:", metrics.precision_score(test, pred))
-    print("Recall:", metrics.recall_score(test, pred))
-
-    print('----------------------------------')
-
-    print('Confusion Matrix:')
-    print(confusionMatrix)
-
+    prospect_stats.to_csv('upcomingProspects.csv', index=False)

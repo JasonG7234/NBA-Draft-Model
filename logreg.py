@@ -6,44 +6,66 @@ import numpy as np
 
 def main():
     master = get_csv_file("perform logistic regression on? ")
-    performLogReg(master)
+    perform_log_reg(master)
 
-# Creates the logistic regression model and tests accuracy
-def performLogReg(dataframe):
+def perform_log_reg(master):
 
-    X = pd.DataFrame() # Create main dataframe
-    Y = pd.DataFrame(index=np.arange(len(dataframe)), columns=['Result']) # Create result dataframe
+    X = pd.DataFrame() 
+    Y = pd.DataFrame(index=np.arange(len(master)), columns=['Result'])
     
-    dataframe = populate_dataframe_with_average_values(dataframe)
+    master = populate_dataframe_with_average_values(master)
 
-    prospectsForUpcomingNBADraft = dataframe.loc[dataframe['NBA GP'] == '?'] # Create prospect dataframe
-    for index, row in dataframe.iterrows():
+    prospects_for_upcoming_nba_draft = master.loc[master['NBA GP'] == '?']
+    for index, row in master.iterrows():
         if (row['NBA GP'] == '?'):
-            dataframe = dataframe.drop(index)
+            master = master.drop(index)
             Y = Y.drop(index)
             continue
         Y.loc[index, 'Result'] = is_nba_player(row)
 
-    X = dataframe[LOG_REG_COLUMNS] # Tie only necessary stats to algorithm
-    prospectStatsForUpcomingNBADraft = prospectsForUpcomingNBADraft[LOG_REG_COLUMNS]
+    X = master[LOG_REG_COLUMNS]
+    prospect_stats_for_upcoming_nba_draft = prospects_for_upcoming_nba_draft[LOG_REG_COLUMNS]
 
-    Y = Y.astype('int') # Cast all of Y to be an integer (0 or 1)
+    Y = Y.astype('int')
+    Y.to_csv('isNBA.csv', index=False)
 
-    X_train, X_test, Y_train, Y_test = getTrainTestSplit(X, Y) # Run train/test split
+    X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.25, shuffle=True)
     
-    logreg = LogisticRegression(max_iter=500)
-    logreg.fit(X_train, Y_train.values.ravel())  # Fits model with data
-    Y_pred = logreg.predict(X_test) # Make predictions on test data to get baseline accuracy
+    logreg = LogisticRegression(solver='liblinear', max_iter=250)
+    logreg.fit(X_train, Y_train.values.ravel())
+    Y_pred = logreg.predict(X_test)
     
-    makePredictionsForUpcomingNBAProspects(logreg, prospectStatsForUpcomingNBADraft, prospectsForUpcomingNBADraft, False)
-    printCoefficientInformation(logreg)
-    printConfusionMatrixForTestData(Y_test, Y_pred)
+    make_predictions_for_upcoming_nba_prospects(logreg, prospect_stats_for_upcoming_nba_draft, prospects_for_upcoming_nba_draft, False)
+    print_coefficient_information(logreg)
+    print_confusion_matrix_for_test_data(Y_test, Y_pred)
 
     return logreg
 
-def getTrainTestSplit(X, Y):
-    X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.8, shuffle=False)
-    return X_train, X_test, Y_train, Y_test
+def print_coefficient_information(logreg):
+    print("----------------------------------")
+    print("Coefficient Information:")
+
+    for i in range(len(LOG_REG_COLUMNS)):
+
+        logregCoefficients = logreg.coef_
+
+        currentFeature = LOG_REG_COLUMNS[i]
+        currentCoefficient = logregCoefficients[0][i]
+
+        print(currentFeature + ': ' + str(currentCoefficient))
+
+def print_confusion_matrix_for_test_data(test, pred):
+    
+    print("----------------------------------")
+
+    print("Accuracy:", metrics.accuracy_score(test, pred))
+    print("Precision:", metrics.precision_score(test, pred))
+    print("Recall:", metrics.recall_score(test, pred))
+
+    print("----------------------------------")
+
+    print("Confusion Matrix: ")
+    print(metrics.confusion_matrix(test, pred))
 
 if __name__ == "__main__":
     main()

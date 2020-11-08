@@ -38,7 +38,6 @@ def main():
     add_college_stats_from_basketball_reference()
     export_master()
 
-
 def add_all_college_basketball_prospects():
     """Get the top 100 prospects each year from NBADraft.net, and add each year's top 100 to a master DataFrame.
     Found NBADraft.net to be the simplest to scrape and the most consistent from year-to-year, 
@@ -46,9 +45,9 @@ def add_all_college_basketball_prospects():
     
     global master
 
-    print("==============================================")
+    print("----------------------------------")
     print("STEP 1 - Getting the names of all the prospects")
-    print("==============================================")
+    print("----------------------------------")
     year_counter = FIRST_YEAR_OF_DRAFT_RANKINGS
     while year_counter <= get_current_year():
         top100 = []
@@ -80,9 +79,9 @@ def add_rsci_rank_as_column():
 
     global master
 
-    print("==============================================")
+    print("----------------------------------")
     print("STEP 2 - Getting the RSCI ranks of all the prospects")
-    print("==============================================")
+    print("----------------------------------")
     
     year_counter = FIRST_YEAR_OF_DRAFT_RANKINGS - MAX_LENGTH_OF_PROSPECT_CAREER
     master['RSCI'] = ""
@@ -126,9 +125,9 @@ def add_college_stats_from_basketball_reference():
 
     global master
 
-    print("==============================================")
+    print("----------------------------------")
     print("STEP 3 - Getting the last year's advanced stats of all of the prospects")
-    print("==============================================")
+    print("----------------------------------")
 
     collegeStats = []
     for index, row in master.iterrows():
@@ -203,9 +202,9 @@ def get_advanced_stats(soup_html):
     return player_advanced_stats
 
 def add_college_stats_from_hoopmath():
-    print("==============================================")
+    print("----------------------------------")
     print("STEP 4 - Getting the last year's Hoop-Math data for all the prospects")
-    print("==============================================")
+    print("----------------------------------")
     # TODO: Is it necessary to add these stats from Hoop-Math? 
 
 def export_master():

@@ -20,7 +20,7 @@ def performLogReg(dataframe):
     prospectsForUpcomingNBADraft = dataframe.loc[dataframe['NBA GP'] == '?'] # Create prospect dataframe
     dataframe = dataframe.drop(prospectsForUpcomingNBADraft.index)
     for index, row in dataframe.iterrows():
-        dataframe.loc[index, 'Result'] = isNBAPlayer(row)
+        dataframe.loc[index, 'Result'] = is_nba_player(row)
 
     dataframe = dataframe.astype({'Result': float})
     dataframe = dataframe.select_dtypes(include=[np.float])
@@ -28,8 +28,8 @@ def performLogReg(dataframe):
 
     print(dataframe)
 
-    dataframe = populateDataFrameWithAverageValues(dataframe)
-    prospects = populateDataFrameWithAverageValues(prospects)
+    dataframe = populate_dataframe_with_average_values(dataframe)
+    prospects = populate_dataframe_with_average_values(prospects)
 
     train = dataframe.sample(frac = 0.75, random_state = 0)
     test = dataframe.drop(train.index)
@@ -57,7 +57,7 @@ def performLogReg(dataframe):
 
     test_predictions = model.predict(normed_test_data).flatten()
     
-    makePredictionsForUpcomingNBAProspects(model, prospects, prospectsForUpcomingNBADraft, True)
+    make_predictions_for_upcoming_nba_prospects(model, prospects, prospectsForUpcomingNBADraft, True)
     #printCoefficientInformationWithTensorflow(model)
     printAccuracyMetricsWithTensorflow(test_labels, test_predictions)
     printConfusionMatrixWithTensorflow(test_labels, test_predictions)
@@ -65,7 +65,7 @@ def performLogReg(dataframe):
 
 def printCoefficientInformationWithTensorflow(model):
     vars = tf.trainable_variables()
-    #print(vars) #some infos about variables...
+    print(vars) 
     sess = tf.Session()
     with sess.as_default():
         vars_vals = sess.run(vars)
