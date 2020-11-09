@@ -28,7 +28,7 @@ Once you have the master.csv file populated, you can plot some simple scatter pl
 
 You can also give the predictive model a try by calling `py model.py` and inputting the master.csv file. You can choose to run it with or without tensorflow. Without tensorflow, it seems to be hovering around 67% accuracy. You can see the metrics below. 
 
-![Metrics](pictures/metrics.png)
+![Metrics](pictures/image.png)
 
 With tensorflow, I am seeing worse results. The current implementation I have is inconsistent but tops out at around 68%, with worse precision and better recall than sklearn's basic LogisticRegression algorithm. I am still tweaking the numbers to find out what works best.
 
