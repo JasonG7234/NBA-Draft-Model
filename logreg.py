@@ -45,12 +45,12 @@ def print_coefficient_information(logreg):
 
     for i in range(len(LOG_REG_COLUMNS)):
 
-        logregCoefficients = logreg.coef_
+        logreg_coefficients = logreg.coef_
 
-        currentFeature = LOG_REG_COLUMNS[i]
-        currentCoefficient = logregCoefficients[0][i]
+        current_feature = LOG_REG_COLUMNS[i]
+        current_coefficient = logreg_coefficients[0][i]
 
-        print(currentFeature + ': ' + str(currentCoefficient))
+        print(current_feature + ': ' + str(current_coefficient))
 
 def print_accuracy_metrics_for_test_data(test, pred):
         
