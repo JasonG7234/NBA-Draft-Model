@@ -207,9 +207,9 @@ def find_site(url):
 	html = response.content.decode("utf-8")
 	return BeautifulSoup(re.sub("<!--|-->","", html), "html.parser")
 
-def check_value_in_dictionary_of_exceptions(name, exceptionsDict, default):
+def check_value_in_dictionary_of_exceptions(name, exceptions_dict, default):
     """Performs a dictionary lookup to try to map the player's name/school to the correct Basketball-Reference page."""
-    return exceptionsDict.get(name, default)
+    return exceptions_dict.get(name, default)
 
 def get_csv_file(objective):
     while True:
@@ -222,9 +222,9 @@ def get_csv_file(objective):
         return master
 
 def get_basketball_reference_player_info(soup):
-	playerInfo =  soup.find('div', {'itemtype': 'https://schema.org/Person'})
-	if (not playerInfo): return None
-	return unidecode.unidecode(playerInfo.getText())
+	player_info =  soup.find('div', {'itemtype': 'https://schema.org/Person'})
+	if (not player_info): return None
+	return unidecode.unidecode(player_info.getText())
 		
 def get_basketball_reference_formatted_school(school, exceptions, default):
 	return check_value_in_dictionary_of_exceptions(school, exceptions, default)
@@ -233,8 +233,8 @@ def get_basketball_reference_formatted_name(name, exceptions):
 	return remove_non_alphabetic_characters(check_value_in_dictionary_of_exceptions(name, exceptions, name))
 
 def get_basketball_reference_formatted_url(name):
-	urlName = name.replace("'", "").replace(".", "").replace(" ", "-").lower() # Translate player name to how it would appear in the URL
-	return check_value_in_dictionary_of_exceptions(urlName, COLLEGE_PLAYER_NAME_EXCEPTIONS, urlName)
+	url_name = name.replace("'", "").replace(".", "").replace(" ", "-").lower()
+	return check_value_in_dictionary_of_exceptions(url_name, COLLEGE_PLAYER_NAME_EXCEPTIONS, url_name)
 
 def remove_non_alphabetic_characters(name):
 	return unidecode.unidecode(re.sub(r'[^A-Za-z- ]+', '', name))
@@ -271,7 +271,7 @@ def is_nba_player(player):
 			return float(1)
 		return float(0)
 
-def make_predictions_for_upcoming_nba_prospects(logreg, prospects, isNumpyArray):
+def make_predictions_for_upcoming_nba_prospects(logreg, prospects, is_round):
     predictions = logreg.predict(prospects[LOG_REG_COLUMNS])
-    prospects['IsNBAPlayer'] = predictions.tolist() if isNumpyArray else predictions
+    prospects['IsNBAPlayer'] = predictions.tolist() if is_round else predictions
     prospects.to_csv('upcomingprospects.csv', index=False)
