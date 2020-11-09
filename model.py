@@ -9,6 +9,10 @@ from tensorflow import keras
 from tensorflow.keras import layers
 from tensorflow.python.keras.backend import set_session
 
+TENSORFLOW_EPOCHS = 50
+NODE_COUNT = 32
+LOGREG_ITER = 500
+
 def main():
     master = get_csv_file("perform logistic regression on? ")
     x_train, x_test, y_train, y_test, prospects = get_train_test_split(master)
@@ -57,7 +61,7 @@ def perform_tensorflow_log_reg(x_train, x_test, y_train, y_test, prospects):
     
     model.fit(
     normed_x_train, y_train,
-    epochs=50, validation_split = 0.25)
+    epochs=TENSORFLOW_EPOCHS, validation_split = 0.25)
 
     loss, accuracy, precision, recall = model.evaluate(normed_x_test, y_test, verbose=2)
 
@@ -73,8 +77,8 @@ def normalize(val, stats):
     
 def build_model(n_cols):
     model = keras.Sequential([
-        layers.Dense(32, activation='relu', input_shape=(n_cols,)),
-        layers.Dense(32, activation='relu'),
+        layers.Dense(NODE_COUNT, activation='relu', input_shape=(n_cols,)),
+        layers.Dense(NODE_COUNT, activation='relu'),
         layers.Dense(1, activation='sigmoid')
     ])
 
@@ -87,7 +91,7 @@ def build_model(n_cols):
 def perform_log_reg(x_train, x_test, y_train, y_test, prospects):
     """Creates the logistic regression model and tests accuracy"""
 
-    logreg = LogisticRegression(solver='liblinear', max_iter=250)
+    logreg = LogisticRegression(solver='liblinear', max_iter=LOGREG_ITER)
     logreg.fit(x_train, y_train.values.ravel())
     y_pred = logreg.predict(x_test)
     
