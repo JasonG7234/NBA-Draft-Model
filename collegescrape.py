@@ -129,7 +129,7 @@ def add_college_stats_from_basketball_reference():
     print("STEP 3 - Getting the last year's advanced stats of all of the prospects")
     print("----------------------------------")
 
-    collegeStats = []
+    college_stats = []
     for index, row in master.iterrows():
         player_stats = []
         print("Getting most recent college stats for " + row['Name'])
@@ -145,8 +145,8 @@ def add_college_stats_from_basketball_reference():
         else:
             master.drop(index, inplace=True)
             break
-        collegeStats.append(player_stats)
-    master = pd.concat([master, pd.DataFrame(collegeStats,index=master.index,columns=COLUMN_NAMES)], axis=1)
+        college_stats.append(player_stats)
+    master = pd.concat([master, pd.DataFrame(college_stats,index=master.index,columns=COLUMN_NAMES)], axis=1)
 
 def get_players_basketball_reference_page(row):
     """Get the player's Basketall-Reference page. This includes pulling the right name and index from the respective dictionaries.
