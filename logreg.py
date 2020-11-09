@@ -15,7 +15,7 @@ def perform_log_reg(master):
     
     master = populate_dataframe_with_average_values(master)
 
-    prospects_for_upcoming_nba_draft = master.loc[master['NBA GP'] == '?']
+    prospects = master.loc[master['NBA GP'] == '?']
     for index, row in master.iterrows():
         if (row['NBA GP'] == '?'):
             master = master.drop(index)
@@ -24,7 +24,6 @@ def perform_log_reg(master):
         Y.loc[index, 'Result'] = is_nba_player(row)
 
     X = master[LOG_REG_COLUMNS]
-    prospect_stats_for_upcoming_nba_draft = prospects_for_upcoming_nba_draft[LOG_REG_COLUMNS]
 
     Y = Y.astype('int')
 
@@ -34,7 +33,7 @@ def perform_log_reg(master):
     logreg.fit(X_train, Y_train.values.ravel())
     Y_pred = logreg.predict(X_test)
     
-    make_predictions_for_upcoming_nba_prospects(logreg, prospect_stats_for_upcoming_nba_draft, prospects_for_upcoming_nba_draft, False)
+    make_predictions_for_upcoming_nba_prospects(logreg, prospects, False)
     print_coefficient_information(logreg)
     print_confusion_matrix_for_test_data(Y_test, Y_pred)
 
@@ -53,13 +52,16 @@ def print_coefficient_information(logreg):
 
         print(currentFeature + ': ' + str(currentCoefficient))
 
-def print_confusion_matrix_for_test_data(test, pred):
-    
+def print_accuracy_metrics_for_test_data(test, pred):
+        
     print("----------------------------------")
 
     print("Accuracy:", metrics.accuracy_score(test, pred))
     print("Precision:", metrics.precision_score(test, pred))
     print("Recall:", metrics.recall_score(test, pred))
+
+
+def print_confusion_matrix_for_test_data(test, pred):
 
     print("----------------------------------")
 
