@@ -7,14 +7,15 @@ import tensorflow.compat.v1 as tf
 import tensorflow_docs as tfdocs
 from tensorflow import keras
 from tensorflow.keras import layers
-
+from tensorflow.python.keras.backend import set_session
 
 def main():
     master = get_csv_file("perform logistic regression on? ")
-    performLogReg(master)
+    perform_tensorflow_log_reg(master)
 
-# Creates the logistic regression model and tests accuracy using tensorflow
-def performLogReg(dataframe):
+def perform_tensorflow_log_reg(dataframe):
+    '''Creates the logistic regression model and tests accuracy using tensorflow'''
+
     dataframe['Result'] = ""
 
     prospectsForUpcomingNBADraft = dataframe.loc[dataframe['NBA GP'] == '?'] # Create prospect dataframe
@@ -47,45 +48,27 @@ def performLogReg(dataframe):
     normed_test_data = normalize(test, train_stats)
     normed_prospect_data = normalize(prospects, train_stats)
 
+    sess = tf.Session()
+    set_session(sess)
     model = build_model(train)
     
-    history = model.fit(
+    model.fit(
     normed_train_data, train_labels,
-    epochs=1000, validation_split = 0.2, verbose=0)
+    epochs=1000, validation_split = 0.25, verbose=0)
 
-    loss, mae, mse = model.evaluate(normed_test_data, test_labels, verbose=2)
+    loss, accuracy, precision, recall = model.evaluate(normed_test_data, test_labels, verbose=2)
 
-    test_predictions = model.predict(normed_test_data).flatten()
+    test_predictions = model.predict(normed_test_data)
     
-    make_predictions_for_upcoming_nba_prospects(model, prospects, prospectsForUpcomingNBADraft, True)
-    #printCoefficientInformationWithTensorflow(model)
-    printAccuracyMetricsWithTensorflow(test_labels, test_predictions)
-    printConfusionMatrixWithTensorflow(test_labels, test_predictions)
-    
-
-def printCoefficientInformationWithTensorflow(model):
-    vars = tf.trainable_variables()
-    print(vars) 
-    sess = tf.Session()
-    with sess.as_default():
-        vars_vals = sess.run(vars)
-        for var, val in zip(vars, vars_vals):
-            print("var: {}, value: {}".format(var.name, val))
-
-def printConfusionMatrixWithTensorflow(labels, predictions):
-    con = tf.confusion_matrix(labels = labels, predictions = predictions)
-    sess = tf.Session()
-    with sess.as_default():
-        print(sess.run(con))
-
-def printAccuracyMetricsWithTensorflow(labels, predictions):
-    print(tf.metrics.accuracy(labels, predictions))
-    print(sk.metrics.accuracy())
+    make_predictions_for_upcoming_nba_prospects(model, prospects, prospectsForUpcomingNBADraft, False)
+    #print_coefficient_information_with_tensorflow(sess, model)
+    print_accuracy_metrics_with_tensorflow(accuracy, precision, recall, loss)
+    #printConfusionMatrixWithTensorflow(test_labels, test_predictions)
 
 def normalize(val, stats):
     val = (val - stats['mean']) / stats['std']
     return val
-
+    
 def build_model(train):
   model = keras.Sequential([
     layers.Dense(64, activation='relu', input_shape=[len(train.keys())]),
@@ -93,13 +76,35 @@ def build_model(train):
     layers.Dense(1)
   ])
 
-  optimizer = tf.keras.optimizers.RMSprop(0.001)
-
   model.compile(loss='mse',
-                optimizer=optimizer,
-                metrics=['mae', 'mse'])
+                optimizer=tf.keras.optimizers.RMSprop(0.001),
+                metrics=[tf.keras.metrics.Accuracy(), tf.keras.metrics.Precision(), tf.keras.metrics.Recall()])
 
   return model
 
+def print_coefficient_information_with_tensorflow(sess, model):
+    vars = tf.trainable_variables()
+    vars_vals = sess.run(vars)
+    for var, val in zip(vars, vars_vals):
+        print("var: {}, value: {}".format(var.name, val))
+
+def printConfusionMatrixWithTensorflow(labels, predictions):
+    v1 = tf.compat.v1
+    con = v1.confusion_matrix(labels = labels, predictions = predictions)
+    sess = v1.Session()
+    with sess.as_default():
+        print(sess.run(con))
+
+def print_accuracy_metrics_with_tensorflow(accuracy, precision, recall, loss):
+    print("----------------------------------")
+
+    print("Accuracy:", tf.keras.metrics.Accuracy().result())
+    print("Precision:", tf.keras.metrics.Precision().result())
+    print("Recall:", recall)
+    print("Loss:", loss)
+
+    print("----------------------------------")
+
 if __name__ == "__main__":
+    tf.compat.v1.disable_eager_execution()
     main()

@@ -272,9 +272,7 @@ def is_nba_player(player):
 			return float(1)
 		return float(0)
 
-def make_predictions_for_upcoming_nba_prospects(logreg, prospect_stats, prospects, isFlatten):
+def make_predictions_for_upcoming_nba_prospects(logreg, prospect_stats, prospects, isNumpyArray):
     predictions = logreg.predict(prospect_stats)
-    if (isFlatten):
-        predictions = predictions.flatten()
-    print(predictions)
-    prospect_stats.to_csv('upcomingProspects.csv', index=False)
+    prospects['IsNBAPlayer'] = predictions.tolist() if isNumpyArray else predictions
+    prospects.to_csv('upcomingprospects.csv', index=False)
