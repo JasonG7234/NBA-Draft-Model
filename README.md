@@ -1,4 +1,4 @@
-e# NBA Draft Model
+# NBA Draft Model
 
 This is a Python college basketball data scraper + draft model.
 
