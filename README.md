@@ -1,4 +1,4 @@
-# NBA Draft Model
+e# NBA Draft Model
 
 This is a Python college basketball data scraper + draft model.
 
@@ -26,11 +26,11 @@ Once you have the master.csv file populated, you can plot some simple scatter pl
 
 ### Logistic Regression
 
-You can also give the predictive model a try by calling `py model.py` and inputting the master.csv file. You can choose to run it with or without tensorflow. Without tensorflow, it seems to be hovering around 67% accuracy. You can see the metrics below. 
+You can also give the predictive model a try by calling `py model.py` and inputting the master.csv file. You can choose to run it with or without tensorflow. Without tensorflow, it seems to be hovering around >70% accuracy. You can see the metrics below. 
 
 ![Metrics](pictures/image.png)
 
-With tensorflow, I am seeing worse results. The current implementation I have is inconsistent but tops out at around 68%, with worse precision and better recall than sklearn's basic LogisticRegression algorithm. I am still tweaking the numbers to find out what works best.
+With tensorflow, I am seeing mixed results. The current implementation I have is inconsistent but tops out at around 73%, with worse precision and better recall than sklearn's basic LogisticRegression algorithm. I am still tweaking the numbers to find out what works best.
 
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
