@@ -12,23 +12,25 @@ pip3 install -r requirements.txt
 
 ## Usage
 
-As of 4/27/20, we only have support for a basic data scraper (pulling all college basketball prospects since 2009) and a very basic graphing utility with the stats pulled from scraping.  
+As of 11/9/20, we only have support for a data scraper (pulling all college basketball prospects since 2009), a very basic graphing utility with the stats pulled from scraping, and two different machine learning algorithms to make NBA predictions on this year's NBA draft class. 
 
 ### Data Scraper
 
-To use the data scraper, just call `python getCollegeStats.py` and it will generate a CSV of 1000+ prospects. I suggest pausing after Step 2 to do some manual data cleanup, because some players are left with funky names and w/o obvious RSCI ranks. I'm working on fixing that, but not in the plans right now. 
+To use the data scraper, just call `python collegescrape.py` and it will generate a CSV of 1000+ prospects. I suggest pausing after Step 2 to do some manual data cleanup, because some players are left with funky names and w/o obvious RSCI ranks. I'm working on fixing that, but not in the plans right now. 
 
 ### Graph
 
 Once you have the master.csv file populated, you can plot some simple scatter plots by calling `py graph.py` and following the steps. It's a super simple way to draw some baseline conclusions about successful college basketball prospects. Below is a graph I made comparing RSCI ranks with college win shares. 
 
-![Image of Graph](https://i.imgur.com/KO5MKXJ.png)
+![Image of Graph](pictures/graph.png)
 
 ### Logistic Regression
 
-You can also give the predictive model a try by calling `py logreg.py` and inputting the master.csv file. It only has around 66% accuracy currently, so there is a lot of improvement to be made. Unfortunately, I'm not a master of AI/ML, so I think for now I'm not going to focus on improving that number. I am currently in the process of testing out tensorflow to see how I can use their algorithm to improve my results. For now, here are the coefficients and confusion matrix:
+You can also give the predictive model a try by calling `py model.py` and inputting the master.csv file. You can choose to run it with or without tensorflow. Without tensorflow, it seems to be hovering around 67% accuracy. You can see the metrics below. 
 
 ![Metrics](pictures/metrics.png)
+
+With tensorflow, I am seeing worse results. The current implementation I have is inconsistent but tops out at around 68%, with worse precision and better recall than sklearn's basic LogisticRegression algorithm. I am still tweaking the numbers to find out what works best.
 
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
