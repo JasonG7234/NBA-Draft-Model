@@ -7,7 +7,6 @@ import urllib
 import numpy as np
 import pandas as pd
 from bs4 import BeautifulSoup
-from googlesearch import search
 from sklearn import metrics
 
 comm = re.compile("<!--|-->")
