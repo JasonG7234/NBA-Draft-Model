@@ -1,7 +1,8 @@
-from utils import *
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+
+from utils import *
 
 GRAPH_FIELD_NAMES = ['label', 'x-axis', 'y-axis']
 

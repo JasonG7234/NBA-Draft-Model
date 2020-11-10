@@ -1,4 +1,3 @@
-from utils import *
 import numpy as np
 import pandas as pd
 import tensorflow.compat.v1 as tf
@@ -8,6 +7,8 @@ from sklearn.model_selection import train_test_split
 from tensorflow import keras
 from tensorflow.keras import layers
 from tensorflow.python.keras.backend import set_session
+
+from utils import *
 
 TENSORFLOW_EPOCHS = 50
 NODE_COUNT = 32

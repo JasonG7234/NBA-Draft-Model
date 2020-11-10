@@ -12,6 +12,7 @@ def remove_non_college_basketball_prospects(master):
     master = remove_international_prospects(master)
     master = remove_non_d1_prospects(master)
     master = remove_individual_prospects(master)
+    return master
 
 def remove_international_prospects(master):
     return master[(master.Class == "Fr.")
@@ -34,8 +35,10 @@ def reformat_remaining_college_basketball_prospects(master):
         row['Name'] = get_basketball_reference_formatted_name(row['Name'], OVERALL_PLAYER_NAME_EXCEPTIONS)
         school = get_basketball_reference_formatted_school(row['School'], OVERALL_SCHOOL_NAME_EXCEPTIONS, row['School'])
         row['School'] = get_basketball_reference_formatted_school(row['Name'], OVERALL_PLAYER_SCHOOL_EXCEPTIONS, school)
-        if (row['School'][-3:] == "St."):
+        if (row['School'].endswith("St.")):
             row['School'] = row['School'][:-1] + "ate"
+
+    return master
 
 def get_rsci_rank_from_dictionary(name):
     return check_value_in_dictionary_of_exceptions(name, OVERALL_RSCI_EXCEPTIONS, 0) 
@@ -48,8 +51,8 @@ def get_last_season_stat_row(soup_html, tableID):
     return None
 
 def get_possession_stats(season_row):
-    stats = season_row.findChildren('td', {'data-stat':True})[INDEX_OF_POSSESSION_STATS_IN_TABLE:]
-    return [ stat.getText() for stat in stats ]
+    stats = season_row.findChildren('td', {'data-stat':True})[INDEX_OF_POSSESSION_STATS_IN_TABLE:] # Slicing
+    return [ stat.getText() for stat in stats ] # List comprehension
 
 def get_ast_to_tov_ratio(soup_html):
     lastSeason = get_last_season_stat_row(soup_html, 'players_totals')
@@ -60,7 +63,7 @@ def get_ast_to_tov_ratio(soup_html):
     return str(round(int(ast)/int(tov), 2))
 
 def is_expected_advanced_stat_in_table(stat, index):
-    return stat['data-stat'] == ADVANCED_COLUMN_IDS[index]
+    return stat['data-stat'] is ADVANCED_COLUMN_IDS[index]
 
 def is_empty_dummy_column(stat):
     return stat['data-stat'] == 'ws-dum' or stat['data-stat'] == 'bpm-dum'

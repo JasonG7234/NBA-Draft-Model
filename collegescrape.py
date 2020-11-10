@@ -1,9 +1,11 @@
-from utils import *
-from collegeutils import *
-import pandas as pd
-import numpy as np
 import os.path
 import sys
+
+import pandas as pd
+import numpy as np
+
+from utils import *
+from collegeutils import *
 
 master = pd.DataFrame()
 
@@ -41,7 +43,8 @@ def main():
 def add_all_college_basketball_prospects():
     """Get the top 100 prospects each year from NBADraft.net, and add each year's top 100 to a master DataFrame.
     Found NBADraft.net to be the simplest to scrape and the most consistent from year-to-year, 
-    their rankings are generally questionable but I'm dropping their rankings anyway."""
+    their rankings are generally questionable but I'm dropping their rankings anyway.
+    """
     
     global master
 
@@ -110,7 +113,7 @@ def add_rsci_rank_as_column():
     add_remaining_rsci_rankings()
     
 def add_remaining_rsci_rankings():
-    """For every player not found on 247 year pages."""
+    """For every player not found on 247 year pages, we want to add their RSCI rank if it we have it saved as an exception."""
     
     global master
     
@@ -121,7 +124,8 @@ def add_remaining_rsci_rankings():
 
 def add_college_stats_from_basketball_reference():
     """Get all advanced college stats for each player's most recent year by scraping the relevant table from basketballreference.
-    I also add on ORTG, DRTG, and AST/TOV% because I think they are really relevant stats for projecting NBA prospects."""
+    I also add on ORTG, DRTG, and AST/TOV% because I think they are really relevant stats for projecting NBA prospects.
+    """
 
     global master
 
@@ -137,10 +141,10 @@ def add_college_stats_from_basketball_reference():
         if (soup_html):
             player_stats.extend(get_advanced_stats(soup_html))
             last_season = get_last_season_stat_row(soup_html, 'players_per_poss')
-
-            if (last_season): player_stats.extend(get_possession_stats(last_season))
-            else: player_stats.extend(["", ""])
-
+            if (last_season): 
+                player_stats.extend(get_possession_stats(last_season))
+            else: 
+                player_stats.extend(["", ""])
             player_stats.append(get_ast_to_tov_ratio(soup_html))
         else:
             master.drop(index, inplace=True)
@@ -150,7 +154,8 @@ def add_college_stats_from_basketball_reference():
 
 def get_players_basketball_reference_page(row):
     """Get the player's Basketall-Reference page. This includes pulling the right name and index from the respective dictionaries.
-    Once we have the URL, we check if it is right by checking the player's quick info."""
+    Once we have the URL, we check if it is right by checking the player's quick info.
+    """
 
     player_name_in_url = get_basketball_reference_formatted_url(row['Name'])
     index_value_in_url = check_value_in_dictionary_of_exceptions(player_name_in_url, COLLEGE_INDEX_EXCEPTIONS, 1)
@@ -174,10 +179,11 @@ def get_players_basketball_reference_page(row):
 
 def get_advanced_stats(soup_html):
     """Get the player's advanced stats from their table. This is a complicated process because of the differences in the format 
-    of the advanced table through the years, along with some dummy columns that are always blank for some reason."""
+    of the advanced table through the years, along with some dummy columns that are always blank for some reason.
+    """
     player_advanced_stats = [] 
     last_season_stats = get_last_season_stat_row(soup_html, 'players_advanced')
-    stats = last_season_stats.findChildren('td')[2:]
+    stats = last_season_stats.findChildren('td')[2:] # Slicing
     stats_index = 0 # Index of which stat we are on in the player's Advanced table
     all_index = 0 # Index of which stat we SHOULD be on, according to all possible stats in the Advanced table
     while all_index in range(0, len(ADVANCED_COLUMN_IDS)): 
@@ -196,7 +202,7 @@ def get_advanced_stats(soup_html):
                     player_advanced_stats.append("")
                     stats_index = stats_index + 1
         except IndexError:
-           if not(ADVANCED_COLUMN_IDS[all_index] == 'bpm-dum'):
+           if (ADVANCED_COLUMN_IDS[all_index] != 'bpm-dum'):
                 player_advanced_stats.append("") 
         all_index = all_index + 1
     return player_advanced_stats
