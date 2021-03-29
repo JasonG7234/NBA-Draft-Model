@@ -10,23 +10,16 @@ from tensorflow.python.keras.backend import set_session
 
 from utils import *
 
-TENSORFLOW_EPOCHS = 50
+TENSORFLOW_EPOCHS = 30
 NODE_COUNT = 32
 LOGREG_ITER = 500
 
 def main():
     master = get_csv_file("perform logistic regression on? ")
     x_train, x_test, y_train, y_test, prospects = get_train_test_split(master)
-    while True:
-        is_tensorflow = input("Do you want to utilize tensorflow with this model? Enter 'yes' or 'no': ").strip()
-        if (is_tensorflow == 'yes'):
-                perform_tensorflow_log_reg(x_train, x_test, y_train, y_test, prospects)
-                break
-        elif (is_tensorflow == 'no'):
-                perform_log_reg(x_train, x_test, y_train, y_test, prospects)
-                break
-        else:
-                print("ERROR - That is not a valid input. Please try again.")
+    perform_tensorflow_log_reg(x_train, x_test, y_train, y_test, prospects)
+    perform_log_reg(x_train, x_test, y_train, y_test, prospects)
+    prospects.to_csv('upcomingprospects.csv', index=False)
 
 def get_train_test_split(master):
     
@@ -68,9 +61,10 @@ def perform_tensorflow_log_reg(x_train, x_test, y_train, y_test, prospects):
 
     y_pred = model.predict(normed_x_test)
 
-    make_predictions_for_upcoming_nba_prospects(model, prospects, False)
+    make_predictions_for_upcoming_nba_prospects(model, prospects, True, False)
     print_accuracy_metrics(accuracy, precision, recall, loss)
     print_confusion_matrix(y_test, y_pred)
+    print("\n")
 
 def normalize(val, stats):
     val = (val - stats['mean']) / stats['std']
@@ -96,7 +90,7 @@ def perform_log_reg(x_train, x_test, y_train, y_test, prospects):
     logreg.fit(x_train, y_train.values.ravel())
     y_pred = logreg.predict(x_test)
     
-    make_predictions_for_upcoming_nba_prospects(logreg, prospects, False)
+    make_predictions_for_upcoming_nba_prospects(logreg, prospects, False, False)
     print_coefficient_information(logreg)
     print_accuracy_metrics(metrics.accuracy_score(y_test, y_pred), metrics.precision_score(y_test, y_pred), metrics.recall_score(y_test, y_pred), metrics.log_loss(y_test, y_pred))
     print_confusion_matrix(y_test, y_pred)

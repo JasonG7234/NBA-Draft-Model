@@ -12,6 +12,8 @@ def remove_non_college_basketball_prospects(master):
     master = remove_international_prospects(master)
     master = remove_non_d1_prospects(master)
     master = remove_individual_prospects(master)
+    master = convert_class_to_number(master)
+    master = convert_height_to_inches(master)
     return master
 
 def remove_international_prospects(master):
@@ -40,6 +42,21 @@ def reformat_remaining_college_basketball_prospects(master):
 
     return master
 
+def convert_class_to_number(master):
+    master['Class'] = master['Class'].replace('Fr.', '1')
+    master['Class'] = master['Class'].replace('So.', '2')
+    master['Class'] = master['Class'].replace('Jr.', '3')
+    master['Class'] = master['Class'].replace('Sr.', '4')
+    return master
+
+def convert_height_to_inches(master):
+    new_heights = []
+    for index, row in master.iterrows():
+        height = row['Height']
+        new_heights.append((int(height[0]) * 12 + int(height[2:].replace('-', ''))))
+
+    master['Height'] = new_heights
+ 
 def get_rsci_rank_from_dictionary(name):
     return check_value_in_dictionary_of_exceptions(name, OVERALL_RSCI_EXCEPTIONS, 0) 
 
@@ -55,15 +72,15 @@ def get_possession_stats(season_row):
     return [ stat.getText() for stat in stats ] # List comprehension
 
 def get_ast_to_tov_ratio(soup_html):
-    lastSeason = get_last_season_stat_row(soup_html, 'players_totals')
-    ast = (lastSeason.find('td', {'data-stat':'ast'})).getText()
-    tov = (lastSeason.find('td', {'data-stat':'tov'})).getText()
+    last_season = get_last_season_stat_row(soup_html, 'players_totals')
+    ast = (last_season.find('td', {'data-stat':'ast'})).getText()
+    tov = (last_season.find('td', {'data-stat':'tov'})).getText()
     if (int(tov) == 0):
         return ast
     return str(round(int(ast)/int(tov), 2))
 
 def is_expected_advanced_stat_in_table(stat, index):
-    return stat['data-stat'] is ADVANCED_COLUMN_IDS[index]
+    return stat['data-stat'].strip() == ADVANCED_COLUMN_IDS[index]
 
 def is_empty_dummy_column(stat):
     return stat['data-stat'] == 'ws-dum' or stat['data-stat'] == 'bpm-dum'

@@ -15,11 +15,16 @@ pattern = re.compile('[\W_]+')
 
 OVERALL_PLAYER_NAME_EXCEPTIONS = {
 	"Moe Harkless" : "Maurice Harkless",
+	"TyShon Alexander" : "Ty-Shon Alexander",
+	"BJ Boston" : "Brandon Boston",
+	"Chris Johnsonn" : "Chris Johnson",
 	"Cameron Reddish" : "Cam Reddish",
 	"James McAdoo" : "James Michael McAdoo",
 	"Cam Long" : "Cameron Long",
 	"Simi Shittu" : "Simisola Shittu",
 	"Kevin Porter" : "Kevin Porter Jr.",
+	"Herbert Jones" : "Herb Jones",
+	"Ron Harper" : "Ron Harper Jr.",
 	"Gary Trent" : "Gary Trent Jr.",
 	"Dennis Smith" : "Dennis Smith Jr.",
 	"Tashawn Thomas" : "TaShawn Thomas",
@@ -38,6 +43,10 @@ OVERALL_SCHOOL_NAME_EXCEPTIONS = {
 	"St. Mary's" : "Saint Mary's", 
 	"Massachusetts" : "UMass",
 	"North Carolina" : "UNC",
+	"Pittsburgh" : "Pitt",
+	"St. Johns" : "St. John's (NY)",
+	"Cal St. Northridge" : "Cal State Northridge",
+	"Mississippi" : "Ole Miss"
 }
 
 COMMON_NAMES = [
@@ -67,6 +76,7 @@ OVERALL_RSCI_EXCEPTIONS = {
 	"Caris LeVert" : 239,
 	"Tu Holloway" : 181,
 	"Jeff Allen" : 83,
+	"Anthony Davis" : 1,
 	"Darington Hobson" : 146,
 	"Manny Harris" : 37,
 	"DeSean Butler" : 107,
@@ -79,8 +89,10 @@ OVERALL_RSCI_EXCEPTIONS = {
 COLLEGE_PLAYER_NAME_EXCEPTIONS = {
     "wendell-carter" : "wendell-carterjr",
     "marvin-bagley" : "marvin-bagleyiii",
+	"trey-murphy" : "trey-murphyiii",
     "fuquan-edwin" : "edwin-fuquan",
     "derrick-jones" : "derrick-jonesjr",
+	"brandon-boston" : "brandon-bostonjr",
     "jaren-jackson" : "jaren-jacksonjr",
     "james-mcadoo" : "james-michael-mcadoo",
     "glen-rice" : "glen-rice-jr",
@@ -105,7 +117,7 @@ COLLEGE_PLAYER_NAME_EXCEPTIONS = {
 	"cam-oliver" : "cameron-oliver",
 	"bam-adebayo" : "edrice-adebayo",
 	"dennis-smith" : "dennis-smithjr",
-	"yogi-ferrell" : "kevin-farrell",
+	"yogi-ferrell" : "kevin-ferrell",
 	"anthony-barber" : "anthony-cat-barber",
 	"christ-koumadje" : "jeanmarc-koumadje",
 	"dewan-hernandez" : "dewan-huell",
@@ -121,6 +133,9 @@ COLLEGE_PLAYER_NAME_EXCEPTIONS = {
 }
 
 COLLEGE_INDEX_EXCEPTIONS = {
+	"anthony-lamb" : 2,
+	"kristian-doolittle" : 2,
+	"paul-reed" : 5,
     "gary-payton" : 2,
     "kyle-anderson" : 3,
     "thomas-robinson" : 2,
@@ -128,12 +143,18 @@ COLLEGE_INDEX_EXCEPTIONS = {
 	"nick-richards" : 2,
 	"aj-lawson" : 12,
 	"reggie-perry" : 2,
+	"robert-woodard" : 2,
+	"greg-brown" : 9,
 	"lonnie-walker" : 2,
+	"anthony-davis" : 5,
 	"chris-walker" : 6,
   	"eric-mika" : 2,
+	"troy-brown" : 5,
 	"charlie-brown" : 2,
 	"rodney-williams" : 3,
-	"chris-smith" : 19
+	"mark-williams" : 7,
+	"chris-smith" : 19,
+	"jalen-johnson" : 24
 }
 
 COLLEGE_SCHOOL_NAME_EXCEPTIONS = {
@@ -185,7 +206,6 @@ NBA_SCHOOL_NAME_EXCEPTIONS = {
 	"Illinois-Chicago" : "University of Illinois at Chicago",
 	"UAB" : "University of Alabama at Birmingham",
 	"Southern Miss." : "University of Southern Mississippi",
-	"Pittsburgh" : "Pitt",
 	"St. Johns" : "St. John's"
 }
 
@@ -195,7 +215,7 @@ ADVANCED_COLUMN_IDS = ['g','gs','mp','per','ts_pct','efg_pct','fg3a_per_fga_pct'
 COLUMN_NAMES = ['G','GS','MP','PER','TS%','eFG%','3PAr','FTr','PProd','ORB%','DRB%','TRB%','AST%',
                     'STL%','BLK%','TOV%','USG%','OWS','DWS','WS','WS/40','OBPM','DBPM','BPM', 'ORTG', 'DRTG', 'AST/TOV']
 
-LOG_REG_COLUMNS = ['TS%','eFG%','3PAr','FTr','TRB%','AST%','BLK%','TOV%','USG%','OWS','DWS','WS','WS/40','AST/TOV']
+LOG_REG_COLUMNS = ['Height','RSCI','Class','TS%','3PAr','TRB%','AST%','BLK%','STL%','WS/40','AST/TOV']
 
 USER_AGENT = "Mozilla/5.0 (Android 4.4; Mobile; rv:41.0) Gecko/41.0 Firefox/41.0"
 HEADERS = { 'User-Agent': USER_AGENT}
@@ -205,7 +225,10 @@ def find_site(url):
 	It's very important to decode + sub out all comments! (Basketball-Reference's HTML comments throw everything out of wack)"""
 	
 	response = requests.get(url, headers=HEADERS)
-	html = response.content.decode("utf-8")
+	try: 
+		html = response.content.decode("utf-8")
+	except UnicodeDecodeError:
+		html = response.content.decode("latin-1")
 	return BeautifulSoup(re.sub("<!--|-->","", html), "html.parser")
 
 def check_value_in_dictionary_of_exceptions(name, exceptions_dict, default):
@@ -272,7 +295,10 @@ def is_nba_player(player):
 			return float(1)
 		return float(0)
 
-def make_predictions_for_upcoming_nba_prospects(logreg, prospects, is_round):
+def make_predictions_for_upcoming_nba_prospects(logreg, prospects, is_tensorflow, is_round):
     predictions = logreg.predict(prospects[LOG_REG_COLUMNS])
-    prospects['IsNBAPlayer'] = predictions.tolist() if is_round else predictions
-    prospects.to_csv('upcomingprospects.csv', index=False)
+    if (is_tensorflow): 
+        prospects['Tensorflow IsNBAPlayer'] = predictions.tolist() if is_round else predictions
+    else:
+        prospects['LogReg IsNBAPlayer'] = predictions.tolist() if is_round else predictions
+    

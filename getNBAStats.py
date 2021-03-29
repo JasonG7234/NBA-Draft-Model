@@ -14,10 +14,10 @@ NBA_STATS = [GP, MPG, WS, WSP48, BPM, VORP, PLUSMINUS]
 
 def main():
     all = get_csv_file("add NBA stats? ")
-    all = populateNBAAllStatistics(all)
-    addNBAStatsToMasterList(pd.read_csv('master.csv'), all)
+    all = populate_NBA_all_statistics(all)
+    addNBAStatsToMasterList(pd.read_csv('temp_master.csv'), all)
 
-def populateNBAAllStatistics(all):
+def populate_NBA_all_statistics(all):
     couldNotFindList = []
     nba_stats = all[['Season','Name']].copy()
     base_url = "https://www.basketball-reference.com/players"
@@ -127,7 +127,7 @@ def addNBAStatsToMasterList(all, nba):
     all['NBA VORP'] = nba['NBA VORP']
     all['NBA PLUSMINUS'] = nba['NBA PLUSMINUS']
     all = reorder_columns(all)
-    all.to_csv("master.csv", index=False)
+    all.to_csv("new_master.csv", index=False)
 
 if __name__ == "__main__":
     main()

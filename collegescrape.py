@@ -18,7 +18,7 @@ def main():
             stop_script = input("We completed Step 2 - do you want to pause the script to do some manual data cleanup? It is recommended. Enter 'yes' or 'no': ").strip()
             if (stop_script == 'yes'):
                 print("Okay, we recommend fixing all of the names and adding missing RSCI ranks from 247sports.")
-                export_master()
+                export_master(master)
                 sys.exit("Exiting the program to do manual data cleanup.")
             elif (stop_script == 'no'):
                 print("Okay! Continuing with the script.")
@@ -38,7 +38,7 @@ def main():
             else:
                 print("ERROR - That is not a valid input. Please try again.")    
     add_college_stats_from_basketball_reference()
-    export_master()
+    export_master(master)
 
 def add_all_college_basketball_prospects():
     """Get the top 100 prospects each year from NBADraft.net, and add each year's top 100 to a master DataFrame.
@@ -148,8 +148,10 @@ def add_college_stats_from_basketball_reference():
             player_stats.append(get_ast_to_tov_ratio(soup_html))
         else:
             master.drop(index, inplace=True)
-            break
+            continue
+        print(player_stats)
         college_stats.append(player_stats)
+
     master = pd.concat([master, pd.DataFrame(college_stats,index=master.index,columns=COLUMN_NAMES)], axis=1)
 
 def get_players_basketball_reference_page(row):
@@ -159,7 +161,7 @@ def get_players_basketball_reference_page(row):
 
     player_name_in_url = get_basketball_reference_formatted_url(row['Name'])
     index_value_in_url = check_value_in_dictionary_of_exceptions(player_name_in_url, COLLEGE_INDEX_EXCEPTIONS, 1)
-    if(index_value_in_url == 1):
+    if (index_value_in_url == 1):
         while index_value_in_url in range(1, MAX_PROFILES_TO_SEARCH_BY_NAME): 
             url = "https://www.sports-reference.com/cbb/players/" + player_name_in_url + "-" + str(index_value_in_url) + ".html"
             soup_html = find_site(url)
@@ -171,9 +173,12 @@ def get_players_basketball_reference_page(row):
                 else:
                     print(row['Name'] + " might be a common name - trying again at next profile index")
                     index_value_in_url = index_value_in_url + 1
+            else:
+                print("Sorry, we couldn't find the correct player page for : " +row['Name'])
+                return None
     else:
         url = "https://www.sports-reference.com/cbb/players/" + player_name_in_url + "-" + str(index_value_in_url) + ".html"
-        return find_site(url)
+        return(find_site(url))
     print("Sorry, we couldn't find any college stats for : " +row['Name'])
     return None
 
@@ -186,11 +191,11 @@ def get_advanced_stats(soup_html):
     stats = last_season_stats.findChildren('td')[2:] # Slicing
     stats_index = 0 # Index of which stat we are on in the player's Advanced table
     all_index = 0 # Index of which stat we SHOULD be on, according to all possible stats in the Advanced table
-    while all_index in range(0, len(ADVANCED_COLUMN_IDS)): 
+    while all_index in range(0, len(ADVANCED_COLUMN_IDS)):
         try:
             stat_at_index = stats[stats_index] 
             if (stat_at_index.getText()):
-                if (is_expected_advanced_stat_in_table(stat_at_index)):
+                if (is_expected_advanced_stat_in_table(stat_at_index, all_index)):
                     player_advanced_stats.append(stat_at_index.getText()) 
                     stats_index = stats_index + 1
                 else: 
@@ -213,10 +218,9 @@ def add_college_stats_from_hoopmath():
     print("----------------------------------")
     # TODO: Is it necessary to add these stats from Hoop-Math? 
 
-def export_master():
-    global master
-    master = reorder_columns(master)
-    master.to_csv('temp_master.csv', index=False)
+def export_master(master):
+    temp_master = reorder_columns(master)
+    temp_master.to_csv('temp_master.csv', index=False)
 
 if __name__ == "__main__":
     main()
