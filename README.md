@@ -12,7 +12,7 @@ pip3 install -r requirements.txt
 
 ## Usage
 
-As of 11/9/20, we only have support for a data scraper (pulling all college basketball prospects since 2009), a very basic graphing utility with the stats pulled from scraping, and two different machine learning algorithms to make NBA predictions on this year's NBA draft class. 
+As of 3/29/20, we only have support for a data scraper (pulling all college basketball prospects since 2009), a very basic graphing utility with the stats pulled from scraping, and three different machine learning algorithms to make NBA predictions on this year's NBA draft class. 
 
 ### Data Scraper
 
@@ -24,13 +24,17 @@ Once you have the master.csv file populated, you can plot some simple scatter pl
 
 ![Image of Graph](pictures/graph.png)
 
-### Logistic Regression
+### Machine Learning Models
 
-You can also give the predictive model a try by calling `py model.py` and inputting the master.csv file. You can choose to run it with or without tensorflow. Without tensorflow, it seems to be hovering around >70% accuracy. You can see the metrics below. 
+You can also give the predictive model a try by calling `py model.py` and inputting the master.csv file. For scikit-learn's LogisticRegression model, it seems to be hovering around >70% accuracy. You can see the metrics below. 
 
 ![Metrics](pictures/image.png)
 
 With tensorflow, I am seeing mixed results. The current implementation I have is inconsistent but tops out at around 73%, with worse precision and better recall than sklearn's basic LogisticRegression algorithm. I am still tweaking the numbers to find out what works best.
+
+Recently, as of 3/29/20, I've added a Gradient Boosting Classification model. This seems to have worse accuracy on the training data (~75%) than the other two models, but greater accuracy on the testing data (~75%). 
+
+You can see the overall results of all three models in the `upcomingProspects.csv` file. I think the combination of all three models is really accurate in terms of creating a tier list of sorts. 
 
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
