@@ -295,10 +295,6 @@ def is_nba_player(player):
 			return float(1)
 		return float(0)
 
-def make_predictions_for_upcoming_nba_prospects(logreg, prospects, is_tensorflow, is_round):
+def make_predictions_for_upcoming_nba_prospects(logreg, prospects, row_name, is_round):
     predictions = logreg.predict(prospects[LOG_REG_COLUMNS])
-    if (is_tensorflow): 
-        prospects['Tensorflow IsNBAPlayer'] = predictions.tolist() if is_round else predictions
-    else:
-        prospects['LogReg IsNBAPlayer'] = predictions.tolist() if is_round else predictions
-    
+    prospects[row_name] = predictions.tolist() if is_round else predictions

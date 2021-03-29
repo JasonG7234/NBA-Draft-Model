@@ -2,7 +2,8 @@ import numpy as np
 import pandas as pd
 import tensorflow.compat.v1 as tf
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import confusion_matrix
+from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.metrics import classification_report, confusion_matrix
 from sklearn.model_selection import train_test_split
 from tensorflow import keras
 from tensorflow.keras import layers
@@ -19,6 +20,7 @@ def main():
     x_train, x_test, y_train, y_test, prospects = get_train_test_split(master)
     perform_tensorflow_log_reg(x_train, x_test, y_train, y_test, prospects)
     perform_log_reg(x_train, x_test, y_train, y_test, prospects)
+    perform_gradient_boosting(x_train, x_test, y_train, y_test, prospects, master)
     prospects.to_csv('upcomingprospects.csv', index=False)
 
 def get_train_test_split(master):
@@ -61,7 +63,7 @@ def perform_tensorflow_log_reg(x_train, x_test, y_train, y_test, prospects):
 
     y_pred = model.predict(normed_x_test)
 
-    make_predictions_for_upcoming_nba_prospects(model, prospects, True, False)
+    make_predictions_for_upcoming_nba_prospects(model, prospects, "Tensorflow", False)
     print_accuracy_metrics(accuracy, precision, recall, loss)
     print_confusion_matrix(y_test, y_pred)
     print("\n")
@@ -90,10 +92,25 @@ def perform_log_reg(x_train, x_test, y_train, y_test, prospects):
     logreg.fit(x_train, y_train.values.ravel())
     y_pred = logreg.predict(x_test)
     
-    make_predictions_for_upcoming_nba_prospects(logreg, prospects, False, False)
+    make_predictions_for_upcoming_nba_prospects(logreg, prospects, "LogReg", False)
     print_coefficient_information(logreg)
     print_accuracy_metrics(metrics.accuracy_score(y_test, y_pred), metrics.precision_score(y_test, y_pred), metrics.recall_score(y_test, y_pred), metrics.log_loss(y_test, y_pred))
     print_confusion_matrix(y_test, y_pred)
+
+def perform_gradient_boosting(x_train, x_test, y_train, y_test, prospects, master):
+    """Creates the Gradient Boosting Machine and tests accuracy"""
+
+    print("\n\n")
+    print("----------------------------------")
+    classifier = GradientBoostingClassifier(random_state=1, learning_rate=0.01)
+    classifier.fit(x_train, y_train.values.ravel())
+    print("GBM Training score: ", classifier.score(x_train, y_train))
+    print("GBM Testing score: ", classifier.score(x_test, y_test))
+    y_pred = classifier.predict(x_test)
+
+    make_predictions_for_upcoming_nba_prospects(classifier, prospects, "GBM", False)
+    print_confusion_matrix(y_test, y_pred)
+    print(classification_report(y_test, y_pred))
 
 
 def print_coefficient_information(logreg):
