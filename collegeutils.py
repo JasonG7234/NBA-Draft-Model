@@ -33,7 +33,7 @@ def remove_individual_prospects(master):
       & (master.Name != "Ricardo Ledo")]
 
 def reformat_remaining_college_basketball_prospects(master):
-    for index, row in master.iterrows():
+    for row in master.iterrows():
         row['Name'] = get_basketball_reference_formatted_name(row['Name'], OVERALL_PLAYER_NAME_EXCEPTIONS)
         school = get_basketball_reference_formatted_school(row['School'], OVERALL_SCHOOL_NAME_EXCEPTIONS, row['School'])
         row['School'] = get_basketball_reference_formatted_school(row['Name'], OVERALL_PLAYER_SCHOOL_EXCEPTIONS, school)
@@ -60,11 +60,11 @@ def convert_height_to_inches(master):
 def get_rsci_rank_from_dictionary(name):
     return check_value_in_dictionary_of_exceptions(name, OVERALL_RSCI_EXCEPTIONS, 0) 
 
-def get_last_season_stat_row(soup_html, tableID):
-    table = soup_html.find('table', {'id':tableID})
+def get_last_season_stat_row(soup_html, table_id):
+    table = soup_html.find('table', {'id':table_id})
     if (table):
-        tableBody = table.find('tbody')
-        return tableBody('tr')[-1] 
+        table_body = table.find('tbody')
+        return table_body('tr')[-1] 
     return None
 
 def get_possession_stats(season_row):
