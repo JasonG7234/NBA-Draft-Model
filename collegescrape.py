@@ -11,33 +11,9 @@ master = pd.DataFrame()
 
 def main():
     global master
-    if not(os.path.isfile('master.csv')):
-        add_all_college_basketball_prospects()
-        add_rsci_rank_as_column()
-        while True:
-            stop_script = input("We completed Step 2 - do you want to pause the script to do some manual data cleanup? It is recommended. Enter 'yes' or 'no': ").strip()
-            if (stop_script == 'yes'):
-                print("Okay, we recommend fixing all of the names and adding missing RSCI ranks from 247sports.")
-                export_master(master)
-                sys.exit("Exiting the program to do manual data cleanup.")
-            elif (stop_script == 'no'):
-                print("Okay! Continuing with the script.")
-                break
-            else:
-                print("ERROR - That is not a valid input. Please try again.")
-    else:
-        while True:
-            continue_script = input("Seems like you already have a master.csv file. Do you want to pick up from step 3? Enter 'yes' or 'no': ").strip()
-            if (continue_script == 'yes'):
-                print("Okay, picking up from Step 3 - adding college stats from Basketball Reference.")
-                master = pd.read_csv('master.csv')
-                break
-            elif (continue_script == 'no'):
-                print("Okay, exiting the program. You can delete the master.csv file if you want to try again.")
-                sys.exit("Exiting the program.")
-            else:
-                print("ERROR - That is not a valid input. Please try again.")    
-    add_college_stats_from_basketball_reference()
+    master = pd.read_csv('main_rsci.csv')
+    add_rsci_rank_as_column()
+        
     export_master(master)
 
 def add_all_college_basketball_prospects():
@@ -52,7 +28,8 @@ def add_all_college_basketball_prospects():
     print("STEP 1 - Getting the names of all the prospects")
     print("----------------------------------")
     year_counter = FIRST_YEAR_OF_DRAFT_RANKINGS
-    while year_counter <= get_current_year():
+    current_year = get_current_year()
+    while year_counter <= current_year:
         top100 = []
         season = get_season_from_year(year_counter)
         print("Getting players from the " + season + " season")
@@ -71,8 +48,8 @@ def add_all_college_basketball_prospects():
                     index = index + 1
                 row.insert(0, season)
                 top100.append(row)
-            yearDataFrame = pd.DataFrame(top100, columns=['Season', 'Name', 'Height', 'Weight', 'Position', 'School', 'Class'])
-        master = master.append(yearDataFrame, ignore_index=True)
+            year_dataframe = pd.DataFrame(top100, columns=['Season', 'Name', 'Height', 'Weight', 'Position', 'School', 'Class'])
+        master = pd.concat([master, year_dataframe], ignore_index=True)
         year_counter = year_counter + 1
     master = remove_non_college_basketball_prospects(master)
     master = reformat_remaining_college_basketball_prospects(master)
@@ -101,26 +78,26 @@ def add_rsci_rank_as_column():
                 for index, row in master.iterrows():
                     if (name in row['Name'].lower() and row['RSCI'] == ""):
                         if (name in COMMON_NAMES):
-                             college = player.find('div', {'class':'status'}).find('img')['alt']
-                             if (college != row['School']):
-                                 continue
+                            college = player.find('div', {'class':'status'}).find('img')['alt']
+                            if (college != row['School']):
+                                continue
                         rank = player.find('div', {'class':'primary'}).getText().split()[0]
                         print("Found a match for " + row['Name'] + ": " + rank)
                         master.at[index, 'RSCI'] = rank
                         break
             page = page + 1
         year_counter = year_counter + 1
-    add_remaining_rsci_rankings()
+    master.apply(add_remaining_rsci_rankings)
     
-def add_remaining_rsci_rankings():
+def add_remaining_rsci_rankings(row):
     """For every player not found on 247 year pages, we want to add their RSCI rank if it we have it saved as an exception."""
-    
-    global master
-    
-    for index, row in master.iterrows():
-        rank_in_dictionary = get_rsci_rank_from_dictionary(row['Name'])
-        if (pd.isna(row['RSCI']) and rank_in_dictionary != 0):
-            row['RSCI'] = rank_in_dictionary
+
+    rank_in_dictionary = get_rsci_rank_from_dictionary(row['Name'])
+    if (rank_in_dictionary != 0):
+        row['RSCI'] = rank_in_dictionary
+    if (pd.isna(row['RSCI'])):
+        row['RSCI'] = 400
+    return row
 
 def add_college_stats_from_basketball_reference():
     """Get all advanced college stats for each player's most recent year by scraping the relevant table from basketballreference.

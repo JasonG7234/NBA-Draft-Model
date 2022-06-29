@@ -17,46 +17,33 @@ def remove_non_college_basketball_prospects(master):
     return master
 
 def remove_international_prospects(master):
-    return master[(master.Class == "Fr.")
-     | (master.Class == "So.")
-      | (master.Class == "Jr.")
-       | (master.Class == "Sr.")]
+    return master[master['Class'].isin(['Fr.','So.','Jr.','Sr.'])]
 
 def remove_non_d1_prospects(master):
-    return master[(master.School != "JUCO")
-     & (master.School != "USA") 
-       & (master.School != "")]
+    return master[~master['School'].isin(["JUCO",'USA',''])]
 
 def remove_individual_prospects(master):
-    return master[(master.Name != "Enes Kanter")
-     & (master.Name != "Garrett Siler")
-      & (master.Name != "Ricardo Ledo")]
+    return master[~master['Name'].isin(["Enes Kanter","Garrett Siler","Ricardo Ledo"])]
 
 def reformat_remaining_college_basketball_prospects(master):
-    for row in master.iterrows():
-        row['Name'] = get_basketball_reference_formatted_name(row['Name'], OVERALL_PLAYER_NAME_EXCEPTIONS)
+    master['Name'] = master['Name'].apply(lambda name: get_basketball_reference_formatted_name(name, OVERALL_PLAYER_NAME_EXCEPTIONS))
+    for index, row in master.iterrows():
         school = get_basketball_reference_formatted_school(row['School'], OVERALL_SCHOOL_NAME_EXCEPTIONS, row['School'])
-        row['School'] = get_basketball_reference_formatted_school(row['Name'], OVERALL_PLAYER_SCHOOL_EXCEPTIONS, school)
-        if (row['School'].endswith("St.")):
-            row['School'] = row['School'][:-1] + "ate"
-
+        school = get_basketball_reference_formatted_school(row['Name'], OVERALL_PLAYER_SCHOOL_EXCEPTIONS, school)
+        if (school.endswith("St.")):
+            school = school[:-1] + "ate"
+        master.at[index, 'School'] = school
     return master
 
 def convert_class_to_number(master):
-    master['Class'] = master['Class'].replace('Fr.', '1')
-    master['Class'] = master['Class'].replace('So.', '2')
-    master['Class'] = master['Class'].replace('Jr.', '3')
-    master['Class'] = master['Class'].replace('Sr.', '4')
+    class_to_number = {'Fr.':1, 'So.':2, 'Jr.':3, 'Sr.':4}
+    master.replace(to_replace=class_to_number, inplace=True)
     return master
 
 def convert_height_to_inches(master):
-    new_heights = []
-    for index, row in master.iterrows():
-        height = row['Height']
-        new_heights.append((int(height[0]) * 12 + int(height[2:].replace('-', ''))))
+    master['Height'] = master['Height'].apply(lambda x: int(x[0])*12 + int(x[2:].replace('-', '')))
+    return master
 
-    master['Height'] = new_heights
- 
 def get_rsci_rank_from_dictionary(name):
     return check_value_in_dictionary_of_exceptions(name, OVERALL_RSCI_EXCEPTIONS, 0) 
 
