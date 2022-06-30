@@ -66,6 +66,11 @@ def get_ast_to_tov_ratio(soup_html):
         return ast
     return str(round(int(ast)/int(tov), 2))
 
+def get_sos(soup_html):
+    last_season = get_last_season_stat_row(soup_html, 'players_per_game')
+    sos = last_season.find('td', {'data-stat':'sos'})
+    return sos.getText() if sos else ""
+
 def is_expected_advanced_stat_in_table(stat, index):
     return stat['data-stat'].strip() == ADVANCED_COLUMN_IDS[index]
 

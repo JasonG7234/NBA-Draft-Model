@@ -11,8 +11,8 @@ master = pd.DataFrame()
 
 def main():
     global master
-    master = pd.read_csv('main_rsci.csv')
-    add_rsci_rank_as_column()
+    master = pd.read_csv('data/main_rsci.csv')
+    add_college_stats_from_basketball_reference()
         
     export_master(master)
 
@@ -117,12 +117,10 @@ def add_college_stats_from_basketball_reference():
         soup_html = get_players_basketball_reference_page(row)
         if (soup_html):
             player_stats.extend(get_advanced_stats(soup_html))
-            last_season = get_last_season_stat_row(soup_html, 'players_per_poss')
-            if (last_season): 
-                player_stats.extend(get_possession_stats(last_season))
-            else: 
-                player_stats.extend(["", ""])
+            player_stats.extend(get_per_40_stats(soup_html))
+            player_stats.extend(get_per_100_stats(soup_html))
             player_stats.append(get_ast_to_tov_ratio(soup_html))
+            player_stats.append(get_sos(soup_html))
         else:
             master.drop(index, inplace=True)
             continue
@@ -141,6 +139,7 @@ def get_players_basketball_reference_page(row):
     if (index_value_in_url == 1):
         while index_value_in_url in range(1, MAX_PROFILES_TO_SEARCH_BY_NAME): 
             url = "https://www.sports-reference.com/cbb/players/" + player_name_in_url + "-" + str(index_value_in_url) + ".html"
+            print(url)
             soup_html = find_site(url)
             if (soup_html.find('table', {'id':'players_advanced'})):
                 quick_player_info = get_basketball_reference_player_info(soup_html)
@@ -156,7 +155,7 @@ def get_players_basketball_reference_page(row):
     else:
         url = "https://www.sports-reference.com/cbb/players/" + player_name_in_url + "-" + str(index_value_in_url) + ".html"
         return(find_site(url))
-    print("Sorry, we couldn't find any college stats for : " +row['Name'])
+    print("Sorry, we couldn't find any college stats for : " + row['Name'])
     return None
 
 def get_advanced_stats(soup_html):
@@ -184,10 +183,27 @@ def get_advanced_stats(soup_html):
                     player_advanced_stats.append("")
                     stats_index = stats_index + 1
         except IndexError:
-           if (ADVANCED_COLUMN_IDS[all_index] != 'bpm-dum'):
+            if (ADVANCED_COLUMN_IDS[all_index] != 'bpm-dum'):
                 player_advanced_stats.append("") 
         all_index = all_index + 1
     return player_advanced_stats
+
+def get_per_40_stats(soup_html):
+    """Get the player's per 40 minute stats from their table.
+    """
+    
+    last_season_stats = get_last_season_stat_row(soup_html, 'players_per_min')
+    return [last_season_stats.find('td', {'data-stat' : col}).getText() for col in PER_40_COLUMN_IDS]
+    
+def get_per_100_stats(soup_html):
+    """Get the player's per 100 possession stats from their table.
+    """
+
+    last_season_stats = get_last_season_stat_row(soup_html, 'players_per_poss')
+    if (last_season_stats): 
+        return [last_season_stats.find('td', {'data-stat' : col}).getText() for col in PER_100_COLUMN_IDS]
+    else: 
+        return [""] * len(PER_100_COLUMN_IDS)
 
 def add_college_stats_from_hoopmath():
     print("----------------------------------")
