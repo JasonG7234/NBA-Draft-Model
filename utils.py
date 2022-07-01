@@ -115,6 +115,7 @@ OVERALL_RSCI_EXCEPTIONS = {
 	"Delon Wright" : 159,
 	"Michael Frazier" : 86,
 	"Bryce Dejean-Jones" : 82,
+	"Michael Porter" : 2,
 	"Jakob Poeltl" : 100,
 	"Kadeem Allen" : 83,
 	"Chris Boucher" : 100,
@@ -150,7 +151,6 @@ COLLEGE_PLAYER_NAME_EXCEPTIONS = {
     "tim-hardaway" : "tim-hardaway-jr",
     "tu-holloway" : "terrell-holloway",
     "bernard-james" : "bernard-james-",
-	"gary-trent-jr" : "gary-trentjr",
 	"simi-shittu" : "simisola-shittu",
 	"kira-lewis" : "kira-lewisjr",
 	"stephen-zimmerman" : "stephen-zimmermanjr",
@@ -158,10 +158,10 @@ COLLEGE_PLAYER_NAME_EXCEPTIONS = {
 	"rob-gray" : "robert-grayjr",
 	"vernon-carey" : "vernon-careyjr",
 	"zach-norvell" : "zach-norvelljr",
-	"kevin-porter-jr" : "kevin-porterjr",
 	"kz-okpala" : "kezie-okpala",
 	"ja-morant" : "temetrius-morant",
 	"jo-lual-acuil" : "jo-acuil",
+	"michael-porter" : "michael-porterjr",
 	"shake-milton" : "malik-milton",
 	"andrew-white" : "andrew-whiteiii",
 	"wesley-johnson" : "wes-johnson",
@@ -180,7 +180,14 @@ COLLEGE_PLAYER_NAME_EXCEPTIONS = {
 	"art-parakhouski" : "artsiom-parakhouski",
 	"landers-nolley" : "landers-nolleyii",
 	"terrence-shannon" : "terrence-shannonjr",
-	"obi-toppin" : "obadiah-toppin"
+	"obi-toppin" : "obadiah-toppin",
+	"duane-washington" : "duane-washingtonjr",
+	"mac-mcclung" : "matthew-mcclung",
+	"mckinley-wright" : "mckinley-wrightiv",
+	"oscar-da-silva" : "oscar-dasilva",
+	"johnny-davis" : "jonathan-davis",
+	"tyty-washington" : "tyty-washingtonjr",
+	"wendell-moore" : "wendell-moorejr"
 }
 
 COLLEGE_INDEX_EXCEPTIONS = {
@@ -206,7 +213,12 @@ COLLEGE_INDEX_EXCEPTIONS = {
 	"cameron-johnson" : 4,
 	"mark-williams" : 7,
 	"chris-smith" : 19,
-	"jalen-johnson" : 24
+	"tyler-davis" : 5,
+	"jalen-johnson" : 24,
+	"david-johnson" : 13,
+	"jalen-williams" : 13,
+	"donovan-williams" : 3,
+	"jonathan-davis" : 3
 }
 
 COLLEGE_SCHOOL_NAME_EXCEPTIONS = {
@@ -217,6 +229,8 @@ COLLEGE_SCHOOL_NAME_EXCEPTIONS = {
 	"Southern Miss." : "Southern Miss",
 	"Tennessee-Martin" : "UT-Martin",
 	"Texas A&M Corpus Christi" : "Texas A&M-Corpus Christi",
+	"UC Santa Barbara" : "UCSB",
+	"Texas Arlington" : "UT Arlington"
 }
 
 NBA_PLAYER_NAME_EXCEPTIONS = {
@@ -261,17 +275,54 @@ NBA_SCHOOL_NAME_EXCEPTIONS = {
 	"St. Johns" : "St. John's"
 }
 
+HOOP_MATH_SCHOOL_EXCEPTIONS = {
+	"UNC" : "NorthCarolina",
+	"SaintMary's" : "SaintMary's(CA)",
+	"Pitt" : "Pittsburgh",
+	"Wisconsin–Milwaukee" : "Milwaukee",
+	"St.Joseph's" : "SaintJoseph's",
+	"NCSt." : "NCState",
+	"USC" : "SouthernCalifornia",
+	"WesternKentucky" : "WesternKy.",
+	"Charleston" : "Col.ofCharleston",
+	"CalSt.Northridge" : "CSUN",
+	"Miami" : "Miami(FL)",
+	"CentralFlorida" : "UCF",
+	"WesternMichigan" : "WesternMich.",
+	"Illinois-Chicago" : "UIC",
+	"TexasArlington" : "UTArlington",
+	"EasternWashington" : "EasternWash.",
+	"LouisianaLafayette" : "Louisiana",
+	"UMass" : "Massachusetts"
+}
+
+HOOP_MATH_NAME_EXCEPTIONS = {
+	"Kenneth Jr. Lofton" : "Kenneth Lofton Jr.",
+	"Herbert Jones" : "Herb Jones",
+	"Barry Jr. Brown" : "Barry Brown",
+	"Vincent Edwards" : "Vince Edwards",
+	"Wendell Jr. Carter" : "Wendell Carter",
+	"Gary Jr. Trent" : "Gary Trent Jr",
+	"Ray Spalding" : "Raymond Spalding",
+	"Edrice Adebayo" : "Bam Adebayo",
+	"Anthony 'Cat' Barber" : "Anthony Barber"
+}
+
 PER_40_COLUMN_IDS = ['fg_per_min', 'fga_per_min', 'fg_pct', 'fg2_per_min', 'fg2a_per_min', 'fg2_pct', 'fg3_per_min', 'fg3a_per_min', 'fg3_pct',
     'ft_per_min','fta_per_min','ft_pct', 'trb_per_min', 'ast_per_min', 'stl_per_min', 'blk_per_min', 'tov_per_min', 'pf_per_min', 'pts_per_min']
 
 PER_100_COLUMN_IDS = ['fg_per_poss', 'fga_per_poss', 'fg2_per_poss', 'fg2a_per_poss', 'fg3_per_poss', 'fg3a_per_poss','ft_per_poss','fta_per_poss',
-    'trb_per_poss', 'ast_per_poss', 'stl_per_poss', 'blk_per_poss', 'tov_per_poss', 'pf_per_poss', 'pf_per_poss', 'off_rtg', 'def_rtg']
+    'trb_per_poss', 'ast_per_poss', 'stl_per_poss', 'blk_per_poss', 'tov_per_poss', 'pf_per_poss', 'pts_per_poss', 'off_rtg', 'def_rtg']
 
 ADVANCED_COLUMN_IDS = ['g','gs','mp','per','ts_pct','efg_pct','fg3a_per_fga_pct','fta_per_fga_pct','pprod','orb_pct','drb_pct','trb_pct','ast_pct',
     'stl_pct','blk_pct','tov_pct','usg_pct','ws-dum','ows','dws','ws','ws_per_40','bpm-dum','obpm','dbpm','bpm']  
     
 COLUMN_NAMES = ['G','GS','MP','PER','TS%','eFG%','3PAr','FTr','PProd','ORB%','DRB%','TRB%','AST%',
-    'STL%','BLK%','TOV%','USG%','OWS','DWS','WS','WS/40','OBPM','DBPM','BPM', 'ORTG', 'DRTG', 'AST/TOV']
+    'STL%','BLK%','TOV%','USG%','OWS','DWS','WS','WS/40','OBPM','DBPM','BPM','FG/40', 'FGA/40', 'FG%', '2FGM/40', '2FGA/40', '2FG%', '3FGM/40', '3FGA/40', '3FG%',
+    'FT/40','FTA/40','FT%', 'TRB/40', 'AST/40', 'STL/40', 'BLK/40', 'TOV/40', 'PF/40', 'PTS/40', 'FGM/100Poss', 'FGA/100Poss', '2FGM/100Poss', '2FGA/100Poss', '3FGM/100Poss', '3FGA/100Poss','FT/100Poss','FTA/100Poss',
+    'TRB/100Poss', 'AST/100Poss', 'STL/100Poss', 'BLK/100Poss', 'TOV/100Poss', 'PF/100Poss', 'PTS/100Poss', 'OFF RTG', 'DEF RTG', 'ATS/TOV', 'SOS']
+
+HOOP_MATH_COLUMN_NAMES = ['% Shots @ Rim', 'FG% @ Rim', '%Astd @ Rim', '% Shots @ Mid', 'FG% @ Mid', '%Astd @ Mid', '% Shots @ 3', '%Astd @ 3']
 
 LOG_REG_COLUMNS = ['Height','RSCI','Class','TS%','3PAr','TRB%','AST%','BLK%','STL%','WS/40','AST/TOV']
 
@@ -317,6 +368,10 @@ def get_basketball_reference_formatted_name(name, exceptions):
 def get_basketball_reference_formatted_url(name):
 	url_name = name.replace("'", "").replace(".", "").replace(" ", "-").lower()
 	return check_value_in_dictionary_of_exceptions(url_name, COLLEGE_PLAYER_NAME_EXCEPTIONS, url_name)
+
+def get_hoop_math_formatted_school(name):
+	url_name = name.replace(" State", "St.").replace(" ", "")
+	return check_value_in_dictionary_of_exceptions(url_name, HOOP_MATH_SCHOOL_EXCEPTIONS, url_name)
 
 def remove_non_alphabetic_characters(name):
 	return unidecode.unidecode(re.sub(r'[^A-Za-z- ]+', '', name))

@@ -1,3 +1,5 @@
+from fuzzywuzzy import fuzz
+
 from utils import *
 
 # Constants are declared with capital letters and underscores
@@ -6,7 +8,9 @@ MAX_LENGTH_OF_PROSPECT_CAREER = 5
 INDEX_SEPERATING_FIRST_AND_LAST_NAME = 2
 PAGE_OF_RSCI_RANK_CUTOFF = 8
 INDEX_OF_POSSESSION_STATS_IN_TABLE = 25
-MAX_PROFILES_TO_SEARCH_BY_NAME = 5
+MAX_PROFILES_TO_SEARCH_BY_NAME = 6
+HOOP_MATH_TABLE_COLUMN_COUNT = 15
+INDEXES_OF_HOOP_MATH_COLUMNS = [4, 5, 6, 7, 8, 9, 10, 12]
 
 def remove_non_college_basketball_prospects(master):
     master = remove_international_prospects(master)
@@ -20,10 +24,10 @@ def remove_international_prospects(master):
     return master[master['Class'].isin(['Fr.','So.','Jr.','Sr.'])]
 
 def remove_non_d1_prospects(master):
-    return master[~master['School'].isin(["JUCO",'USA',''])]
+    return master[~master['School'].isin(["JUCO",'USA','Canada','G-League',''])]
 
 def remove_individual_prospects(master):
-    return master[~master['Name'].isin(["Enes Kanter","Garrett Siler","Ricardo Ledo"])]
+    return master[~master['Name'].isin(["Enes Kanter","Garrett Siler","Ricardo Ledo","Shaedon Sharpe"])]
 
 def reformat_remaining_college_basketball_prospects(master):
     master['Name'] = master['Name'].apply(lambda name: get_basketball_reference_formatted_name(name, OVERALL_PLAYER_NAME_EXCEPTIONS))
@@ -73,6 +77,11 @@ def get_sos(soup_html):
 
 def is_expected_advanced_stat_in_table(stat, index):
     return stat['data-stat'].strip() == ADVANCED_COLUMN_IDS[index]
+
+def is_fuzzy_name_match(hoop_math_name, csv_name):
+    hm_name = check_value_in_dictionary_of_exceptions(hoop_math_name, HOOP_MATH_NAME_EXCEPTIONS, hoop_math_name)
+    ratio = fuzz.partial_ratio(csv_name, hm_name.replace('.', '').replace("'", ''), )
+    return True if ratio >= 92 else False
 
 def is_empty_dummy_column(stat):
     return stat['data-stat'] == 'ws-dum' or stat['data-stat'] == 'bpm-dum'

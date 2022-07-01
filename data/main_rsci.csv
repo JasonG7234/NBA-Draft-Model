@@ -715,6 +715,7 @@ Damyean Dotson,2016-17,78,205,SG/SF,Houston,4,262
 Sterling Brown,2016-17,77,225,SG/SF,SMU,4,109
 Kadeem Allen,2016-17,74,190,SG,Arizona,4,83
 Edmond Sumner,2016-17,77,175,PG/SG,Xavier,2,106
+DeAnthony Melton,2016-17,75,195,PG/SG,USC,2,134
 Dillon Brooks,2016-17,78,220,SF,Oregon,3,59
 LJ Peak,2016-17,76,215,SG,Georgetown,3,65
 VJ Beachem,2016-17,79,195,SF,Notre Dame,4,74
@@ -772,6 +773,7 @@ Lonnie Walker,2017-18,77,195,SG,Miami,1,16
 Kevin Huerter,2017-18,79,195,SG,Maryland,2,65
 Miles Bridges,2017-18,78,220,SF/PF,Michigan State,2,12
 Robert Williams,2017-18,81,240,PF/C,Texas A&M,2,61
+Jontay Porter,2017-18,83,210,PF/C,Missouri,2,25
 Troy Brown,2017-18,79,210,SG,Oregon,1,13
 Khyri Thomas,2017-18,76,200,SG,Creighton,3,326
 Gary Trent Jr,2017-18,77,205,SG,Duke,1,17
@@ -930,7 +932,7 @@ Jarrey Foster,2018-19,78,220,SF,SMU,4,221
 Barry Brown,2018-19,75,195,PG/SG,Kansas State,4,250
 Jarrell Brantley,2018-19,79,255,PF,Charleston,4,400
 Anthony Edwards,2019-20,77,225,SG,Georgia,1,2
-Obi Toppin,2019-20,81,220,PF,Dayton,2,
+Obi Toppin,2019-20,81,220,PF,Dayton,2,343
 Onyeka Okongwu,2019-20,81,235,PF/C,USC,1,25
 Patrick Williams,2019-20,79,215,SF/PF,Florida State,1,26
 Isaac Okoro,2019-20,78,215,SG/SF,Auburn,1,36
@@ -1016,9 +1018,7 @@ Alpha Diallo,2019-20,78,210,SG/SF,Providence,4,117
 Cade Cunningham,2020-21,80,220,PG/SG,Oklahoma State,1,1
 Evan Mobley,2020-21,84,215,PF/C,USC,1,3
 Jalen Suggs,2020-21,76,205,PG,Gonzaga,1,11
-Jalen Green,2020-21,77,180,SG,G-League,1,2
 Scottie Barnes,2020-21,80,225,SF/PF,Florida State,1,7
-Jonathan Kuminga,2020-21,79,220,SF/PF,G-League,1,4
 James Bouknight,2020-21,77,190,SG,UConn,2,66
 Moses Moody,2020-21,78,210,SG,Arkansas,1,46
 Ziaire Williams,2020-21,81,190,SG/SF,Stanford,1,6
@@ -1026,7 +1026,7 @@ Kai Jones,2020-21,83,220,C,Texas,2,51
 Franz Wagner,2020-21,82,220,SF/PF,Michigan,2,114
 Davion Mitchell,2020-21,73,200,PG,Baylor,3,59
 Corey Kispert,2020-21,79,225,SG/SF,Gonzaga,4,106
-Trey Murphy,2020-21,81,205,SF/PF,Virginia,3,
+Trey Murphy,2020-21,81,205,SF/PF,Virginia,3,400
 Keon Johnson,2020-21,77,185,SG/SF,Tennessee,1,19
 Jalen Johnson,2020-21,81,210,SF/PF,Duke,1,147
 Joshua Primo,2020-21,77,190,SG,Alabama,1,62
@@ -1037,7 +1037,6 @@ Cameron Thomas,2020-21,75,200,SG,LSU,1,25
 Ayo Dosunmu,2020-21,77,195,PG/SG,Illinois,3,32
 Jared Butler,2020-21,75,195,PG/SG,Baylor,3,97
 Brandon Boston Jr,2020-21,79,185,SG,Kentucky,1,5
-Isaiah Todd,2020-21,82,220,PF/C,G-League,1,20
 Jaden Springer,2020-21,76,200,SG,Tennessee,1,16
 Joel Ayayi,2020-21,77,180,PG/SG,Gonzaga,3,100
 Charles Bassey,2020-21,82,230,PF/C,Western Kentucky,3,6
@@ -1058,7 +1057,6 @@ Neemias Queta,2020-21,84,250,C,Utah State,3,400
 Joe Wieskamp,2020-21,79,205,SG/SF,Iowa,3,60
 Isaiah Livers,2020-21,79,230,SF/PF,Michigan,4,133
 David Duke,2020-21,77,205,PG/SG,Providence,3,47
-Daishen Nix,2020-21,76,225,PG,G-League,1,17
 DayRon Sharpe,2020-21,82,265,PF/C,UNC,1,15
 Aaron Henry,2020-21,78,210,SG/SF,Michigan State,3,140
 EJ Onu,2020-21,83,240,PF,Shawnee State,4,400
@@ -1125,7 +1123,6 @@ Tari Eason,2021-22,80,215,SF/PF,LSU,2,138
 Wendell Moore,2021-22,77,215,SG/SF,Duke,3,29
 Jalen Williams,2021-22,78,210,SG/SF,Santa Clara,3,242
 TyTy Washington,2021-22,75,195,PG,Kentucky,1,15
-Jaden Hardy,2021-22,76,200,SG,G-League,1,4
 Kennedy Chandler,2021-22,73,170,PG,Tennessee,1,9
 Jaylin Williams,2021-22,82,235,PF/C,Arkansas,2,120
 Walker Kessler,2021-22,85,255,C,Auburn,2,22
@@ -1133,7 +1130,6 @@ John Butler,2021-22,85,175,PF/C,Florida State,1,71
 Christian Braun,2021-22,79,210,SG,Kansas,3,130
 Dalen Terry,2021-22,79,195,PG/SG,Arizona,2,52
 EJ Liddell,2021-22,79,245,PF,Ohio State,3,44
-MarJon Beauchamp,2021-22,78,195,SG/SF,G-League,2,56
 Andrew Nembhard,2021-22,76,195,PG,Gonzaga,4,23
 Ron Harper Jr,2021-22,77,240,SF,Rutgers,4,175
 Ryan Rollins,2021-22,75,180,PG/SG,Toledo,2,400
@@ -1152,7 +1148,6 @@ Iverson Molinar,2021-22,75,185,PG,Mississippi State,3,208
 JD Davison,2021-22,74,190,PG/SG,Alabama,1,13
 Lester Quinones,2021-22,77,210,SG/SF,Memphis,3,58
 Jabari Walker,2021-22,80,215,SF/PF,Colorado,2,172
-Michael Foster,2021-22,81,235,PF,G-League,1,22
 Jordan Hall,2021-22,79,215,PG/SG,St. Joseph's,2,400
 Bryson Williams,2021-22,81,235,PF/C,Texas Tech,4,362
 Donovan Williams,2021-22,78,190,SG,UNLV,3,73

@@ -11,8 +11,9 @@ master = pd.DataFrame()
 
 def main():
     global master
-    master = pd.read_csv('data/main_rsci.csv')
+    master = pd.read_csv('main_2015.csv')
     add_college_stats_from_basketball_reference()
+    add_college_stats_from_hoopmath()
         
     export_master(master)
 
@@ -148,15 +149,33 @@ def get_players_basketball_reference_page(row):
                     return soup_html
                 else:
                     print(row['Name'] + " might be a common name - trying again at next profile index")
-                    index_value_in_url = index_value_in_url + 1
+                    if (player_name_in_url[-3:] == '-jr'):
+                        player_name_in_url = player_name_in_url[:-3] + 'jr'
+                        print(player_name_in_url)
+                    else:
+                        index_value_in_url = index_value_in_url + 1
             else:
                 print("Sorry, we couldn't find the correct player page for : " +row['Name'])
+                if (player_name_in_url[-3:] == '-jr'):
+                    player_name_in_url = player_name_in_url[:-3] + 'jr'
+                    url = "https://www.sports-reference.com/cbb/players/" + player_name_in_url + "-" + str(index_value_in_url) + ".html"
+                    return(find_site(url))
                 return None
     else:
         url = "https://www.sports-reference.com/cbb/players/" + player_name_in_url + "-" + str(index_value_in_url) + ".html"
         return(find_site(url))
     print("Sorry, we couldn't find any college stats for : " + row['Name'])
     return None
+
+def get_players_hoop_math_page(row):
+    """Get the player's Hoop-Math team page.
+    """
+    
+    team_name_in_url = get_hoop_math_formatted_school(row['School'])
+    season_in_url = '20' + row['Season'].split('-')[-1]
+    url = 'https://hoop-math.com/' + team_name_in_url + season_in_url + '.php'
+    print(url)
+    return find_site(url)
 
 def get_advanced_stats(soup_html):
     """Get the player's advanced stats from their table. This is a complicated process because of the differences in the format 
@@ -210,6 +229,43 @@ def add_college_stats_from_hoopmath():
     print("STEP 4 - Getting the last year's Hoop-Math data for all the prospects")
     print("----------------------------------")
     # TODO: Is it necessary to add these stats from Hoop-Math? 
+    
+    global master
+
+    hoop_math_stats = []
+    #hoop_math_stats = [[''] * 8 for _ in master[master['Season'].isin(['2008-09', '2009-10', '2010-11'])]]
+    
+    for index, row in master.iterrows():
+        player_stats = []
+        print("Getting most recent hoop-math stats for " + row['Name'])
+        soup_html = get_players_hoop_math_page(row)
+        pbp_table = soup_html.find('table', {'id': 'OffTable1'})
+        if (pbp_table):
+            player_found = False
+            items = pbp_table.find_all('td')
+            for i in range(int(len(items) / HOOP_MATH_TABLE_COLUMN_COUNT)):
+                hoop_math_row = items[i*HOOP_MATH_TABLE_COLUMN_COUNT:(i+1)*HOOP_MATH_TABLE_COLUMN_COUNT]
+                hoop_math_name = ' '.join(reversed(hoop_math_row[0].getText().strip().split(', ')))
+                if(is_fuzzy_name_match(hoop_math_name, row['Name'])):
+                    for i in INDEXES_OF_HOOP_MATH_COLUMNS:
+                        val = hoop_math_row[i].getText() 
+                        if (val == '---'):
+                            player_stats.append(0)
+                        else:
+                            player_stats.append(val.replace('%', ''))
+                    player_found = True
+                    break
+            if not player_found:
+                print(f"ERROR: Could not find hoop-math data for player {row['Name']}")
+                hoop_math_stats.append(['']*len(INDEXES_OF_HOOP_MATH_COLUMNS))
+            else:
+                print(player_stats)
+                hoop_math_stats.append(player_stats)
+        else:
+            print(f"ERROR: Could not find hoop-math site for player {row['Name']}")
+            hoop_math_stats.append(['']*len(INDEXES_OF_HOOP_MATH_COLUMNS))
+    master = pd.concat([master, pd.DataFrame(hoop_math_stats,index=master.index,columns=HOOP_MATH_COLUMN_NAMES)], axis=1)
+        
 
 def export_master(master):
     temp_master = reorder_columns(master)
