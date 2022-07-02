@@ -11,7 +11,7 @@ master = pd.DataFrame()
 
 def main():
     global master
-    master = pd.read_csv('main_2014.csv')
+    master = pd.read_csv('main_2012.csv')
     add_college_stats_from_basketball_reference()
     #add_college_stats_from_hoopmath()
         
@@ -173,8 +173,9 @@ def get_players_hoop_math_page(row):
     
     team_name_in_url = get_hoop_math_formatted_school(row['School'])
     season_in_url = '20' + row['Season'].split('-')[-1]
+    if (int(season_in_url) < 2018 and team_name_in_url == 'NCState'):
+        team_name_in_url = "NorthCarolinaSt."
     url = 'https://hoop-math.com/' + team_name_in_url + season_in_url + '.php'
-    print(url)
     return find_site(url)
 
 def get_advanced_stats(soup_html):
@@ -233,9 +234,11 @@ def add_college_stats_from_hoopmath():
     global master
 
     hoop_math_stats = []
-    #hoop_math_stats = [[''] * 8 for _ in master[master['Season'].isin(['2008-09', '2009-10', '2010-11'])]]
     
-    for index, row in master.iterrows():
+    for _, row in master.iterrows():
+        if (row['Season'] in ['2008-09', '2009-10', '2010-11']):
+            hoop_math_stats.append(['']*len(INDEXES_OF_HOOP_MATH_COLUMNS))
+            continue
         player_stats = []
         print("Getting most recent hoop-math stats for " + row['Name'])
         soup_html = get_players_hoop_math_page(row)

@@ -300,8 +300,13 @@ HOOP_MATH_NAME_EXCEPTIONS = {
 	"Gary Jr. Trent" : "Gary Trent Jr",
 	"Ray Spalding" : "Raymond Spalding",
 	"Edrice Adebayo" : "Bam Adebayo",
-	"Anthony 'Cat' Barber" : "Anthony Barber"
-}
+	"Anthony 'Cat' Barber" : "Anthony Barber",
+	"McAdoo,James" : "James Michael McAdoo",
+	"Amath M'Baye" : "Amath Mbaye",
+	"Phl Pressey" : "Phil Pressey",
+	"Edward Daniel" : "Ed Daniel",
+	"Moe Harkless" : "Maurice Harkless",
+	"KEVIN JONES" : "Kevin Jones",}
 
 PER_40_COLUMN_IDS = ['fg_per_min', 'fga_per_min', 'fg_pct', 'fg2_per_min', 'fg2a_per_min', 'fg2_pct', 'fg3_per_min', 'fg3a_per_min', 'fg3_pct',
     'ft_per_min','fta_per_min','ft_pct', 'trb_per_min', 'ast_per_min', 'stl_per_min', 'blk_per_min', 'tov_per_min', 'pf_per_min', 'pts_per_min']
