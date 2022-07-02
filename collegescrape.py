@@ -11,9 +11,9 @@ master = pd.DataFrame()
 
 def main():
     global master
-    master = pd.read_csv('main_2015.csv')
+    master = pd.read_csv('main_2014.csv')
     add_college_stats_from_basketball_reference()
-    add_college_stats_from_hoopmath()
+    #add_college_stats_from_hoopmath()
         
     export_master(master)
 

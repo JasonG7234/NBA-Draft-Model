@@ -1,17 +1,12 @@
 import datetime
 import re
 import requests
-import string
-import urllib
 
 import unidecode
 import numpy as np
 import pandas as pd
 from bs4 import BeautifulSoup
 from sklearn import metrics
-
-comm = re.compile("<!--|-->")
-pattern = re.compile('[\W_]+')
 
 OVERALL_PLAYER_NAME_EXCEPTIONS = {
 	"Moe Harkless" : "Maurice Harkless",
