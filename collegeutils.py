@@ -1,5 +1,3 @@
-from fuzzywuzzy import fuzz
-
 from utils import *
 
 # Constants are declared with capital letters and underscores
@@ -77,11 +75,6 @@ def get_sos(soup_html):
 
 def is_expected_advanced_stat_in_table(stat, index):
     return stat['data-stat'].strip() == ADVANCED_COLUMN_IDS[index]
-
-def is_fuzzy_name_match(hoop_math_name, csv_name):
-    hm_name = check_value_in_dictionary_of_exceptions(hoop_math_name, HOOP_MATH_NAME_EXCEPTIONS, hoop_math_name)
-    ratio = fuzz.partial_ratio(csv_name, hm_name.replace('.', '').replace("'", ''), )
-    return True if ratio >= 92 else False
 
 def is_empty_dummy_column(stat):
     return stat['data-stat'] == 'ws-dum' or stat['data-stat'] == 'bpm-dum'

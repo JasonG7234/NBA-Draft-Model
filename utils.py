@@ -6,7 +6,7 @@ import unidecode
 import numpy as np
 import pandas as pd
 from bs4 import BeautifulSoup
-from sklearn import metrics
+from fuzzywuzzy import fuzz
 
 OVERALL_PLAYER_NAME_EXCEPTIONS = {
 	"Moe Harkless" : "Maurice Harkless",
@@ -358,6 +358,11 @@ def get_basketball_reference_player_info(soup):
 	player_info =  soup.find('div', {'id': 'meta'})
 	if (not player_info): return None
 	return unidecode.unidecode(player_info.getText())
+
+def is_fuzzy_name_match(hoop_math_name, csv_name):
+    hm_name = check_value_in_dictionary_of_exceptions(hoop_math_name, HOOP_MATH_NAME_EXCEPTIONS, hoop_math_name)
+    ratio = fuzz.partial_ratio(csv_name, hm_name.replace('.', '').replace("'", ''), )
+    return True if ratio >= 90 else False
 		
 def get_basketball_reference_formatted_school(school, exceptions, default):
 	return check_value_in_dictionary_of_exceptions(school, exceptions, default)

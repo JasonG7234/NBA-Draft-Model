@@ -1,5 +1,6 @@
-import os.path
 import sys
+sys.path.append("./src")
+from nbacombineanthro import measurements
 
 import pandas as pd
 import numpy as np
@@ -11,11 +12,11 @@ master = pd.DataFrame()
 
 def main():
     global master
-    master = pd.read_csv('main_2012.csv')
-    add_college_stats_from_basketball_reference()
+    master = pd.read_csv('data/main.csv')
+    #add_college_stats_from_basketball_reference()
     #add_college_stats_from_hoopmath()
-        
-    export_master(master)
+    
+    export_master(measurements.get_NBA_Combine_measurements(master))
 
 def add_all_college_basketball_prospects():
     """Get the top 100 prospects each year from NBADraft.net, and add each year's top 100 to a master DataFrame.
