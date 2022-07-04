@@ -16,32 +16,30 @@ NBA_DRAFT_COMBINE_NAME_EXCEPTIONS = {
 def get_NBA_Combine_measurements(df):
     tmp = df.sort_values(by=['Season'])
     for col in DRAFT_COMBINE_DATAFRAME_COLUMN_NAMES:
-        if col not in tmp:
+        if col not in tmp: # FIX THIS
             tmp[col] = ""
-            
-    for season in tmp.Season.unique():
-        print(season)
-        season_players = tmp[tmp['Season'] == season]
-        combine_data = get_NBA_combine_data(season)
+    
+    season = '2008-09'
+    season_players = tmp[tmp['Season'] == season]
+    combine_data = get_NBA_combine_data(season)
 
-        for _, combine_player in combine_data.iterrows():
-            print(combine_player['PLAYER_NAME'])
-            for _, df_player in season_players.iterrows():
-                combine_player_name = check_value_in_dictionary_of_exceptions(combine_player['PLAYER_NAME'], NBA_DRAFT_COMBINE_NAME_EXCEPTIONS, combine_player['PLAYER_NAME'])
-                try:
-                    if (is_fuzzy_name_match(df_player['Name'], combine_player_name)):
-                        print(f"Found match for {combine_player['PLAYER_NAME']}")
-                        populate_NBA_combine_measurements(tmp, df.loc[(df['Name'] == df_player['Name']) & (df['School'] == df_player['School'])], combine_player)
-                        break
-                except KeyError:
-                    print(f"Could not find direct match for {combine_player['PLAYER_NAME']}")
+    for _, combine_player in combine_data.iterrows():
+        print(combine_player['PLAYER_NAME'])
+        for _, df_player in season_players.iterrows():
+            combine_player_name = check_value_in_dictionary_of_exceptions(combine_player['PLAYER_NAME'], NBA_DRAFT_COMBINE_NAME_EXCEPTIONS, combine_player['PLAYER_NAME'])
+            if (is_fuzzy_name_match(df_player['Name'], combine_player_name)):
+                print(f"Found match for {combine_player['PLAYER_NAME']}")
+                populate_NBA_combine_measurements(tmp, df.loc[(df['Name'] == df_player['Name']) & (df['School'] == df_player['School'])], combine_player)
+                break
     return tmp
                 
 def populate_NBA_combine_measurements(df, row, combine_values):
     print(row.index[0])
+    print(combine_values)
     for i in range(len(DRAFT_COMBINE_DATAFRAME_COLUMN_NAMES)):
         col_index = df.columns.get_loc(DRAFT_COMBINE_DATAFRAME_COLUMN_NAMES[i])
-        df.loc[row.index[0], col_index] = combine_values[DRAFT_COMBINE_ANTHRO_COLUMNS[i]]
+        print(row.index[0]+1, col_index)
+        df.loc[row.index[0]+1, col_index] = combine_values[DRAFT_COMBINE_ANTHRO_COLUMNS[i]]
         
 def get_NBA_combine_data(season):
     season = str(int(season[:4])+1) + '-' + str(int(season[-2:])+1)
