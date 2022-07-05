@@ -14,37 +14,35 @@ NBA_DRAFT_COMBINE_NAME_EXCEPTIONS = {
     }
 
 def get_NBA_Combine_measurements(df):
-    tmp = df.sort_values(by=['Season'])
+    seasons = df.Season.unique()
     for col in DRAFT_COMBINE_DATAFRAME_COLUMN_NAMES:
-        if col not in tmp: # FIX THIS
-            tmp[col] = ""
-    
-    season = '2008-09'
-    season_players = tmp[tmp['Season'] == season]
-    combine_data = get_NBA_combine_data(season)
-
-    for _, combine_player in combine_data.iterrows():
-        print(combine_player['PLAYER_NAME'])
-        for _, df_player in season_players.iterrows():
+        if col not in df:
+            df[col] = ""
+            
+    for season in seasons:
+        combine_data = fetch_NBA_combine_data(season)
+        for _, combine_player in combine_data.iterrows():
             combine_player_name = check_value_in_dictionary_of_exceptions(combine_player['PLAYER_NAME'], NBA_DRAFT_COMBINE_NAME_EXCEPTIONS, combine_player['PLAYER_NAME'])
-            if (is_fuzzy_name_match(df_player['Name'], combine_player_name)):
-                print(f"Found match for {combine_player['PLAYER_NAME']}")
-                populate_NBA_combine_measurements(tmp, df.loc[(df['Name'] == df_player['Name']) & (df['School'] == df_player['School'])], combine_player)
-                break
-    return tmp
-                
-def populate_NBA_combine_measurements(df, row, combine_values):
-    print(row.index[0])
-    print(combine_values)
+            print(combine_player_name)
+            for i, df_player in df.iterrows():
+                if (is_fuzzy_name_match(df_player['Name'], combine_player_name)):
+                    print(f"Found match for {df_player['Name']}")
+                    populate_NBA_combine_measurements(df, i, combine_player)
+                    break
+    return df
+
+def populate_NBA_combine_measurements(df, index, combine_values):
+    print(index)
     for i in range(len(DRAFT_COMBINE_DATAFRAME_COLUMN_NAMES)):
-        col_index = df.columns.get_loc(DRAFT_COMBINE_DATAFRAME_COLUMN_NAMES[i])
-        print(row.index[0]+1, col_index)
-        df.loc[row.index[0]+1, col_index] = combine_values[DRAFT_COMBINE_ANTHRO_COLUMNS[i]]
+        df.loc[index, DRAFT_COMBINE_DATAFRAME_COLUMN_NAMES[i]] = combine_values[DRAFT_COMBINE_ANTHRO_COLUMNS[i]]
         
-def get_NBA_combine_data(season):
+def fetch_NBA_combine_data(season):
     season = str(int(season[:4])+1) + '-' + str(int(season[-2:])+1)
     time.sleep(2)
-    return draftcombineplayeranthro.DraftCombinePlayerAnthro(
+    count = 0
+    while count < 3:
+        try:
+            combine_data = draftcombineplayeranthro.DraftCombinePlayerAnthro(
             league_id='00', 
             season_year=season,
             headers={'Accept': 'application/json, text/plain, */*',
@@ -62,3 +60,13 @@ def get_NBA_combine_data(season):
 'User-Agent': 'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.141 Mobile Safari/537.36',
 'x-nba-stats-origin': 'stats',
 'x-nba-stats-token': 'true'}).results.get_data_frame()
+            return combine_data
+        except requests.exceptions.ConnectionError:
+            print("Yup connection error, giving it 10 and retrying")
+            time.sleep(10)
+            count += 1
+        except Exception:
+            print("Other error, giving it 10 and retrying")
+            time.sleep(10)
+            count += 1
+    return None
