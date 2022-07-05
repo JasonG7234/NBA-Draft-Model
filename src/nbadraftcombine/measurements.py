@@ -5,12 +5,28 @@ from utils import *
 from nba_api.stats.endpoints import draftcombineplayeranthro
 import time
 
-DRAFT_COMBINE_ANTHRO_COLUMNS = ["POSITION", "HEIGHT_WO_SHOES", "HEIGHT_W_SHOES", "HEIGHT_W_SHOES", "WEIGHT", "WINGSPAN", "STANDING_REACH", "BODY_FAT_PCT", "HAND_LENGTH", "HAND_WIDTH"]
+DRAFT_COMBINE_ANTHRO_COLUMNS = ["POSITION", "HEIGHT_WO_SHOES", "HEIGHT_W_SHOES", "WEIGHT", "WINGSPAN", "STANDING_REACH", "BODY_FAT_PCT", "HAND_LENGTH", "HAND_WIDTH"]
 
-DRAFT_COMBINE_DATAFRAME_COLUMN_NAMES = ["Position", "Height w/o Shoes", "Height w/ Shoes", "Wingspan", "Weight", "Standing Reach", "Body Fat %", "Hand Length", "Hand Width"]
+DRAFT_COMBINE_DATAFRAME_COLUMN_NAMES = ["Position", "Height w/o Shoes", "Height w/ Shoes", "Weight", "Wingspan", "Standing Reach", "Body Fat %", "Hand Length", "Hand Width"]
 
 NBA_DRAFT_COMBINE_NAME_EXCEPTIONS = {
-    "Edrice Adebayo" : "Bam Adebayo"
+    "Edrice Adebayo" : "Bam Adebayo",
+    "Byron Mullens" : "BJ Mullens",
+    "Patrick Mills" : "Patty Mills",
+    "Jeff Ayres" : "Jeff Pendergraph",
+    "Keith Gallon" : "Tiny Gallon",
+    "Artsiom Parakhouski" : "Art Parakhouski",
+    "E'Twaun Moore" : "Etwaun Moore",
+    "Jeff Taylor" : "Jeffrey Taylor",
+    "James McAdoo" : "James Michael McAdoo",
+    "Devyn Marble" : "Roy Devyn",
+    "Kay Felder" : "Kahlil Felder",
+    "Cat Barber" : "Anthony Barber",
+    "Ray Spalding" : "Raymond Spalding",
+    "Cameron Reddish" : "Cam Reddish",
+    "Cameron Thomas" : "Cam Thomas",
+    "Herbert Jones" : "Herb Jones",
+    "Matt Hurt" : "Matthew Hurt"
     }
 
 def get_NBA_Combine_measurements(df):
@@ -20,12 +36,11 @@ def get_NBA_Combine_measurements(df):
             df[col] = ""
             
     for season in seasons:
+        print(season)
         combine_data = fetch_NBA_combine_data(season)
         for _, combine_player in combine_data.iterrows():
-            combine_player_name = check_value_in_dictionary_of_exceptions(combine_player['PLAYER_NAME'], NBA_DRAFT_COMBINE_NAME_EXCEPTIONS, combine_player['PLAYER_NAME'])
-            print(combine_player_name)
-            for i, df_player in df.iterrows():
-                if (is_fuzzy_name_match(df_player['Name'], combine_player_name)):
+            for i, df_player in df[df['Season'] == season].iterrows():
+                if (is_fuzzy_name_match(combine_player['PLAYER_NAME'], df_player['Name'], NBA_DRAFT_COMBINE_NAME_EXCEPTIONS)):
                     print(f"Found match for {df_player['Name']}")
                     populate_NBA_combine_measurements(df, i, combine_player)
                     break
@@ -34,7 +49,9 @@ def get_NBA_Combine_measurements(df):
 def populate_NBA_combine_measurements(df, index, combine_values):
     print(index)
     for i in range(len(DRAFT_COMBINE_DATAFRAME_COLUMN_NAMES)):
-        df.loc[index, DRAFT_COMBINE_DATAFRAME_COLUMN_NAMES[i]] = combine_values[DRAFT_COMBINE_ANTHRO_COLUMNS[i]]
+        combine_value = combine_values[DRAFT_COMBINE_ANTHRO_COLUMNS[i]]
+        if (combine_value not in ['' or '-' or '-%']):
+            df.loc[index, DRAFT_COMBINE_DATAFRAME_COLUMN_NAMES[i]] = combine_value
         
 def fetch_NBA_combine_data(season):
     season = str(int(season[:4])+1) + '-' + str(int(season[-2:])+1)

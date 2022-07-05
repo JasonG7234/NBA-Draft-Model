@@ -1,6 +1,6 @@
 import sys
 sys.path.append("./src")
-from nbacombineanthro import measurements
+from nbadraftcombine import measurements
 
 import pandas as pd
 import numpy as np
@@ -250,7 +250,7 @@ def add_college_stats_from_hoopmath():
             for i in range(int(len(items) / HOOP_MATH_TABLE_COLUMN_COUNT)):
                 hoop_math_row = items[i*HOOP_MATH_TABLE_COLUMN_COUNT:(i+1)*HOOP_MATH_TABLE_COLUMN_COUNT]
                 hoop_math_name = ' '.join(reversed(hoop_math_row[0].getText().strip().split(', ')))
-                if(is_fuzzy_name_match(hoop_math_name, row['Name'])):
+                if(is_fuzzy_name_match(hoop_math_name, row['Name'], HOOP_MATH_NAME_EXCEPTIONS)):
                     for i in INDEXES_OF_HOOP_MATH_COLUMNS:
                         val = hoop_math_row[i].getText() 
                         if (val == '---'):
