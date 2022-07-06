@@ -348,11 +348,11 @@ def get_csv_file(objective):
     while True:
         file_name = input("What csv file would you like to " + objective).strip()
         try:
-            master = pd.read_csv(file_name)
+            main = pd.read_csv(file_name)
         except FileNotFoundError:
             print("ERROR - File not found. Please try again.")
             continue
-        return master
+        return main
 
 def get_basketball_reference_player_info(soup):
 	player_info =  soup.find('div', {'id': 'meta'})
@@ -387,10 +387,10 @@ def get_current_year():
 def get_season_from_year(year):
 	return str(year-1) + "-" + str(year)[2:4]
 
-def reorder_columns(master):
+def reorder_columns(main):
     cols_to_order = ['Name', 'Season']
-    new_columns = cols_to_order + (master.columns.drop(cols_to_order).tolist())
-    return master[new_columns]
+    new_columns = cols_to_order + (main.columns.drop(cols_to_order).tolist())
+    return main[new_columns]
 
 def populate_dataframe_with_average_values(df):
     df = df.replace('', np.nan)
