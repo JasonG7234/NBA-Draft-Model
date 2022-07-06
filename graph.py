@@ -7,15 +7,15 @@ from utils import *
 GRAPH_FIELD_NAMES = ['label', 'x-axis', 'y-axis']
 
 def main():
-    master = get_csv_file("graph? ")
+    main = get_csv_file("graph? ")
     column_count = 0
-    for col in master.columns:
+    for col in main.columns:
         print("At index " + str(column_count) + ", the column name is " + col)
         column_count += 1
     column_indexes = []
     for graph_field_name in GRAPH_FIELD_NAMES:
         column_indexes.append(get_index_of_column(graph_field_name, column_count))
-    graph(master, column_indexes)
+    graph(main, column_indexes)
 
 
 def get_index_of_column(graph_part, column_count):
