@@ -3,7 +3,10 @@ sys.path.insert(0, '../../')
 from utils import *
 
 from nba_api.stats.endpoints import draftcombineplayeranthro
+import numpy as np
 import time
+
+ERROR_VALUES = [None, np.nan, '', '-', '-%']
 
 DRAFT_COMBINE_ANTHRO_COLUMNS = ["POSITION", "HEIGHT_WO_SHOES", "HEIGHT_W_SHOES", "WEIGHT", "WINGSPAN", "STANDING_REACH", "BODY_FAT_PCT", "HAND_LENGTH", "HAND_WIDTH"]
 
@@ -47,10 +50,12 @@ def get_NBA_Combine_measurements(df):
     return df
 
 def populate_NBA_combine_measurements(df, index, combine_values):
-    print(index)
+    print(index) # TEST ON ONE SEASON
     for i in range(len(DRAFT_COMBINE_DATAFRAME_COLUMN_NAMES)):
         combine_value = combine_values[DRAFT_COMBINE_ANTHRO_COLUMNS[i]]
-        if (combine_value not in ['' or '-' or '-%']):
+        if (combine_value in ERROR_VALUES):
+            print("Not adding a value for " + DRAFT_COMBINE_ANTHRO_COLUMNS[i])
+        else:
             df.loc[index, DRAFT_COMBINE_DATAFRAME_COLUMN_NAMES[i]] = combine_value
         
 def fetch_NBA_combine_data(season):
