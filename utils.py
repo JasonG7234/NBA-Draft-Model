@@ -359,10 +359,10 @@ def get_basketball_reference_player_info(soup):
 	if (not player_info): return None
 	return unidecode.unidecode(player_info.getText())
 
-def is_fuzzy_name_match(data_name, csv_name, name_exception_dict):
+def is_fuzzy_name_match(data_name, csv_name, name_exception_dict, name_match_percentage=90):
     exception_name = check_value_in_dictionary_of_exceptions(data_name, name_exception_dict, data_name)
     ratio = fuzz.partial_ratio(csv_name, exception_name.replace('.', '').replace("'", ''), )
-    return True if ratio >= 90 else False
+    return True if ratio >= name_match_percentage else False
 		
 def get_basketball_reference_formatted_school(school, exceptions, default):
 	return check_value_in_dictionary_of_exceptions(school, exceptions, default)

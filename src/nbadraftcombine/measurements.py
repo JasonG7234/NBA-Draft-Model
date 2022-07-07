@@ -27,12 +27,19 @@ NBA_DRAFT_COMBINE_NAME_EXCEPTIONS = {
     "Cat Barber" : "Anthony Barber",
     "Ray Spalding" : "Raymond Spalding",
     "Cameron Reddish" : "Cam Reddish",
-    "Cameron Thomas" : "Cam Thomas",
     "Herbert Jones" : "Herb Jones",
     "Matt Hurt" : "Matthew Hurt"
     }
 
 def get_NBA_Combine_measurements(df):
+    """Takes in a dataframe, adds columns for each nba combine measurement, and then returns the dataframe with the new data.
+
+    Args:
+        df (dataframe): Any DataFrame with a "Name" and "Season" column
+
+    Returns:
+        dataframe: The dataframe with the new data
+    """
     seasons = df.Season.unique()
     for col in DRAFT_COMBINE_DATAFRAME_COLUMN_NAMES:
         if col not in df:
@@ -50,7 +57,7 @@ def get_NBA_Combine_measurements(df):
     return df
 
 def populate_NBA_combine_measurements(df, index, combine_values):
-    print(index) # TEST ON ONE SEASON
+    print(index)
     for i in range(len(DRAFT_COMBINE_DATAFRAME_COLUMN_NAMES)):
         combine_value = combine_values[DRAFT_COMBINE_ANTHRO_COLUMNS[i]]
         if (combine_value in ERROR_VALUES):
@@ -59,6 +66,15 @@ def populate_NBA_combine_measurements(df, index, combine_values):
             df.loc[index, DRAFT_COMBINE_DATAFRAME_COLUMN_NAMES[i]] = combine_value
         
 def fetch_NBA_combine_data(season):
+    """Fetches the NBA Combine measurement data for a specific season.
+    NOTE: This function takes in the collegiate season as a parameter, not the NBA season. 
+
+    Args:
+        season (string): The collegiate season to fetch the data for.
+        
+    Returns: 
+        DataFrame: The NBA Combine data for that season.
+    """
     season = str(int(season[:4])+1) + '-' + str(int(season[-2:])+1)
     time.sleep(2)
     count = 0
