@@ -1,73 +1,88 @@
+from audioop import add
 import sys
 sys.path.insert(0, '../../')
 from utils import *
 
 import time
+import json
+import requests
 
-'''["E.J. Liddell",
- "Ohio St.",
- "B10",
- 32,
- 82.4,
- 116.2,
- 30.5,
- 54.6,
- 59.83,
- 8.9,
- 19.1,
- 16.1,
- 15.1,
- 169,
- 221,
- 0.765,
- 157,
- 291,
- 0.54,
- 46,
- 123,
- 0.374,
- 8.2,
- 1,
- 53.4,
- "Jr",
- "6-7",
- 32,
- 6.02357,
- 138.063,
- 3,
- 2022,
- 70850,
- "Belleville, IL",
- 91.4,
- 0.96200581,
- 58,
- 83,
- 99,
- 208,
- 0.6988,
- 0.476,
- 15,
- 16,
- 0.9375,
- 41,
- 98.7707,
- 93.4008,
- 3.88843,
- 219.672,
- 10.0124,
- 5.85515,
- 4.15726,
- 10.3847,
- 33.2188,
- 7.87826,
- 2.50642,
- 2.25,
- 5.6562,
- 7.9062,
- 2.375,
- 0.5625,
- 2.5,
- 19.4062,
- "PF\/C",
- 7.15604]
- '''
+BART_TORVIK_NAME_EXCEPTIONS = {
+    "Wes Johnson" : "Wesley Johnson",
+    "Artsiom Parakhouski" : "Art Parakhouski",
+    "Howard Thompkins III" : "Trey Thompkins",
+    "Moe Harkless" : "Maurice Harkless",
+    "Amath M'Baye" : "Amath Mbaye",
+    "Phl Pressey" : "Phil Pressey",
+    "Edward Daniel" : "Ed Daniel",
+    "Deandre Daniels" : "DeAndre Daniels",
+    "Deandre Kane" : "DeAndre Kane",
+    "Laquinton Ross" : "LaQuinton Ross",
+    "Tashawn Thomas" : "TaShawn Thomas",
+    "Ladontae Henton" : "LaDontae Henton",
+    "Dennis Smith, Jr." : "Dennis Smith Jr",
+    "Edrice Adebayo" : "Bam Adebayo",
+    "Vincent Edwards" : "Vince Edwards",
+    "Simi Shittu" : "Simisola Shittu",
+    "Tyty Washington Jr." : "TyTy Washington",
+    "Jeenathan Williams" : "JeeNathan Williams",
+    "E'Twaun Moore" : "Etwaun Moore",
+    "Jeff Taylor" : "Jeffrey Taylor",
+    "Devyn Marble" : "Roy Devyn",
+    "Kay Felder" : "Kahlil Felder",
+    "Ray Spalding" : "Raymond Spalding",
+    "Herbert Jones" : "Herb Jones",
+    }
+
+BART_TORVIK_VALUE_EXCEPTIONS = {
+    "Derrick Williams2009-10" : "40",
+    "Tyler Harris2015-16" : "6",
+    "Donovan Mitchell2016-17" : "9",
+    "Jordan Bell2016-17" : "50",
+    "Donovan Williams2021-22" : "9"
+}
+
+def fetch_bart_torvik_data(year):
+    """Fetches the bart torvik player data for a given year.
+
+    Args:
+        year (string): Represents the end year of the college basketball season. 
+    
+    Returns:
+        List: The torvik data.
+    """
+    
+    torvik_season_url = f"https://barttorvik.com/getadvstats.php?year={year}&top=400&page=playerstat"
+    response = requests.get(url = torvik_season_url).text
+    return json.loads(response)
+
+def get_torvik_dunks(df):
+    """Takes in a DataFrame, adds a '# Dunks' column, and adds the value according to the prospect's name.
+
+    Args:
+        df (DataFrame): Any DataFrame that uses a "Name" column
+        
+    Returns:
+        DataFrame: The DataFrame with the new data
+    """
+    
+    df['# Dunks'] = ""
+    seasons = df.Season.unique()
+    for season in seasons:
+        if season == '2008-09': continue # Bart Torvik doesn't have dunk data for this season 
+        year = int(season[:4])+1
+        print(year)
+        torvik_json = fetch_bart_torvik_data(year)
+        for index, df_player in df[df['Season'] == season].iterrows():
+            manual_dunks = BART_TORVIK_VALUE_EXCEPTIONS.get(df_player['Name'] + df_player['Season'], None)
+            if (manual_dunks):
+                df.loc[index, '# Dunks'] = manual_dunks
+            else:
+                for player in torvik_json:
+                    if (is_fuzzy_name_match(player[0], df_player['Name'], BART_TORVIK_NAME_EXCEPTIONS, 95)):
+                        print(f"Found match for {df_player['Name']}")
+                        print(player[42])
+                        df.loc[index, '# Dunks'] = player[42]
+                        break
+    return df
+
