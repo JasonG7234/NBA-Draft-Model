@@ -392,6 +392,20 @@ def reorder_columns(main):
     new_columns = cols_to_order + (main.columns.drop(cols_to_order).tolist())
     return main[new_columns]
 
+def draw_conclusions_on_column(df, col_name, num_top=5):
+    print(f"The top 5 highest values of column {col_name} are: ")
+    for _, row in df.nlargest(num_top, [col_name]).iterrows():
+        print(f"{row['Name']}: {row[col_name]}")
+    
+    print('=========================================')
+    print(f"The top 5 lowest values of column {col_name} are: ")
+    for _, row in df.nsmallest(num_top, [col_name]).iterrows():
+        print(f"{row['Name']}: {row[col_name]}")
+    
+    print('=========================================')    
+    print(f"The average value of column {col_name} is: {df[col_name].mean()}")
+    print(f"The median value of column {col_name} is: {df[col_name].median()}")
+
 def populate_dataframe_with_average_values(df):
     df = df.replace('', np.nan)
     return df.fillna(df.mean())
