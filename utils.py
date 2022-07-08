@@ -340,19 +340,15 @@ def find_site(url):
 		html = response.content.decode("latin-1")
 	return BeautifulSoup(re.sub("<!--|-->","", html), "html.parser")
 
+def birthday_to_draft_day_age(birthday, season):
+	dt = datetime.strptime(' '.join(birthday), "%b %d, %Y")
+	draft_date = datetime.strptime(f"Jun 25, {season}", "%b %d, %Y")
+	return round((draft_date - dt).days / 365, 2)
+
 def check_value_in_dictionary_of_exceptions(name, exceptions_dict, default):
     """Performs a dictionary lookup to try to map the player's name/school to the correct Basketball-Reference page."""
     return exceptions_dict.get(name, default)
 
-def get_csv_file(objective):
-    while True:
-        file_name = input("What csv file would you like to " + objective).strip()
-        try:
-            main = pd.read_csv(file_name)
-        except FileNotFoundError:
-            print("ERROR - File not found. Please try again.")
-            continue
-        return main
 
 def get_basketball_reference_player_info(soup):
 	player_info =  soup.find('div', {'id': 'meta'})
