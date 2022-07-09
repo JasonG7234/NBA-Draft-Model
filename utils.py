@@ -349,7 +349,6 @@ def check_value_in_dictionary_of_exceptions(name, exceptions_dict, default):
     """Performs a dictionary lookup to try to map the player's name/school to the correct Basketball-Reference page."""
     return exceptions_dict.get(name, default)
 
-
 def get_basketball_reference_player_info(soup):
 	player_info =  soup.find('div', {'id': 'meta'})
 	if (not player_info): return None
@@ -383,6 +382,9 @@ def get_current_year():
 def get_season_from_year(year):
 	return str(year-1) + "-" + str(year)[2:4]
 
+def get_year_from_season(season):
+    return int(season[:4])+1
+
 def reorder_columns(main):
     cols_to_order = ['Name', 'Season']
     new_columns = cols_to_order + (main.columns.drop(cols_to_order).tolist())
@@ -405,24 +407,3 @@ def draw_conclusions_on_column(df, col_name, num_top=5):
 def populate_dataframe_with_average_values(df):
     df = df.replace('', np.nan)
     return df.fillna(df.mean())
-
-def is_nba_player(player):
-	is_recent_season = int(player['Season'][0:4]) >= get_current_year() - 3
-	games_played = int(player['NBA GP'])
-	minutes_played = float(player['NBA MPG'])
-	if (is_recent_season):
-		if (games_played >= 82): 
-			return float(1)
-		if (games_played >= 41 and minutes_played >= 12): 
-			return float(1)
-		return float(0)
-	else:
-		if (games_played >= 123): 
-			return float(1)
-		if (games_played >= 82 and minutes_played >= 18): 
-			return float(1)
-		return float(0)
-
-def make_predictions_for_upcoming_nba_prospects(logreg, prospects, row_name, is_round):
-    predictions = logreg.predict(prospects[LOG_REG_COLUMNS])
-    prospects[row_name] = predictions.tolist() if is_round else predictions
