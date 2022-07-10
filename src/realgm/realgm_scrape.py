@@ -96,17 +96,27 @@ class RealGM:
                 international_stats.append(stats_row[i].text)
         return international_stats
 
-for index, row in master.iterrows():
-    summary_index = REALGM_PLAYER_PAGE_SUMMARY_MAPPINGS.get(row['Name'] + ',' + row['School'], None)
-    url_name = get_realgm_formatted_name(row['Name'])
-    print("PLAYER NAME: " + row['Name'])
-    if (summary_index):
-        realgm_url = "https://basketball.realgm.com/player/" + url_name.replace(" ", "-") + "/Summary/" + str(summary_index)
-    else:
-        realgm_url = "https://basketball.realgm.com/search?q=" + url_name.replace(" ", "+")
-    try:
-        site, url = find_site(realgm_url)
-        player_page = RealGM(site)
-    except Exception:
-        print("CANNOT FIND PLAYER PAGE FOR " + row['Name'] + " TRY AGAIN")
-        continue
+import sys
+sys.path.insert(0, '../../')
+from utils import *
+
+def get_realgm_stats(df):
+    
+    for index, row in df.iterrows():
+        summary_index = row['RealGM ID']
+        url_name = get_matchable_name(row['Name'])
+        print("PLAYER NAME: " + row['Name'])
+        if (np.isnan(summary_index)):
+            realgm_url = "https://basketball.realgm.com/search?q=" + url_name.replace(" ", "+")
+        else:
+            print(summary_index)
+            continue
+        try:
+            site, url = find_site(realgm_url)
+            summary_id = url[url.rindex('/')+1:]
+            print("RealGM ID: " + str(int(summary_id)))
+            df.loc[index, 'RealGM ID'] = summary_id
+        except Exception:
+            print("CANNOT FIND PLAYER PAGE FOR " + row['Name'] + " TRY AGAIN")
+    df.to_csv('temp_master', index=False)
+    

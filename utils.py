@@ -338,7 +338,7 @@ def find_site(url):
 		html = response.content.decode("utf-8")
 	except UnicodeDecodeError:
 		html = response.content.decode("latin-1")
-	return BeautifulSoup(re.sub("<!--|-->","", html), "html.parser")
+	return BeautifulSoup(re.sub("<!--|-->","", html), "html.parser"), response.url
 
 def birthday_to_draft_day_age(birthday, season):
 	dt = datetime.strptime(' '.join(birthday), "%b %d, %Y")
@@ -378,6 +378,9 @@ def remove_non_alphabetic_characters(name):
 
 def get_current_year():
 	return datetime.datetime.now().year
+
+def get_matchable_name(name):
+    return name.replace("'", '').replace('.', '').replace('-', ' ').lower()
 
 def get_season_from_year(year):
 	return str(year-1) + "-" + str(year)[2:4]
