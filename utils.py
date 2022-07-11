@@ -343,8 +343,8 @@ def find_site(url):
 	return BeautifulSoup(re.sub("<!--|-->","", html), "html.parser"), response.url
 
 def birthday_to_draft_day_age(birthday, season):
-	dt = datetime.strptime(' '.join(birthday), "%b %d, %Y")
-	draft_date = datetime.strptime(f"Jun 25, {season}", "%b %d, %Y")
+	dt = datetime.datetime.strptime(' '.join(birthday), "%b %d, %Y")
+	draft_date = datetime.datetime.strptime(f"Jun 25, {season}", "%b %d, %Y")
 	return round((draft_date - dt).days / 365, 2)
 
 def check_value_in_dictionary_of_exceptions(name, exceptions_dict, default):
@@ -396,12 +396,12 @@ def reorder_columns(main):
     return main[new_columns]
 
 def draw_conclusions_on_column(df, col_name, num_top=5):
-    print(f"The top 5 highest values of column {col_name} are: ")
+    print(f"The top {str(num_top)} highest values of column {col_name} are: ")
     for _, row in df.nlargest(num_top, [col_name]).iterrows():
         print(f"{row['Name']}: {row[col_name]}")
     
     print('=========================================')
-    print(f"The top 5 lowest values of column {col_name} are: ")
+    print(f"The top {str(num_top)} lowest values of column {col_name} are: ")
     for _, row in df.nsmallest(num_top, [col_name]).iterrows():
         print(f"{row['Name']}: {row[col_name]}")
     
