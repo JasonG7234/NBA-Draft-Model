@@ -6,8 +6,6 @@ from nba_api.stats.endpoints import draftcombineplayeranthro
 import numpy as np
 import time
 
-ERROR_VALUES = [None, np.nan, '', '-', '-%']
-
 DRAFT_COMBINE_ANTHRO_COLUMNS = ["POSITION", "HEIGHT_WO_SHOES", "HEIGHT_W_SHOES", "WEIGHT", "WINGSPAN", "STANDING_REACH", "BODY_FAT_PCT", "HAND_LENGTH", "HAND_WIDTH"]
 
 DRAFT_COMBINE_DATAFRAME_COLUMN_NAMES = ["Position", "Height w/o Shoes", "Height w/ Shoes", "Weight", "Wingspan", "Standing Reach", "Body Fat %", "Hand Length", "Hand Width"]

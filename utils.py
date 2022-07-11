@@ -329,6 +329,8 @@ LOG_REG_COLUMNS = ['Height','RSCI','Class','TS%','3PAr','TRB%','AST%','BLK%','ST
 USER_AGENT = "Mozilla/5.0 (Android 4.4; Mobile; rv:41.0) Gecko/41.0 Firefox/41.0"
 HEADERS = { 'User-Agent': USER_AGENT}
 
+ERROR_VALUES = [None, np.nan, '', '-', '-%']
+
 def find_site(url):
 	"""Use BeautifulSoup to head to designated URL and return BeautifulSoup object.
 	It's very important to decode + sub out all comments! (Basketball-Reference's HTML comments throw everything out of wack)"""
