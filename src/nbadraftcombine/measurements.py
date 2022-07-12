@@ -65,13 +65,15 @@ def populate_NBA_combine_measurements(df, index, combine_values):
         
 def fetch_NBA_combine_data(season):
     """Fetches the NBA Combine measurement data for a specific season.
-    NOTE: This function takes in the collegiate season as a parameter, not the NBA season. 
+    NOTE: This function takes in the collegiate season as a parameter, not the NBA season.
+    Ex. If you want data on Chet Holmgren/Paolo Banchero, who played during the 2021-22 cbb season, enter season as "2021-22".
+    Even though the NBA Combine data represents this data as the 2022-23 season.
 
     Args:
         season (string): The collegiate season to fetch the data for.
         
     Returns: 
-        DataFrame: The NBA Combine data for that season.
+        DataFrame: The NBA Combine data for that season as a DataFrame.
     """
     season = str(int(season[:4])+1) + '-' + str(int(season[-2:])+1)
     time.sleep(2)
@@ -82,27 +84,27 @@ def fetch_NBA_combine_data(season):
             league_id='00', 
             season_year=season,
             headers={'Accept': 'application/json, text/plain, */*',
-'Accept-Encoding': 'gzip, deflate, br',
-'Accept-Language': 'en-US,en;q=0.5',
-'Connection': 'keep-alive',
-'Host': 'stats.nba.com',
-'Origin': 'https://www.stats.nba.com',
-'Referer': 'https://www.stats.nba.com/',
-'sec-ch-ua': '"Google Chrome";v="87", "\"Not;A\\Brand";v="99", "Chromium";v="87"',
-'sec-ch-ua-mobile': '?1',
-'Sec-Fetch-Dest': 'empty',
-'Sec-Fetch-Mode': 'cors',
-'Sec-Fetch-Site': 'same-site',
-'User-Agent': 'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.141 Mobile Safari/537.36',
-'x-nba-stats-origin': 'stats',
-'x-nba-stats-token': 'true'}).results.get_data_frame()
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Accept-Language': 'en-US,en;q=0.5',
+            'Connection': 'keep-alive',
+            'Host': 'stats.nba.com',
+            'Origin': 'https://www.stats.nba.com',
+            'Referer': 'https://www.stats.nba.com/',
+            'sec-ch-ua': '"Google Chrome";v="87", "\"Not;A\\Brand";v="99", "Chromium";v="87"',
+            'sec-ch-ua-mobile': '?1',
+            'Sec-Fetch-Dest': 'empty',
+            'Sec-Fetch-Mode': 'cors',
+            'Sec-Fetch-Site': 'same-site',
+            'User-Agent': 'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.141 Mobile Safari/537.36',
+            'x-nba-stats-origin': 'stats',
+            'x-nba-stats-token': 'true'}).results.get_data_frame()
             return combine_data
         except requests.exceptions.ConnectionError:
-            print("Yup connection error, giving it 10 and retrying")
+            print("Connection error, giving it 10 and retrying")
             time.sleep(10)
             count += 1
         except Exception:
-            print("Other error, giving it 10 and retrying")
+            print("Non-connection error, giving it 10 and retrying")
             time.sleep(10)
             count += 1
     return None

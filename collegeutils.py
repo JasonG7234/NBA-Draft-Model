@@ -1,14 +1,8 @@
 from utils import *
 
-# Constants are declared with capital letters and underscores
-FIRST_YEAR_OF_DRAFT_RANKINGS = 2009
-MAX_LENGTH_OF_PROSPECT_CAREER = 5
 INDEX_SEPERATING_FIRST_AND_LAST_NAME = 2
-PAGE_OF_RSCI_RANK_CUTOFF = 8
 INDEX_OF_POSSESSION_STATS_IN_TABLE = 25
 MAX_PROFILES_TO_SEARCH_BY_NAME = 6
-HOOP_MATH_TABLE_COLUMN_COUNT = 15
-INDEXES_OF_HOOP_MATH_COLUMNS = [4, 5, 6, 7, 8, 9, 10, 12]
 
 def remove_non_college_basketball_prospects(master):
     master = remove_international_prospects(master)
@@ -45,9 +39,6 @@ def convert_class_to_number(master):
 def convert_height_to_inches(master):
     master['Height'] = master['Height'].apply(lambda x: int(x[0])*12 + int(x[2:].replace('-', '')))
     return master
-
-def get_rsci_rank_from_dictionary(name):
-    return check_value_in_dictionary_of_exceptions(name, OVERALL_RSCI_EXCEPTIONS, 0) 
 
 def get_last_season_stat_row(soup_html, table_id):
     table = soup_html.find('table', {'id':table_id})
