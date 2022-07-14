@@ -50,9 +50,6 @@ def reorder_final_columns(main):
                 'Event Year','Event Name','Event GP','Event MIN','Event PTS','Event FGM','Event FGA','Event FG%','Event 3PM','Event 3PA','Event 3P%','Event FTM','Event FTA','Event FT%','Event TRB','Event AST','Event STL','Event BLK','Event TOV','Event PF','Event Placement'
                 ]]
 
-main = pd.read_csv('data/main.csv')
-reorder_final_columns(main).to_csv('temp_master.csv', index=False)
-
 def set_up_streamlit(main):
     st.set_page_config(page_title="NBA Draft Model", page_icon=":bar_chart:", layout="wide")
 
@@ -127,3 +124,73 @@ def set_up_streamlit(main):
                 </style>
                 """
     st.markdown(hide_st_style, unsafe_allow_html=True)
+    
+def play_styles(main):
+    # df = main[main['Position 1'] == 'PG']
+    # df['Floor General%'] = df['Pure Point Rating'].rank(na_option='bottom', pct=True)
+    # df['Athletic%'] = df['% Shots @ Rim'].rank(na_option='keep', pct=True)
+    # df['Scorer%'] = df['PTS/40'].rank(na_option='bottom', pct=True)
+    # df['Shooter%'] = df['3FG%'].rank(na_option='bottom', pct=True)
+    # df['Play Style'] = df[['Floor General%','Athletic%','Scorer%','Shooter%']].idxmax(axis=1)
+    # df.to_csv('PG.csv', index=False)
+    
+    # df = main[main['Position 1'] == 'C']
+    # df['Stretch%'] = df['3FGM/40'].rank(na_option='keep', pct=True)
+    # for index, row in df.iterrows():
+    #     if row['3FGM/40'] <= 1:
+    #         df.loc[index, 'Stretch%'] = 0
+    # df['OREB%'] = df['ORB%'].rank(na_option='keep', pct=True)
+    # df['PlayFinisher%'] = df['2FG%'].rank(na_option='keep', pct=True)
+    # df['ShortRoll%'] = df['AST%'].rank(na_option='keep', pct=True)
+    # df['PostUp%'] = df['%Astd @ Rim'].rank(na_option='keep', ascending=False, pct=True)
+    # df['Play Style'] = df[['Stretch%','OREB%','PlayFinisher%','ShortRoll%', 'PostUp%']].idxmax(axis=1)
+    # df.to_csv('C.csv', index=False)
+    
+    # df = main[main['Position 1'] in ['SF', 'SG']]
+    # df['Creator%'] = df['Hands-On Buckets'].rank(na_option='keep', pct=True)
+    # df['Scorer%'] = df['PTS/40'].rank(na_option='keep', pct=True)
+    # df['Shooter%'] = df['% Shots @ 3'].rank(na_option='keep', pct=True)
+    # df['Slasher%'] = df['% Shots @ Rim'].rank(na_option='keep', pct=True)
+    # df['Play Style'] = df[['Creator%','Scorer%','Shooter%','Slasher%']].idxmax(axis=1)
+    # for index, row in df.iterrows():
+    #     if row['Scorer%'] <= 0.675 and row['Creator%'] <= 0.675 and row['Slasher%'] <= 0.675 and row['Shooter%'] <= 0.675:
+    #         df.loc[index, 'Play Style'] = 'Connector'
+    # # Creator, Scorer, Secondary, Connector, Shooter, Slasher, Off-Ball
+    # df.to_csv('SF.csv', index=False)
+    
+        # df = main[main['Position 1'] == 'C']
+    # df['Stretch%'] = df['3FGM/40'].rank(na_option='keep', pct=True)
+    # for index, row in df.iterrows():
+    #     if row['3FGM/40'] <= 1:
+    #         df.loc[index, 'Stretch%'] = 0
+    # df['OREB%'] = df['ORB%'].rank(na_option='keep', pct=True)
+    # df['PlayFinisher%'] = df['2FG%'].rank(na_option='keep', pct=True)
+    # df['ShortRoll%'] = df['AST%'].rank(na_option='keep', pct=True)
+    # df['PostUp%'] = df['%Astd @ Rim'].rank(na_option='keep', ascending=False, pct=True)
+    # df['Play Style'] = df[['Stretch%','OREB%','PlayFinisher%','ShortRoll%', 'PostUp%']].idxmax(axis=1)
+    # df.to_csv('C.csv', index=False)
+    
+    df = main[main['Position 1'] == 'PF']
+    df['Stretch%'] = df['3FGM/40'].rank(na_option='keep', pct=True)
+    for index, row in df.iterrows():
+        if row['3FGM/40'] <= 1.75:
+            df.loc[index, 'Stretch%'] = 0
+    df['Energy'] = df['ORB%'].rank(na_option='keep', pct=True)
+    df['Playmaker%'] = df['AST%'].rank(na_option='keep', pct=True)
+    df['Scorer%'] = df['PTS/40'].rank(na_option='keep', pct=True)
+    df['Creator%'] = df['Hands-On Buckets'].rank(na_option='keep', pct=True)
+    df['Play Style'] = df[['Stretch%','Energy','Playmaker%','Scorer%', 'Creator%']].idxmax(axis=1)
+    for index, row in df.iterrows():
+        if row['Scorer%'] <= 0.675 and row['Creator%'] <= 0.675 and row['Playmaker%'] <= 0.675 and row['Stretch%'] <= 0.675 and row['Energy'] <= 0.675:
+            df.loc[index, 'Play Style'] = 'Connector'
+    df.to_csv('PF.csv', index=False)
+    
+def add_aux_columns(main):
+    main = jason_3pt_confidence(main)
+    main = bentaylor_stats(main)
+    df = play_styles(main)
+    
+main = pd.read_csv('data/main.csv')
+add_aux_columns(main)
+play_styles(main)
+#df = main[main['Position 1'] == 'PG']
