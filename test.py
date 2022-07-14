@@ -33,7 +33,7 @@ def bentaylor_stats(main):
             _cTOV = _TOV / _OL
             main.loc[index, 'Adjusted TOV%'] = round(_cTOV, 3)
         else:
-            print(f"{row['Name']}") 
+            print(f"{row['Name']}")
     return main
     
 def reorder_final_columns(main):
@@ -192,5 +192,5 @@ def add_aux_columns(main):
     
 main = pd.read_csv('data/main.csv')
 add_aux_columns(main)
-play_styles(main)
+#play_styles(main)
 #df = main[main['Position 1'] == 'PG']
