@@ -31,7 +31,7 @@ def populate_NBA_all_statistics(all):
         while True:
             url = base_url + bkrefIdentifier + "0" + str(bkrefIndex) + ".html"
             print(url)
-            soup = find_site(url)   
+            soup, _ = find_site(url)   
             if (soup):
                 if (soup.find('div', {'class': 'index reading'}) or not soup.find('table')):
                     print("Reached 404 page - assuming there are no stats for " + row['Name'])
