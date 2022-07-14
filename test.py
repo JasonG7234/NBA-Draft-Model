@@ -215,9 +215,10 @@ def play_styles(main):
 def add_aux_columns(main):
     main = jason_3pt_confidence(main)
     main = bentaylor_stats(main)
-    df = play_styles(main)
+    #df = play_styles(main)
+    draw_conclusions_on_column(main, 'Hands-On Buckets', num_top=15)
+    draw_conclusions_on_column(main, 'Box Score Creation', num_top=15)
     
 main = pd.read_csv('data/main.csv')
 add_aux_columns(main)
-#play_styles(main)
 #df = main[main['Position 1'] == 'PG']

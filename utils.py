@@ -313,6 +313,8 @@ def reorder_final_columns(main):
                 ]]
 
 def draw_conclusions_on_column(df, col_name, num_top=5):
+    df[col_name].replace('', np.nan, inplace=True)
+    df[col_name].astype(float)
     print(f"The top {str(num_top)} highest values of column {col_name} are: ")
     for _, row in df.nlargest(num_top, [col_name]).iterrows():
         print(f"{row['Name']}: {row[col_name]}")
