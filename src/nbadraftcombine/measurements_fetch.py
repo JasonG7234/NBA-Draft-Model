@@ -44,7 +44,6 @@ def get_NBA_Combine_measurements(df):
             df[col] = ""
             
     for season in seasons:
-        print(season)
         combine_data = fetch_NBA_combine_data(season)
         for _, combine_player in combine_data.iterrows():
             for i, df_player in df[df['Season'] == season].iterrows():
@@ -55,7 +54,6 @@ def get_NBA_Combine_measurements(df):
     return df
 
 def populate_NBA_combine_measurements(df, index, combine_values):
-    print(index)
     for i in range(len(DRAFT_COMBINE_DATAFRAME_COLUMN_NAMES)):
         combine_value = combine_values[DRAFT_COMBINE_ANTHRO_COLUMNS[i]]
         if (combine_value in ERROR_VALUES):

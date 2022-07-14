@@ -115,60 +115,74 @@ import sys
 sys.path.insert(0, '../../')
 from utils import *
 
-def get_realgm_stats(df):
-    
-    AAU_STATS_TABLE_COLUMNS = ['AAU Season', 'AAU Team', 'AAU League', 'AAU GP', 'AAU GS', 'AAU MIN', 'AAU PTS', 'AAU FGM', 'AAU FGA', 'AAU FG%', 'AAU 3PM', 'AAU 3PA', 'AAU 3P%', 
+AAU_STATS_TABLE_COLUMNS = ['AAU Season', 'AAU Team', 'AAU League', 'AAU GP', 'AAU GS', 'AAU MIN', 'AAU PTS', 'AAU FGM', 'AAU FGA', 'AAU FG%', 'AAU 3PM', 'AAU 3PA', 'AAU 3P%', 
         'AAU FTM', 'AAU FTA', 'AAU FT%', 'AAU ORB', 'AAU DRB', 'AAU TRB', 'AAU AST', 'AAU STL', 'AAU BLK', 'AAU TOV', 'AAU PF']
     
-    INTERNATIONAL_STATS_TABLE_COLUMNS = ['Event Year', 'Event Name', 'Event GP', 'Event MIN', 'Event PTS', 'Event FGM', 'Event FGA', 'Event FG%', 'Event 3PM', 'Event 3PA', 'Event 3P%', 
+INTERNATIONAL_STATS_TABLE_COLUMNS = ['Event Year', 'Event Name', 'Event GP', 'Event MIN', 'Event PTS', 'Event FGM', 'Event FGA', 'Event FG%', 'Event 3PM', 'Event 3PA', 'Event 3P%', 
         'Event FTM', 'Event FTA', 'Event FT%', 'Event TRB', 'Event AST', 'Event STL', 'Event BLK', 'Event TOV', 'Event PF', 'Event Placement']
+
+def get_realgm_stats(df, find_single_player=False):
     
+    df["RealGM ID"] = ''
     df["Birthday"] = ''
     df["Draft Day Age"] = ''
     df["Hands-On Buckets"] = ''
     df["Wins"] = ''
     df["Losses"] = ''
     df["Pure Point Rating"] = ''
-    for index, row in df.iterrows():
-        summary_index = row['RealGM ID']
-        url_name = get_matchable_name(row['Name'])
-        print("PLAYER NAME: " + row['Name'])
-        if (np.isnan(summary_index)):
-            realgm_url = "https://basketball.realgm.com/search?q=" + url_name.replace(" ", "+")
-        else:
-            realgm_url = "https://basketball.realgm.com/player/" + url_name.replace(" ", "-") + "/Summary/" + str(summary_index)
-        try:
-            site, url = find_site(realgm_url)
-            player_page = RealGM(site)
-            birthday = player_page.get_birthday()
-            if (birthday):
-                print(birthday)
-                df.loc[index, 'Birthday'] = " ".join(birthday)
-                draft_day_age = birthday_to_draft_day_age(birthday, get_year_from_season(row['Season']))
-                print(draft_day_age)
-                df.loc[index, 'Draft Day Age'] = draft_day_age
-            hob = player_page.get_ncaa_hob()
-            print(hob)
-            df.loc[index, 'Hands-On Buckets'] = hob
-            wins, losses = player_page.get_ncaa_win_loss()
-            print(f"{str(wins)}/{str(losses)}")
-            df.loc[index, 'Wins'] = wins
-            df.loc[index, 'Losses'] = losses
-            ppr = player_page.get_ncaa_ppr()
-            print(ppr)
-            df.loc[index, 'Pure Point Rating'] = ppr
-            aau_stats = player_page.get_aau_stats()
-            if aau_stats:
-                print(aau_stats)
-                for i in range(len(aau_stats)):
-                    df.loc[index, AAU_STATS_TABLE_COLUMNS[i]] = aau_stats[i]
-            event_stats = player_page.get_international_stats()
-            if event_stats:
-                print(event_stats)
-                for i in range(len(event_stats)):
-                    df.loc[index, INTERNATIONAL_STATS_TABLE_COLUMNS[i]] = event_stats[i]
-        except Exception as e:
-            print(e)
+    for col in AAU_STATS_TABLE_COLUMNS:
+        df[col] = ''
+    for col in INTERNATIONAL_STATS_TABLE_COLUMNS:
+        df[col] = ''
         
-    df.to_csv('temp_master.csv', index=False)
+    for index, row in df.iterrows():
+        is_row_data_populated = False
+        while not is_row_data_populated:
+            url_name = get_matchable_name(row['Name'])
+            try: 
+                summary_index = df.at[index, 'RealGM ID']
+                print(summary_index)
+                if (not summary_index or summary_index in ERROR_VALUES):
+                    realgm_url = "https://basketball.realgm.com/search?q=" + url_name.replace(" ", "+")
+                else:
+                    realgm_url = "https://basketball.realgm.com/player/" + url_name.replace(" ", "-") + "/Summary/" + str(summary_index)
+            except KeyError:
+                realgm_url = "https://basketball.realgm.com/search?q=" + url_name.replace(" ", "+")
+            print("PLAYER NAME: " + row['Name']) 
+            try:
+                site, url = find_site(realgm_url)
+                player_page = RealGM(site)
+                df.loc[index, 'RealGM ID'] = url.split("/")[-1]
+                populate_stats(df, player_page, index, row)
+                is_row_data_populated = True
+            except Exception as e:
+                if (find_single_player):
+                    realgm_id = input("Cannot find player page. Can you try manually inputting the RealGM ID? ")
+                    df.loc[0, 'RealGM ID'] = realgm_id
+                else:
+                    print(e)
+                    is_row_data_populated = True
+    return df
+
+def populate_stats(df, player_page, index, row):
+    birthday = player_page.get_birthday()
+    if (birthday):
+        df.loc[index, 'Birthday'] = " ".join(birthday)
+        draft_day_age = birthday_to_draft_day_age(birthday, get_year_from_season(row['Season']))
+        df.loc[index, 'Draft Day Age'] = draft_day_age
+    hob = player_page.get_ncaa_hob()
+    df.loc[index, 'Hands-On Buckets'] = hob
+    wins, losses = player_page.get_ncaa_win_loss()
+    df.loc[index, 'Wins'] = wins
+    df.loc[index, 'Losses'] = losses
+    ppr = player_page.get_ncaa_ppr()
+    df.loc[index, 'Pure Point Rating'] = ppr
+    aau_stats = player_page.get_aau_stats()
+    if aau_stats:
+        for i in range(len(aau_stats)):
+            df.loc[index, AAU_STATS_TABLE_COLUMNS[i]] = aau_stats[i]
+    event_stats = player_page.get_international_stats()
+    if event_stats:
+        for i in range(len(event_stats)):
+            df.loc[index, INTERNATIONAL_STATS_TABLE_COLUMNS[i]] = event_stats[i]
     

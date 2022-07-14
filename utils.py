@@ -8,6 +8,10 @@ import pandas as pd
 from bs4 import BeautifulSoup
 from fuzzywuzzy import fuzz
 
+FIRST_YEAR_OF_DRAFT_RANKINGS = 2009
+
+
+
 OVERALL_PLAYER_NAME_EXCEPTIONS = {
 	"Moe Harkless" : "Maurice Harkless",
 	"TyShon Alexander" : "Ty-Shon Alexander",
@@ -114,7 +118,8 @@ COLLEGE_PLAYER_NAME_EXCEPTIONS = {
 	"oscar-da-silva" : "oscar-dasilva",
 	"johnny-davis" : "jonathan-davis",
 	"tyty-washington" : "tyty-washingtonjr",
-	"wendell-moore" : "wendell-moorejr"
+	"wendell-moore" : "wendell-moorejr",
+	"kenneth-lofton" : "kenneth-loftonjr"
 }
 
 COLLEGE_INDEX_EXCEPTIONS = {
@@ -133,7 +138,7 @@ COLLEGE_INDEX_EXCEPTIONS = {
 	"lonnie-walker" : 2,
 	"anthony-davis" : 5,
 	"chris-walker" : 6,
-  	"eric-mika" : 2,
+	"eric-mika" : 2,
 	"troy-brown" : 5,
 	"charlie-brown" : 2,
 	"rodney-williams" : 3,
@@ -202,27 +207,6 @@ NBA_SCHOOL_NAME_EXCEPTIONS = {
 	"St. Johns" : "St. John's"
 }
 
-HOOP_MATH_SCHOOL_EXCEPTIONS = {
-	"UNC" : "NorthCarolina",
-	"SaintMary's" : "SaintMary's(CA)",
-	"Pitt" : "Pittsburgh",
-	"Wisconsin–Milwaukee" : "Milwaukee",
-	"St.Joseph's" : "SaintJoseph's",
-	"NCSt." : "NCState",
-	"USC" : "SouthernCalifornia",
-	"WesternKentucky" : "WesternKy.",
-	"Charleston" : "Col.ofCharleston",
-	"CalSt.Northridge" : "CSUN",
-	"Miami" : "Miami(FL)",
-	"CentralFlorida" : "UCF",
-	"WesternMichigan" : "WesternMich.",
-	"Illinois-Chicago" : "UIC",
-	"TexasArlington" : "UTArlington",
-	"EasternWashington" : "EasternWash.",
-	"LouisianaLafayette" : "Louisiana",
-	"UMass" : "Massachusetts"
-}
-
 PER_40_COLUMN_IDS = ['fg_per_min', 'fga_per_min', 'fg_pct', 'fg2_per_min', 'fg2a_per_min', 'fg2_pct', 'fg3_per_min', 'fg3a_per_min', 'fg3_pct',
     'ft_per_min','fta_per_min','ft_pct', 'trb_per_min', 'ast_per_min', 'stl_per_min', 'blk_per_min', 'tov_per_min', 'pf_per_min', 'pts_per_min']
 
@@ -235,7 +219,7 @@ ADVANCED_COLUMN_IDS = ['g','gs','mp','per','ts_pct','efg_pct','fg3a_per_fga_pct'
 COLUMN_NAMES = ['G','GS','MP','PER','TS%','eFG%','3PAr','FTr','PProd','ORB%','DRB%','TRB%','AST%',
     'STL%','BLK%','TOV%','USG%','OWS','DWS','WS','WS/40','OBPM','DBPM','BPM','FG/40', 'FGA/40', 'FG%', '2FGM/40', '2FGA/40', '2FG%', '3FGM/40', '3FGA/40', '3FG%',
     'FT/40','FTA/40','FT%', 'TRB/40', 'AST/40', 'STL/40', 'BLK/40', 'TOV/40', 'PF/40', 'PTS/40', 'FGM/100Poss', 'FGA/100Poss', '2FGM/100Poss', '2FGA/100Poss', '3FGM/100Poss', '3FGA/100Poss','FT/100Poss','FTA/100Poss',
-    'TRB/100Poss', 'AST/100Poss', 'STL/100Poss', 'BLK/100Poss', 'TOV/100Poss', 'PF/100Poss', 'PTS/100Poss', 'OFF RTG', 'DEF RTG', 'ATS/TOV', 'SOS']
+    'TRB/100Poss', 'AST/100Poss', 'STL/100Poss', 'BLK/100Poss', 'TOV/100Poss', 'PF/100Poss', 'PTS/100Poss', 'OFF RTG', 'DEF RTG', 'ATS/TOV', 'SOS', 'Conference']
 
 HOOP_MATH_COLUMN_NAMES = ['% Shots @ Rim', 'FG% @ Rim', '%Astd @ Rim', '% Shots @ Mid', 'FG% @ Mid', '%Astd @ Mid', '% Shots @ 3', '%Astd @ 3']
 
@@ -286,10 +270,6 @@ def get_basketball_reference_formatted_url(name):
 	url_name = name.replace("'", "").replace(".", "").replace(" ", "-").lower()
 	return check_value_in_dictionary_of_exceptions(url_name, COLLEGE_PLAYER_NAME_EXCEPTIONS, url_name)
 
-def get_hoop_math_formatted_school(name):
-	url_name = name.replace(" State", "St.").replace(" ", "")
-	return check_value_in_dictionary_of_exceptions(url_name, HOOP_MATH_SCHOOL_EXCEPTIONS, url_name)
-
 def remove_non_alphabetic_characters(name):
 	return unidecode.unidecode(re.sub(r'[^A-Za-z- ]+', '', name))
 
@@ -305,10 +285,32 @@ def get_season_from_year(year):
 def get_year_from_season(season):
     return int(season[:4])+1
 
-def reorder_columns(main):
-    cols_to_order = ['Name', 'Season']
-    new_columns = cols_to_order + (main.columns.drop(cols_to_order).tolist())
-    return main[new_columns]
+def update_position_columns(df):
+    if 'Position 1' in df and 'Position 2' in df:
+        return df
+    else:
+        df['Position 2'] = ''
+        for index, row in df.iterrows():
+            positions = re.split('/|-', df.at[index, 'Position'])
+            df.loc[index, 'Position'] = positions[0]
+            if (len(positions) == 2):
+                df.loc[index, 'Position 2'] = positions[1]
+        df = df.rename(columns = {'Position' : 'Position 1'})
+    return df
+
+def reorder_final_columns(main):
+    return main[['RealGM ID','Season','Name',
+                'Position 1','Position 2',
+                'School','Conference','Wins','Losses','SOS',
+                'Class','Birthday','Draft Day Age',
+                'Height','Weight','Height w/o Shoes','Height w/ Shoes','Wingspan','Standing Reach','Body Fat %','Hand Length','Hand Width',
+                'RSCI','G','GS','MP','PER','TS%','eFG%','3PAr','FTr','PProd','ORB%','DRB%','TRB%','AST%','STL%','BLK%','TOV%','USG%','OWS','DWS','WS','WS/40','OBPM','DBPM','BPM','ATS/TOV','OFF RTG','DEF RTG','Hands-On Buckets','Pure Point Rating',
+                'FG/40','FGA/40','FG%','2FGM/40','2FGA/40','2FG%','3FGM/40','3FGA/40','3FG%','FT/40','FTA/40','FT%','TRB/40','AST/40','STL/40','BLK/40','TOV/40','PF/40','PTS/40',
+                'FGM/100Poss','FGA/100Poss','2FGM/100Poss','2FGA/100Poss','3FGM/100Poss','3FGA/100Poss','FT/100Poss','FTA/100Poss','TRB/100Poss','AST/100Poss','STL/100Poss','BLK/100Poss','TOV/100Poss','PF/100Poss','PTS/100Poss','FGA/100Poss',
+                '# Dunks','% Shots @ Rim','FG% @ Rim','%Astd @ Rim','% Shots @ Mid','FG% @ Mid','%Astd @ Mid','% Shots @ 3','%Astd @ 3',
+                'AAU Season','AAU Team','AAU League','AAU GP','AAU GS','AAU MIN','AAU PTS','AAU FGM','AAU FGA','AAU FG%','AAU 3PM','AAU 3PA','AAU 3P%','AAU FTM','AAU FTA','AAU FT%','AAU ORB','AAU DRB','AAU TRB','AAU AST','AAU STL','AAU BLK','AAU TOV','AAU PF',
+                'Event Year','Event Name','Event GP','Event MIN','Event PTS','Event FGM','Event FGA','Event FG%','Event 3PM','Event 3PA','Event 3P%','Event FTM','Event FTA','Event FT%','Event TRB','Event AST','Event STL','Event BLK','Event TOV','Event PF','Event Placement'
+                ]]
 
 def draw_conclusions_on_column(df, col_name, num_top=5):
     print(f"The top {str(num_top)} highest values of column {col_name} are: ")
@@ -323,6 +325,10 @@ def draw_conclusions_on_column(df, col_name, num_top=5):
     print('=========================================')    
     print(f"The average value of column {col_name} is: {df[col_name].mean()}")
     print(f"The median value of column {col_name} is: {df[col_name].median()}")
+
+def print_dataframe(df):
+	with pd.option_context('display.max_rows', None, 'display.max_columns', None):
+		print(df)
 
 def populate_dataframe_with_average_values(df):
     df = df.replace('', np.nan)

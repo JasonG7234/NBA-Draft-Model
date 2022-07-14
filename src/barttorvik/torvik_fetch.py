@@ -70,7 +70,6 @@ def get_torvik_dunks(df):
     seasons = df.Season.unique()
     for season in seasons:
         if season == '2008-09': continue # Bart Torvik doesn't have dunk data for this season 
-        print(season)
         torvik_json = fetch_bart_torvik_data(get_year_from_season(season))
         for index, df_player in df[df['Season'] == season].iterrows():
             manual_dunks = BART_TORVIK_VALUE_EXCEPTIONS.get(df_player['Name'] + df_player['Season'], None)

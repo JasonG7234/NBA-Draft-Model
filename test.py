@@ -35,21 +35,48 @@ def bentaylor_stats(main):
         else:
             print(f"{row['Name']}")
     return main
-    
-def reorder_final_columns(main):
-    return main[['RealGM ID','Season','Name',
-                'Position 1','Position 2',
-                'School','Wins','Losses','SOS',
-                'Class','Birthday','Draft Day Age',
-                'Height','Weight','Height w/o Shoes','Height w/ Shoes','Wingspan','Standing Reach','Body Fat %','Hand Length','Hand Width',
-                'RSCI','G','GS','MP','PER','TS%','eFG%','3PAr','FTr','PProd','ORB%','DRB%','TRB%','AST%','STL%','BLK%','TOV%','USG%','OWS','DWS','WS','WS/40','OBPM','DBPM','BPM','ATS/TOV','OFF RTG','DEF RTG','Hands-On Buckets','Pure Point Rating',
-                'FG/40','FGA/40','FG%','2FGM/40','2FGA/40','2FG%','3FGM/40','3FGA/40','3FG%','FT/40','FTA/40','FT%','TRB/40','AST/40','STL/40','BLK/40','TOV/40','PF/40','PTS/40',
-                'FGM/100Poss','FGA/100Poss','2FGM/100Poss','2FGA/100Poss','3FGM/100Poss','3FGA/100Poss','FT/100Poss','FTA/100Poss','TRB/100Poss','AST/100Poss','STL/100Poss','BLK/100Poss','TOV/100Poss','PF/100Poss','PTS/100Poss','FGA/100Poss',
-                '# Dunks','% Shots @ Rim','FG% @ Rim','%Astd @ Rim','% Shots @ Mid','FG% @ Mid','%Astd @ Mid','% Shots @ 3','%Astd @ 3',
-                'AAU Season','AAU Team','AAU League','AAU GP','AAU GS','AAU MIN','AAU PTS','AAU FGM','AAU FGA','AAU FG%','AAU 3PM','AAU 3PA','AAU 3P%','AAU FTM','AAU FTA','AAU FT%','AAU ORB','AAU DRB','AAU TRB','AAU AST','AAU STL','AAU BLK','AAU TOV','AAU PF',
-                'Event Year','Event Name','Event GP','Event MIN','Event PTS','Event FGM','Event FGA','Event FG%','Event 3PM','Event 3PA','Event 3P%','Event FTM','Event FTA','Event FT%','Event TRB','Event AST','Event STL','Event BLK','Event TOV','Event PF','Event Placement'
-                ]]
 
+def add_conference(df):
+    ACC = ['Boston College', 'Clemson', 'Duke', 'UNC', 'North Carolina', 'NC State', 'Wake Forest', 'Florida State', 'Georgia Tech', 'Louisville', 'Miami', 'Notre Dame', 'Pitt', 'Syracuse', 'Virginia Tech', 'Virginia']
+    BIG_EAST = ['Butler', 'Creighton', 'DePaul', 'Georgetown', 'Marquette', 'Providence', 'Seton Hall', "St. John's (NY)", 'UConn', 'Villanova', 'Xavier']
+    SEC = ['Alabama', 'Arkansas', 'Auburn', 'Florida', 'Georgia', 'Kentucky', 'LSU', 'Ole Miss', 'Mississippi State', 'Missouri', 'South Carolina', 'Tennessee', 'Texas A&M', 'Vanderbilt']
+    BIG_TEN = ['Illinois', 'Indiana', 'Iowa', 'Maryland', 'Michigan State', 'Michigan', 'Minnesota', 'Nebraska', 'Northwestern', 'Ohio State', 'Penn State', 'Purdue', 'Rutgers', 'Wisconsin']
+    WCC = ['Gonzaga', 'Pepperdine', 'Santa Clara', 'BYU', "Saint Mary's", 'San Francisco']
+    BIG_12 = ['Baylor', 'Iowa State', 'Kansas', 'Kansas State', 'Oklahoma', 'Oklahoma State', 'Texas', 'TCU', 'Texas Tech', 'West Virginia']
+    PAC_12 = ['Oregon', 'USC', 'UCLA', 'Arizona State', 'Arizona', 'California', 'Colorado', 'Utah', 'Oregon State', 'Stanford', 'Washington', 'Washington State']
+    MWC = ['Air Force', 'Boise State', 'Colorado State', 'Fresno State', 'Nevada', 'New Mexico', 'San Diego State', 'San Jose State', 'UNLV', 'Utah State', 'Wyoming']
+    AAC = ['Cincinnati', 'East Carolina', 'Houston', 'Memphis', 'SMU', 'South Florida', 'Temple', 'Tulane', 'Tulsa', 'Wichita State', 'Central Florida']
+    A10 = ['Davidson', 'Dayton', 'Duquesne', 'Fordham', 'George Mason', 'George Washington', 'La Salle', 'Rhode Island', 'Richmond', "St. Joseph's", 'Saint Louis', 'St. Bonaventure', 'UMass', 'VCU']
+    
+    df['Conference'] = 'Other'
+    for index, row in df.iterrows():
+        school = row['School']
+        if school in ACC:
+            df.loc[index, 'Conference'] = 'ACC'
+        if school in BIG_EAST:
+            df.loc[index, 'Conference'] = 'Big East'
+        if school in SEC:
+            df.loc[index, 'Conference'] = 'SEC'
+        if school in BIG_TEN:
+            df.loc[index, 'Conference'] = 'Big Ten'
+        if school in WCC:
+            df.loc[index, 'Conference'] = 'WCC'
+        if school in BIG_12:
+            df.loc[index, 'Conference'] = 'Big 12'
+        if school in PAC_12:
+            df.loc[index, 'Conference'] = 'Pac-12'
+        if school in MWC:
+            df.loc[index, 'Conference'] = 'MWC'
+        if school in AAC:
+            df.loc[index, 'Conference'] = 'AAC'
+        if school in A10:
+            df.loc[index, 'Conference'] = 'AAC'
+    return df
+
+main = pd.read_csv('data/main.csv')
+df = add_conference(main)
+reorder_final_columns(df).to_csv('temp_master.csv', index=False)
+        
 def set_up_streamlit(main):
     st.set_page_config(page_title="NBA Draft Model", page_icon=":bar_chart:", layout="wide")
 

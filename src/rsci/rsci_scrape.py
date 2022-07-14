@@ -2,10 +2,8 @@ import sys
 sys.path.insert(0, '../../')
 from utils import *
 
-FIRST_YEAR_OF_DRAFT_RANKINGS = 2009
 MAX_LENGTH_OF_PROSPECT_CAREER = 5
 PAGE_OF_RSCI_RANK_CUTOFF = 8
-
 
 OVERALL_RSCI_EXCEPTIONS = {
     "Hasheem Thabeet": 64,
@@ -74,7 +72,7 @@ OVERALL_RSCI_EXCEPTIONS = {
 	"Quenton Jackson": 242,
 }
 
-def add_rsci_rank_as_column(df):
+def add_rsci_rank_as_column(df, find_single_player=False):
     """Get the RSCI rank from 247Sports (not rivals) and add it as a column to the main DataFrame.
     
     Args:
@@ -83,9 +81,12 @@ def add_rsci_rank_as_column(df):
     Returns:
         dataframe: The dataframe with the new data
     """
-    
-    year_counter = FIRST_YEAR_OF_DRAFT_RANKINGS - MAX_LENGTH_OF_PROSPECT_CAREER
     df['RSCI'] = ""
+    df = add_initial_rsci_rankings(df)
+    if (find_single_player and df.at[0, 'RSCI']):
+        return df
+    start_year = FIRST_YEAR_OF_DRAFT_RANKINGS if not find_single_player else get_year_from_season(df.at[0, 'Season'])
+    year_counter = start_year - MAX_LENGTH_OF_PROSPECT_CAREER 
     while year_counter < get_current_year():
         print("Getting RSCI rank for players from the class of " + str(year_counter))
         page = 1
@@ -103,10 +104,14 @@ def add_rsci_rank_as_column(df):
                         rank = player.find('div', {'class':'primary'}).getText().split()[0]
                         print("Found a match for " + row['Name'] + ": " + rank)
                         df.at[index, 'RSCI'] = rank
-                        break
+                        if find_single_player:
+                            return df
+                        else:
+                            break
             page = page + 1
         year_counter = year_counter + 1
-    df.apply(add_remaining_rsci_rankings)
+    df.apply(set_remaining_rsci_rankings, axis=1)
+    return df
     
 def fetch_247_html(year_counter, page):
     """Fetches the 247 recruiting rankings for a given year & page.
@@ -120,14 +125,18 @@ def fetch_247_html(year_counter, page):
     """
     base_url = "http://247sports.com/Season/" + str(year_counter) + "-Basketball/CompositeRecruitRankings"
     params = "?View=Detailed&InstitutionGroup=HighSchool&Page=" + str(page)
-    return find_site(base_url + params)
+    return find_site(base_url + params)[0]
     
-def add_remaining_rsci_rankings(row):
+def add_initial_rsci_rankings(df):
+    for index, row in df.iterrows():
+        rank_in_dictionary = OVERALL_RSCI_EXCEPTIONS.get(row['Name'], 0)
+        if (rank_in_dictionary != 0):
+            df.loc[index, 'RSCI'] = rank_in_dictionary
+    return df
+    
+def set_remaining_rsci_rankings(row):
     """For every player not found on 247 year pages, we want to add their RSCI rank if it we have it saved as an exception."""
-
-    rank_in_dictionary = OVERALL_RSCI_EXCEPTIONS.get(row['Name'], 0)
-    if (rank_in_dictionary != 0):
-        row['RSCI'] = rank_in_dictionary
+	
     if (pd.isna(row['RSCI'])):
         row['RSCI'] = 400
     return row
