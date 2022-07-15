@@ -2,6 +2,8 @@ import datetime
 import re
 import requests
 
+from scipy import stats
+
 import unidecode
 import numpy as np
 import pandas as pd
@@ -298,8 +300,17 @@ def update_position_columns(df):
         df = df.rename(columns = {'Position' : 'Position 1'})
     return df
 
-def reorder_final_columns(main):
-    return main[['RealGM ID','Season','Name',
+def normalize(df, col_name, is_inverse_normalization=False):
+    max_value = df[col_name].max()
+    min_value = df[col_name].min()
+    if (is_inverse_normalization):
+        df[f'{col_name} Normalized'] = 1 - (df[col_name] - min_value) / (max_value - min_value)
+    else:
+        df[f'{col_name} Normalized'] = (df[col_name] - min_value) / (max_value - min_value)
+    return df
+
+def reorder_final_columns(df):
+    return df[['RealGM ID','Season','Name',
                 'Position 1','Position 2',
                 'School','Conference','Wins','Losses','SOS',
                 'Class','Birthday','Draft Day Age',
@@ -311,6 +322,25 @@ def reorder_final_columns(main):
                 'AAU Season','AAU Team','AAU League','AAU GP','AAU GS','AAU MIN','AAU PTS','AAU FGM','AAU FGA','AAU FG%','AAU 3PM','AAU 3PA','AAU 3P%','AAU FTM','AAU FTA','AAU FT%','AAU ORB','AAU DRB','AAU TRB','AAU AST','AAU STL','AAU BLK','AAU TOV','AAU PF',
                 'Event Year','Event Name','Event GP','Event MIN','Event PTS','Event FGM','Event FGA','Event FG%','Event 3PM','Event 3PA','Event 3P%','Event FTM','Event FTA','Event FT%','Event TRB','Event AST','Event STL','Event BLK','Event TOV','Event PF','Event Placement'
                 ]]
+    
+def get_value_at_column_by_player_name(df, player_name, col_name, get_percentile=False):
+    print('=========================================')
+    try:
+        val = df.loc[df['Name'] == player_name].iloc[0][col_name]
+    except IndexError:
+        print(f"ERROR: The name {player_name} has no exact match.")
+        return
+    print(f"{player_name}'s value for column '{col_name}' is: {val}")
+    if get_percentile:
+        df['Rank'] = df[col_name].rank(pct=True)
+        percentile = round(df.loc[df['Name'] == player_name].iloc[0]['Rank']*100)
+        d = {1 : 'st', 2 : 'nd', 3 : 'rd'}
+        print(f"This value is in the {percentile}{d.get(percentile % 10, 'th')} percentile.")
+    print('=========================================')
+    
+def cast_column_to_float(df, col_name):
+    df[col_name].astype(float)
+    return df
 
 def draw_conclusions_on_column(df, col_name, num_top=5):
     df[col_name].replace('', np.nan, inplace=True)
