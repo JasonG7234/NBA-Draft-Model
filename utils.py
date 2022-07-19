@@ -107,6 +107,7 @@ COLLEGE_PLAYER_NAME_EXCEPTIONS = {
 	"bryce-dejean-jones" : "bryce-jones",
 	"ronald-roberts" : "ronald-roberts-",
 	"ed-daniel" : "edward-daniel",
+	"shaq-buchanan" : "leroy-buchanan",
 	"cam-long" : "cameron-long",
 	"art-parakhouski" : "artsiom-parakhouski",
 	"landers-nolley" : "landers-nolleyii",
