@@ -87,7 +87,8 @@ def add_rsci_rank_as_column(df, find_single_player=False):
         return df
     start_year = FIRST_YEAR_OF_DRAFT_RANKINGS if not find_single_player else get_year_from_season(df.at[0, 'Season'])
     year_counter = start_year - MAX_LENGTH_OF_PROSPECT_CAREER 
-    while year_counter < get_current_year():
+    end_year = get_year_from_season(df.at[0, 'Season']) if find_single_player else get_current_year()
+    while year_counter < end_year:
         print("Getting RSCI rank for players from the class of " + str(year_counter))
         page = 1
         while page <= PAGE_OF_RSCI_RANK_CUTOFF: 

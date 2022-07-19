@@ -121,7 +121,10 @@ COLLEGE_PLAYER_NAME_EXCEPTIONS = {
 	"johnny-davis" : "jonathan-davis",
 	"tyty-washington" : "tyty-washingtonjr",
 	"wendell-moore" : "wendell-moorejr",
-	"kenneth-lofton" : "kenneth-loftonjr"
+	"kenneth-lofton" : "kenneth-loftonjr",
+	"joe-harris" : "joe-harris-",
+	"garrison-mathews" : "garrison-matthews",
+	"kc-ndefo" : "kenechukwu-ndefo"
 }
 
 COLLEGE_INDEX_EXCEPTIONS = {
@@ -152,7 +155,8 @@ COLLEGE_INDEX_EXCEPTIONS = {
 	"david-johnson" : 13,
 	"jalen-williams" : 13,
 	"donovan-williams" : 3,
-	"jonathan-davis" : 3
+	"jonathan-davis" : 3,
+	"jared-harper" : 12
 }
 
 COLLEGE_SCHOOL_NAME_EXCEPTIONS = {
@@ -274,6 +278,15 @@ def get_basketball_reference_formatted_url(name):
 
 def remove_non_alphabetic_characters(name):
 	return unidecode.unidecode(re.sub(r'[^A-Za-z- ]+', '', name))
+
+def convert_class_to_number(df):
+    class_to_number = {'Fr.':1, 'So.':2, 'Jr.':3, 'Sr.':4}
+    df.replace(to_replace=class_to_number, inplace=True)
+    return df
+
+def convert_height_to_inches(df):
+    df['Height'] = df['Height'].apply(lambda x: int(x[0])*12 + int(x[2:].replace('-', '')))
+    return df
 
 def get_current_year():
 	return datetime.datetime.now().year

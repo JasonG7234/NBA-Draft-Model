@@ -37,6 +37,7 @@ def get_players_basketball_reference_page(row):
     """
 
     player_name_in_url = get_basketball_reference_formatted_url(row['Name'])
+    print(player_name_in_url)
     index_value_in_url = check_value_in_dictionary_of_exceptions(player_name_in_url, COLLEGE_INDEX_EXCEPTIONS, 1)
     if (index_value_in_url == 1):
         while index_value_in_url in range(1, MAX_PROFILES_TO_SEARCH_BY_NAME): 

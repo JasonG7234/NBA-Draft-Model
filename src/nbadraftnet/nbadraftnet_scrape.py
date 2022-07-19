@@ -19,9 +19,10 @@ def add_all_college_basketball_prospects(df, find_single_player=False):
         if (soup_html):
             players = soup_html.find('tbody').findChildren('tr')
             if (find_single_player):
-                df = find_single_player_info(df, players)
+                df, is_found = find_single_player_info(df, players)
+                if not is_found:
+                    return df
                 df = convert_class_to_number(df)
-                print(df)
                 df = convert_height_to_inches(df)
                 df = reformat_remaining_college_basketball_prospects(df)
                 return df
@@ -42,9 +43,9 @@ def find_single_player_info(df, players):
             df.loc[0, 'Weight'] = stats[4].text
             df.loc[0, 'Position'] = stats[5].text
             df.loc[0, 'Class'] = stats[7].text
-            return df
+            return df, True
     print("ERROR: Could not find single player info from nbadraft.net.")
-    return df
+    return df, False
 
 def add_all_prospects_to_df(season, players):
     top100 = []
@@ -97,11 +98,4 @@ def reformat_remaining_college_basketball_prospects(df):
         df.at[index, 'School'] = school
     return df
 
-def convert_class_to_number(df):
-    class_to_number = {'Fr.':1, 'So.':2, 'Jr.':3, 'Sr.':4}
-    df.replace(to_replace=class_to_number, inplace=True)
-    return df
 
-def convert_height_to_inches(df):
-    df['Height'] = df['Height'].apply(lambda x: int(x[0])*12 + int(x[2:].replace('-', '')))
-    return df

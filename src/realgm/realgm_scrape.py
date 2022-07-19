@@ -7,20 +7,27 @@ class RealGM:
         "FIBA Junior Team Events Stats",
         "Non-FIBA Events Stats"
     ]}
+    RELEVANT_PROFILE_INFO = {key: None for key in [
+        "Born:",
+        "Height:",
+        "Pre-Draft"
+    ]}
+    
     HOB_INDEX = 10
     WIN_INDEX = 14
     LOSS_INDEX = 15
     PPR_INDEX = 15
 
     def __init__(self, soup):
-        self.reset_relevant_tables()
-        profile_box = soup.find('div', {"class": "half-column-left"})
+        self.reset_relevant_info()
+        profile_box = soup.find('div', {"class": "profile-box"})
         if not profile_box:
             raise ReferenceError("Page not found.")
+        self.position = profile_box.find('h2').find('span').text
         for item in profile_box.find_all('p'):
-            info_category = item.text.split(" ")[0]
-            if "Born:" in info_category:
-                self.birthday = item.text
+            info_category = item.text.split(" ")
+            if info_category[0] in self.RELEVANT_PROFILE_INFO.keys():
+                self.RELEVANT_PROFILE_INFO[info_category[0]] = info_category
         content = soup.find('div', {"class": "profile-wrap"})
         headers = content.find_all('h2')
         for i, header in enumerate(headers):
@@ -28,28 +35,48 @@ class RealGM:
                 table = content.find_all('table')[i]
                 self.RELEVANT_TABLES[header.text] = table
 
+    def get_position(self):
+        if self.position == 'G':
+            return 'SG/PG'
+        if self.position == 'F':
+            return 'PF/SF'
+        return self.position
     
     def get_birthday(self):
-        return self.birthday.split(" ")[1:4] if hasattr(self, 'birthday') else None
+        birthday = self.RELEVANT_PROFILE_INFO.get('Born:')
+        if not birthday:
+            return None
+        return birthday[1:4]
+    
+    def get_height(self):
+        return self.RELEVANT_PROFILE_INFO.get('Height:')[1]
+    
+    def get_weight(self):
+        return self.RELEVANT_PROFILE_INFO.get('Height:')[4]
+    
+    def get_class(self):
+        grade = self.RELEVANT_PROFILE_INFO.get('Pre-Draft')
+        if not grade:
+            return None
+        return grade[-1].strip('()') + '.'
 
-    def get_ncaa_hob(self):
+    def get_ncaa_hob(self, row_to_get=-1):
         table = self.RELEVANT_TABLES.get("NCAA Season Stats - Misc Stats")
         if not table:
             return None
         
-        row = table.find('tbody').find_all('tr')[-1]
+        row = table.find('tbody').find_all('tr')[row_to_get]
         hob = row.find_all('td')[self.HOB_INDEX].text
         try:
             return float(hob)
-        except Exception as e:
-            print(e)
+        except Exception:
             return None
     
-    def get_ncaa_win_loss(self):
+    def get_ncaa_win_loss(self, row_to_get=-1):
         table = self.RELEVANT_TABLES.get("NCAA Season Stats - Misc Stats")
         if not table:
             return None, None
-        row = table.find('tbody').find_all('tr')[-1]
+        row = table.find('tbody').find_all('tr')[row_to_get]
         win = row.find_all('td')[self.WIN_INDEX].text
         loss = row.find_all('td')[self.LOSS_INDEX].text
         try:
@@ -57,12 +84,11 @@ class RealGM:
         except Exception:
             return None, None
     
-    def get_ncaa_ppr(self):
+    def get_ncaa_ppr(self, row_to_get=-1):
         table = self.RELEVANT_TABLES.get("NCAA Season Stats - Advanced Stats")
         if not table:
             return None
-        
-        row = table.find('tbody').find_all('tr')[-1]
+        row = table.find('tbody').find_all('tr')[row_to_get]
         ppr = row.find_all('td')[self.PPR_INDEX].text
         try:
             return float(ppr)
@@ -102,13 +128,18 @@ class RealGM:
                 international_stats.append(stats_row[i].text)
         return international_stats
     
-    def reset_relevant_tables(self):
+    def reset_relevant_info(self):
         self.RELEVANT_TABLES = {key: None for key in [
         "NCAA Season Stats - Misc Stats",
         "NCAA Season Stats - Advanced Stats",
         "AAU Stats - Per Game",
         "FIBA Junior Team Events Stats",
         "Non-FIBA Events Stats"
+    ]}
+        self.RELEVANT_PROFILE_INFO = {key: None for key in [
+        "Born:",
+        "Height:",
+        "Pre-Draft"
     ]}
 
 import sys
@@ -121,7 +152,7 @@ AAU_STATS_TABLE_COLUMNS = ['AAU Season', 'AAU Team', 'AAU League', 'AAU GP', 'AA
 INTERNATIONAL_STATS_TABLE_COLUMNS = ['Event Year', 'Event Name', 'Event GP', 'Event MIN', 'Event PTS', 'Event FGM', 'Event FGA', 'Event FG%', 'Event 3PM', 'Event 3PA', 'Event 3P%', 
         'Event FTM', 'Event FTA', 'Event FT%', 'Event TRB', 'Event AST', 'Event STL', 'Event BLK', 'Event TOV', 'Event PF', 'Event Placement']
 
-def get_realgm_stats(df, find_single_player=False):
+def get_realgm_stats(df, find_single_player=False, need_profile_info=False):
     
     df["RealGM ID"] = ''
     df["Birthday"] = ''
@@ -130,6 +161,7 @@ def get_realgm_stats(df, find_single_player=False):
     df["Wins"] = ''
     df["Losses"] = ''
     df["Pure Point Rating"] = ''
+    
     for col in AAU_STATS_TABLE_COLUMNS:
         df[col] = ''
     for col in INTERNATIONAL_STATS_TABLE_COLUMNS:
@@ -141,19 +173,19 @@ def get_realgm_stats(df, find_single_player=False):
             url_name = get_matchable_name(row['Name'])
             try: 
                 summary_index = df.at[index, 'RealGM ID']
-                print(summary_index)
                 if (not summary_index or summary_index in ERROR_VALUES):
                     realgm_url = "https://basketball.realgm.com/search?q=" + url_name.replace(" ", "+")
                 else:
                     realgm_url = "https://basketball.realgm.com/player/" + url_name.replace(" ", "-") + "/Summary/" + str(summary_index)
             except KeyError:
                 realgm_url = "https://basketball.realgm.com/search?q=" + url_name.replace(" ", "+")
-            print("PLAYER NAME: " + row['Name']) 
             try:
                 site, url = find_site(realgm_url)
                 player_page = RealGM(site)
                 df.loc[index, 'RealGM ID'] = url.split("/")[-1]
                 populate_stats(df, player_page, index, row)
+                if (need_profile_info):
+                    populate_profile_info(df, player_page)
                 is_row_data_populated = True
             except Exception as e:
                 if (find_single_player):
@@ -171,11 +203,15 @@ def populate_stats(df, player_page, index, row):
         draft_day_age = birthday_to_draft_day_age(birthday, get_year_from_season(row['Season']))
         df.loc[index, 'Draft Day Age'] = draft_day_age
     hob = player_page.get_ncaa_hob()
-    df.loc[index, 'Hands-On Buckets'] = hob
     wins, losses = player_page.get_ncaa_win_loss()
+    ppr = player_page.get_ncaa_ppr()
+    if (wins == losses == hob == ppr == None): #If last season data is missing, get previous season
+        hob = player_page.get_ncaa_hob(-2)
+        wins, losses = player_page.get_ncaa_win_loss(-2)
+        ppr = player_page.get_ncaa_ppr(-2)
+    df.loc[index, 'Hands-On Buckets'] = hob
     df.loc[index, 'Wins'] = wins
     df.loc[index, 'Losses'] = losses
-    ppr = player_page.get_ncaa_ppr()
     df.loc[index, 'Pure Point Rating'] = ppr
     aau_stats = player_page.get_aau_stats()
     if aau_stats:
@@ -185,4 +221,11 @@ def populate_stats(df, player_page, index, row):
     if event_stats:
         for i in range(len(event_stats)):
             df.loc[index, INTERNATIONAL_STATS_TABLE_COLUMNS[i]] = event_stats[i]
+            
+def populate_profile_info(df, player_page):
+    df["Position"] = player_page.get_position()
+    df["Height"] = player_page.get_height()
+    df["Weight"] = player_page.get_weight()
+    df["Class"] = player_page.get_class()
+    
     
