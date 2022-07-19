@@ -1,7 +1,7 @@
 import pandas as pd
 import math
-import plotly.express as px  
-import streamlit as st 
+#import plotly.express as px  
+#import streamlit as st 
 from utils import *
 
 def jason_3pt_confidence(df):
@@ -16,6 +16,14 @@ def percent_assisted_overall(df):
         (df['% Shots @ Mid']/100*df['%Astd @ Mid']) +
         (df['%Astd @ 3']/100*df['% Shots @ 3'])
     )
+    return df
+
+def self_created_dunks(df):
+    df["Dunks per Minute"] = df['# Dunks'] / df['MP']
+    df["Rim Shots per Minute"] = (df['% Shots @ Rim'] * df['FGA/40']) / 4000
+    df["Dunk vs Rim Shot Percentage"] = round(df["Dunks per Minute"] / df["Rim Shots per Minute"]*100, 2)
+    df["% Dunks Unassisted"] = (100-df['%Astd @ Rim'])*(df['Dunk vs Rim Shot Percentage']*df['% Shots @ Rim']/100)/100
+    df.drop(["Rim Shots per Minute", "Dunks per Minute"], axis=1, inplace=True)
     return df
 
 def bentaylor_stats(df):
@@ -203,41 +211,64 @@ def play_styles(df):
     new_df = pd.concat([pg, wing,pf,c], axis=0)
     return new_df.sort_values(by=['BPM'], ascending=False)
 
-    
+def athleticism(df):
+    df["Dunks per Minute Played"] = df['# Dunks'] / df['MP']
+    df['Stock%'] = df['STL%'] * df['BLK%']
+    df['%Unastd @ Rim'] = 100-df['%Astd @ Rim']
+    df['Shots @ Rim / 100'] = df['% Shots @ Rim'] * df['FGA/100Poss'] / 100
+    df['Unassisted Shots @ Rim / 100 Possessions'] = df['%Unastd @ Rim'] * df['Shots @ Rim / 100'] / 100
+    df = normalize(df, 'Height', True)
+    df = normalize(df, 'Stock%')
+    df["Athleticism?"] = (df['Height Normalized']) * (df["Dunks per Minute Played"]+1) * (df["Stock% Normalized"]) * (df['Unassisted Shots @ Rim / 100 Possessions'])*50
+    draw_conclusions_on_column(df, 'Athleticism?', num_top=25)
+    get_value_at_column_by_player_name(df, "Josh Minott", "Dunks per Minute Played")
+    get_value_at_column_by_player_name(df, "Dereon Seabron", "Athleticism?")
+
 def add_aux_columns(df):
-    #df = jason_3pt_confidence(df)
     df = bentaylor_stats(df)
+    df = percent_assisted_overall(df)
+    df = self_created_dunks(df)
+    df = play_styles(df)
+    df['Stock%'] = df['STL%'] * df['BLK%']
     df = normalize(df, 'Height')
     df = normalize(df, 'SOS')
     df = normalize(df, 'Draft Day Age', True)
     
     df['Box Score Creation'].replace('', np.nan, inplace=True)
     df['Box Score Creation'].astype(float)
-    df['Helio Score'] = (df['Box Score Creation'] * (df['Height Normalized']+0.05) * df['SOS Normalized'] * df['Draft Day Age Normalized'])
+    df['Helio Score'] = (df['Box Score Creation'] * (df['Height Normalized']+0.05) * (df['SOS Normalized']+1) * df['Draft Day Age Normalized'])
     df.loc[df['G'] <= 15, 'Helio Score'] = df['Helio Score']*(df['G']/15)
     for index, row in df.nlargest(25, ['Helio Score']).iterrows():
         df.loc[index, 'Play Style'] = 'Primary'
     df.drop(['Height Normalized', 'SOS Normalized', 'Draft Day Age Normalized'], axis=1, inplace=True)
-    #draw_conclusions_on_column(df, '3 Point Confidence', num_top=15)
-    return df
+    #draw_conclusions_on_column(df, '"% Dunks Unassisted"', num_top=25)
+    #get_value_at_column_by_player_name(df, "Ja Morant", "Helio Score", True)
+    
+    return reorder_aux_columns(df)
 
-def reorder_final_columns_with_playstyle(df):
+def reorder_aux_columns(df):
     return df[['RealGM ID','Season','Name',
                 'Position 1','Position 2','Play Style',
                 'School','Conference','Wins','Losses','SOS',
                 'Class','Birthday','Draft Day Age',
                 'Height','Weight','Height w/o Shoes','Height w/ Shoes','Wingspan','Standing Reach','Body Fat %','Hand Length','Hand Width',
-                'RSCI','G','GS','MP','PER','TS%','eFG%','3PAr','FTr','PProd','ORB%','DRB%','TRB%','AST%','STL%','BLK%','TOV%','USG%','OWS','DWS','WS','WS/40','OBPM','DBPM','BPM','ATS/TOV','OFF RTG','DEF RTG','Hands-On Buckets','Pure Point Rating',
-                'FG/40','FGA/40','FG%','2FGM/40','2FGA/40','2FG%','3FGM/40','3FGA/40','3FG%','FT/40','FTA/40','FT%','TRB/40','AST/40','STL/40','BLK/40','TOV/40','PF/40','PTS/40',
+                'RSCI','G','GS','MP','PER','TS%','eFG%','3PAr','FTr','PProd','ORB%','DRB%','TRB%','AST%','STL%','BLK%','Stock%','TOV%','Adjusted TOV%','USG%','Offensive Load','OWS','DWS','WS','WS/40','OBPM','DBPM','BPM','ATS/TOV','OFF RTG','DEF RTG','Hands-On Buckets','Pure Point Rating',
+                'FG/40','FGA/40','FG%','2FGM/40','2FGA/40','2FG%','3FGM/40','3FGA/40','3FG%',"3 Point Proficiency",'FT/40','FTA/40','FT%','TRB/40','AST/40','STL/40','BLK/40','TOV/40','PF/40','PTS/40',
                 'FGM/100Poss','FGA/100Poss','2FGM/100Poss','2FGA/100Poss','3FGM/100Poss','3FGA/100Poss','FT/100Poss','FTA/100Poss','TRB/100Poss','AST/100Poss','STL/100Poss','BLK/100Poss','TOV/100Poss','PF/100Poss','PTS/100Poss','FGA/100Poss',
-                '# Dunks','% Shots @ Rim','FG% @ Rim','%Astd @ Rim','% Shots @ Mid','FG% @ Mid','%Astd @ Mid','% Shots @ 3','%Astd @ 3',
+                '# Dunks',"Dunk vs Rim Shot Percentage","% Dunks Unassisted",'% Shots @ Rim','FG% @ Rim','%Astd @ Rim','% Shots @ Mid','FG% @ Mid','%Astd @ Mid','% Shots @ 3','%Astd @ 3','% Assisted',
                 'AAU Season','AAU Team','AAU League','AAU GP','AAU GS','AAU MIN','AAU PTS','AAU FGM','AAU FGA','AAU FG%','AAU 3PM','AAU 3PA','AAU 3P%','AAU FTM','AAU FTA','AAU FT%','AAU ORB','AAU DRB','AAU TRB','AAU AST','AAU STL','AAU BLK','AAU TOV','AAU PF',
-                'Event Year','Event Name','Event GP','Event MIN','Event PTS','Event FGM','Event FGA','Event FG%','Event 3PM','Event 3PA','Event 3P%','Event FTM','Event FTA','Event FT%','Event TRB','Event AST','Event STL','Event BLK','Event TOV','Event PF','Event Placement'
-                ]]
+                'Event Year','Event Name','Event GP','Event MIN','Event PTS','Event FGM','Event FGA','Event FG%','Event 3PM','Event 3PA','Event 3P%','Event FTM','Event FTA','Event FT%','Event TRB','Event AST','Event STL','Event BLK','Event TOV','Event PF','Event Placement',
+                'Box Score Creation','Helio Score']]
     
-df = pd.read_csv('temp.csv')
-df = add_aux_columns(df)
-df.to_csv('temp.csv', index=False)
+df = read_csv_and_cast_columns('data/jason_db.csv')
+#add_aux_columns(df).to_csv("data/jason_db.csv", index=False)
+draw_conclusions_on_column(df, "% Dunks Unassisted")
+get_value_at_column_by_player_name(df, "DJ Stephens", "% Dunks Unassisted")
+get_value_at_column_by_player_name(df, "OG Anunoby", "% Dunks Unassisted")
+get_value_at_column_by_player_name(df, "Zhaire Smith", "% Dunks Unassisted")
+get_value_at_column_by_player_name(df, "Zion Williamson", "% Dunks Unassisted")
+get_value_at_column_by_player_name(df, "Dereon Seabron", "% Dunks Unassisted")
+
 
 
 

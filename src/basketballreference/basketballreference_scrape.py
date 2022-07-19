@@ -128,7 +128,7 @@ def get_last_season_stat_row(soup_html, table_id):
 
 def get_possession_stats(season_row):
     stats = season_row.findChildren('td', {'data-stat':True})[INDEX_OF_POSSESSION_STATS_IN_TABLE:] # Slicing
-    return [ stat.getText() for stat in stats ] # List comprehension
+    return [ stat.getText() for stat in stats ]
 
 def get_ast_to_tov_ratio(soup_html):
     last_season = get_last_season_stat_row(soup_html, 'players_totals')

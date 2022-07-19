@@ -32,12 +32,19 @@ school = input(f"Enter the school {player_name} played for in {season}: ")
 df = pd.DataFrame([[season, player_name, school]], columns=['Season', 'Name', 'School'])
 df.set_index(['Season', 'Name', 'School'])
 df = nbadraftnet_scrape.add_all_college_basketball_prospects(df, True)
+if ('Height' not in df.columns):
+    df = realgm_scrape.get_realgm_stats(df, True, True)
+    df = convert_class_to_number(df)
+    df = convert_height_to_inches(df)
+else:
+    df = realgm_scrape.get_realgm_stats(df, True, False)
 df = basketballreference_scrape.add_college_stats_from_basketball_reference(df)
 df = rsci_scrape.add_rsci_rank_as_column(df, True)
+if (df.at[0, 'RSCI'] == ""):
+    df.loc[0, 'RSCI'] = 400
 df = measurements_fetch.get_NBA_Combine_measurements(df)
 df = torvik_fetch.get_torvik_dunks(df)
 df = hoopmath_scrape.add_college_stats_from_hoopmath(df)
-df = realgm_scrape.get_realgm_stats(df, True)
 df = update_position_columns(df)
 df = reorder_final_columns(df)
 df.to_csv('temp.csv', index=False)
