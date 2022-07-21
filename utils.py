@@ -1,6 +1,7 @@
 import datetime
 import re
 import requests
+import time
 
 import unidecode
 import numpy as np
@@ -226,7 +227,6 @@ COLUMN_NAMES = ['G','GS','MP','PER','TS%','eFG%','3PAr','FTr','PProd','ORB%','DR
     'FT/40','FTA/40','FT%', 'TRB/40', 'AST/40', 'STL/40', 'BLK/40', 'TOV/40', 'PF/40', 'PTS/40', 'FGM/100Poss', 'FGA/100Poss', '2FGM/100Poss', '2FGA/100Poss', '3FGM/100Poss', '3FGA/100Poss','FT/100Poss','FTA/100Poss',
     'TRB/100Poss', 'AST/100Poss', 'STL/100Poss', 'BLK/100Poss', 'TOV/100Poss', 'PF/100Poss', 'PTS/100Poss', 'OFF RTG', 'DEF RTG', 'ATS/TOV', 'SOS', 'Conference']
 
-HOOP_MATH_COLUMN_NAMES = ['% Shots @ Rim', 'FG% @ Rim', '%Astd @ Rim', '% Shots @ Mid', 'FG% @ Mid', '%Astd @ Mid', '% Shots @ 3', '%Astd @ 3']
 
 LOG_REG_COLUMNS = ['Height','RSCI','Class','TS%','3PAr','TRB%','AST%','BLK%','STL%','WS/40','AST/TOV']
 
@@ -236,12 +236,21 @@ HEADERS = { 'User-Agent': USER_AGENT}
 ERROR_VALUES = [None, np.nan, '', '-', '-%']
 COLUMNS_TO_CAST = ['MP', 'STL%', 'BLK%','TOV%','USG%','OWS','DWS','WS', '# Dunks', '% Shots @ Rim', 'FG% @ Rim', '%Astd @ Rim', '% Shots @ Mid', 'FG% @ Mid', 'FGA/100Poss']
 
-def find_site(url):
+def find_site(url, max_retry_count=3):
 	"""Use BeautifulSoup to head to designated URL and return BeautifulSoup object.
 	It's very important to decode + sub out all comments! (Basketball-Reference's HTML comments throw everything out of wack)"""
 	
-	response = requests.get(url, headers=HEADERS)
-	try: 
+	count = 0
+	while count < max_retry_count:
+		try: 
+			response = requests.get(url, headers=HEADERS)
+		except requests.exceptions.ConnectionError:
+			print("Connection error, giving it 10 and retrying")
+			time.sleep(10)
+			count += 1
+	if not response:
+		return None, None
+	try:
 		html = response.content.decode("utf-8")
 	except UnicodeDecodeError:
 		html = response.content.decode("latin-1")

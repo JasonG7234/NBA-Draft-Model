@@ -71,6 +71,7 @@ OVERALL_RSCI_EXCEPTIONS = {
 	"JD Notae" : 343,
 	"Quenton Jackson": 242,
     "Shaq Buchanan" : 400,
+    "Daeqwon Plowden" : 400,
     "Dakota Mathias" : 218,
 }
 
