@@ -1,7 +1,5 @@
 import pandas as pd
 import math
-#import plotly.express as px  
-#import streamlit as st 
 from utils import *
 
 def jason_3pt_confidence(df):
@@ -88,81 +86,6 @@ def add_conference(df):
         if school in A10:
             df.loc[index, 'Conference'] = 'AAC'
     return df
-
-def set_up_streamlit(df):
-    st.set_page_config(page_title="NBA Draft Model", page_icon=":bar_chart:", layout="wide")
-
-    st.sidebar.header("Please Filter Here:")
-    position = st.sidebar.multiselect(
-        "Select the primary position:",
-        options=df["Position 1"].unique(),
-        default=df["Position 1"].unique()
-    )
-
-    season = st.sidebar.multiselect(
-        "Select the season:",
-        options=df["Season"].unique(),
-        default=df["Season"].unique()
-    )
-
-    classification = st.sidebar.multiselect(
-        "Select the class/year:",
-        options=df["Class"].unique(),
-        default=df["Class"].unique()
-    )
-    st.sidebar.text("Class 1 = Freshmen, Class 2 = Sophomore, etc.")
-
-    df_selection = df.query(
-        "'Position 1' == @position & Season == @season & Class == @classification"
-    )
-    df['Position 2'] = df['Position 2'].fillna('')
-    df = df.round({'PER': 1})
-    st.dataframe(df)
-
-    bsc = (
-        df_selection.groupby(by=["Class"]).mean()[["Box Score Creation"]].sort_values(by="Box Score Creation")
-    )
-    fig_bsc = px.bar(
-        bsc,
-        x="Box Score Creation",
-        y=bsc.index,
-        orientation="h",
-        title="<b>Box Score Creation by Year</b>",
-        color_discrete_sequence=["#0083B8"] * len(bsc),
-        template="plotly_white",
-    )
-    fig_bsc.update_layout(
-        plot_bgcolor="rgba(0,0,0,0)",
-        xaxis=(dict(showgrid=False))
-    )
-
-    offensive_load_by_position = df_selection.groupby(by=["Position 1"]).mean()[["Offensive Load"]]
-    fig_offensive_load = px.bar(
-        offensive_load_by_position,
-        x='Position 1',
-        y="Offensive Load",
-        title="<b>Offensive Load By Position</b>",
-        color_discrete_sequence=["#0083B8"] * len(offensive_load_by_position),
-        template="plotly_white",
-    )
-    fig_offensive_load.update_layout(
-        xaxis=dict(tickmode="linear"),
-        plot_bgcolor="rgba(0,0,0,0)",
-        yaxis=(dict(showgrid=False)),
-    )
-
-    left_column, right_column = st.columns(2)
-    left_column.plotly_chart(fig_offensive_load, use_container_width=True)
-    right_column.plotly_chart(fig_bsc, use_container_width=True)
-    #df.to_csv('temp_master.csv', index=False)
-    hide_st_style = """
-                <style>
-                #dfMenu {visibility: hidden;}
-                footer {visibility: hidden;}
-                header {visibility: hidden;}
-                </style>
-                """
-    st.markdown(hide_st_style, unsafe_allow_html=True)
     
 def play_styles(df):
     pg = df[df['Position 1'] == 'PG']
@@ -252,7 +175,7 @@ def reorder_aux_columns(df):
                 'School','Conference','Wins','Losses','SOS',
                 'Class','Birthday','Draft Day Age',
                 'Height','Weight','Height w/o Shoes','Height w/ Shoes','Wingspan','Standing Reach','Body Fat %','Hand Length','Hand Width',
-                'RSCI','G','GS','MP','PER','TS%','eFG%','3PAr','FTr','PProd','ORB%','DRB%','TRB%','AST%','STL%','BLK%','Stock%','TOV%','Adjusted TOV%','USG%','Offensive Load','OWS','DWS','WS','WS/40','OBPM','DBPM','BPM','ATS/TOV','OFF RTG','DEF RTG','Hands-On Buckets','Pure Point Rating',
+                'RSCI','G','GS','MP','PER','TS%','eFG%','3PAr','FTr','PProd','ORB%','DRB%','TRB%','AST%','STL%','BLK%','Stock%','TOV%','Adjusted TOV%','USG%','Offensive Load','OWS','DWS','WS','WS/40','OBPM','DBPM','BPM','AST/TOV','OFF RTG','DEF RTG','Hands-On Buckets','Pure Point Rating',
                 'FG/40','FGA/40','FG%','2FGM/40','2FGA/40','2FG%','3FGM/40','3FGA/40','3FG%',"3 Point Proficiency",'FT/40','FTA/40','FT%','TRB/40','AST/40','STL/40','BLK/40','TOV/40','PF/40','PTS/40',
                 'FGM/100Poss','FGA/100Poss','2FGM/100Poss','2FGA/100Poss','3FGM/100Poss','3FGA/100Poss','FT/100Poss','FTA/100Poss','TRB/100Poss','AST/100Poss','STL/100Poss','BLK/100Poss','TOV/100Poss','PF/100Poss','PTS/100Poss','FGA/100Poss',
                 '# Dunks',"Dunk vs Rim Shot Percentage","% Dunks Unassisted",'% Shots @ Rim','FG% @ Rim','%Astd @ Rim','% Shots @ Mid','FG% @ Mid','%Astd @ Mid','% Shots @ 3','%Astd @ 3','% Assisted',
@@ -260,14 +183,18 @@ def reorder_aux_columns(df):
                 'Event Year','Event Name','Event GP','Event MIN','Event PTS','Event FGM','Event FGA','Event FG%','Event 3PM','Event 3PA','Event 3P%','Event FTM','Event FTA','Event FT%','Event TRB','Event AST','Event STL','Event BLK','Event TOV','Event PF','Event Placement',
                 'Box Score Creation','Helio Score']]
     
-df = read_csv_and_cast_columns('data/jason_db.csv')
+# Shooting, Measurables, Athleticism, Passing, Rebounding, Defense (Per position)
+    
+#df = read_csv_and_cast_columns('data/jason_db.csv')
 #add_aux_columns(df).to_csv("data/jason_db.csv", index=False)
-draw_conclusions_on_column(df, "% Dunks Unassisted")
-get_value_at_column_by_player_name(df, "DJ Stephens", "% Dunks Unassisted")
-get_value_at_column_by_player_name(df, "OG Anunoby", "% Dunks Unassisted")
-get_value_at_column_by_player_name(df, "Zhaire Smith", "% Dunks Unassisted")
-get_value_at_column_by_player_name(df, "Zion Williamson", "% Dunks Unassisted")
-get_value_at_column_by_player_name(df, "Dereon Seabron", "% Dunks Unassisted")
+#draw_conclusions_on_column(df, "% Dunks Unassisted")
+#get_value_at_column_by_player_name(df, "DJ Stephens", "% Dunks Unassisted")
+#get_value_at_column_by_player_name(df, "OG Anunoby", "% Dunks Unassisted")
+#get_value_at_column_by_player_name(df, "Zhaire Smith", "% Dunks Unassisted")
+#get_value_at_column_by_player_name(df, "Zion Williamson", "% Dunks Unassisted")
+#get_value_at_column_by_player_name(df, "Dereon Seabron", "% Dunks Unassisted")
+df = read_csv_and_cast_columns('data/main.csv')
+draw_conclusions_on_player(df, "Sharife Cooper")
 
 
 
