@@ -40,6 +40,8 @@ class RealGM:
             return 'SG/PG'
         if self.position == 'F':
             return 'PF/SF'
+        if self.position == 'GF':
+            return 'SG/SF'
         return self.position
     
     def get_birthday(self):

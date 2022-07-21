@@ -3,7 +3,6 @@ sys.path.insert(0, '../../')
 from utils import *
 
 from nba_api.stats.endpoints import draftcombineplayeranthro
-import numpy as np
 import time
 
 DRAFT_COMBINE_ANTHRO_COLUMNS = ["POSITION", "HEIGHT_WO_SHOES", "HEIGHT_W_SHOES", "WEIGHT", "WINGSPAN", "STANDING_REACH", "BODY_FAT_PCT", "HAND_LENGTH", "HAND_WIDTH"]
