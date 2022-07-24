@@ -5,6 +5,107 @@ from utils import *
 INDEX_OF_POSSESSION_STATS_IN_TABLE = 25
 MAX_PROFILES_TO_SEARCH_BY_NAME = 6
 
+BASKETBALL_REFERENCE_PLAYER_NAME_EXCEPTIONS = {
+    "wendell-carter" : "wendell-carterjr",
+    "marvin-bagley" : "marvin-bagleyiii",
+    "trey-murphy" : "trey-murphyiii",
+    "fuquan-edwin" : "edwin-fuquan",
+    "derrick-jones" : "derrick-jonesjr",
+    "brandon-boston" : "brandon-bostonjr",
+    "jaren-jackson" : "jaren-jacksonjr",
+    "james-mcadoo" : "james-michael-mcadoo",
+    "glen-rice" : "glen-rice-jr",
+    "tim-hardaway" : "tim-hardaway-jr",
+    "tu-holloway" : "terrell-holloway",
+    "bernard-james" : "bernard-james-",
+    "simi-shittu" : "simisola-shittu",
+    "kira-lewis" : "kira-lewisjr",
+    "stephen-zimmerman" : "stephen-zimmermanjr",
+    "roy-devyn" : "roy-devyn-marble",
+    "rob-gray" : "robert-grayjr",
+    "vernon-carey" : "vernon-careyjr",
+    "zach-norvell" : "zach-norvelljr",
+    "kz-okpala" : "kezie-okpala",
+    "ja-morant" : "temetrius-morant",
+    "jo-lual-acuil" : "jo-acuil",
+    "michael-porter" : "michael-porterjr",
+    "shake-milton" : "malik-milton",
+    "andrew-white" : "andrew-whiteiii",
+    "wesley-johnson" : "wes-johnson",
+    "cam-oliver" : "cameron-oliver",
+    "bam-adebayo" : "edrice-adebayo",
+    "dennis-smith" : "dennis-smithjr",
+    "yogi-ferrell" : "kevin-ferrell",
+    "anthony-barber" : "anthony-cat-barber",
+    "christ-koumadje" : "jeanmarc-koumadje",
+    "dewan-hernandez" : "dewan-huell",
+    "dez-wells" : "dezmine-wells",
+    "bryce-dejean-jones" : "bryce-jones",
+    "ronald-roberts" : "ronald-roberts-",
+    "ed-daniel" : "edward-daniel",
+    "cam-long" : "cameron-long",
+    "art-parakhouski" : "artsiom-parakhouski",
+    "landers-nolley" : "landers-nolleyii",
+    "terrence-shannon" : "terrence-shannonjr",
+    "obi-toppin" : "obadiah-toppin",
+    "duane-washington" : "duane-washingtonjr",
+    "mac-mcclung" : "matthew-mcclung",
+    "mckinley-wright" : "mckinley-wrightiv",
+    "oscar-da-silva" : "oscar-dasilva",
+    "johnny-davis" : "jonathan-davis",
+    "tyty-washington" : "tyty-washingtonjr",
+    "wendell-moore" : "wendell-moorejr",
+    "kenneth-lofton" : "kenneth-loftonjr",
+    "joe-harris" : "joe-harris-",
+    "garrison-mathews" : "garrison-matthews",
+    "kc-ndefo" : "kenechukwu-ndefo"
+}
+
+BASKETBALL_REFERENCE_INDEX_EXCEPTIONS = {
+    "anthony-lamb" : 2,
+    "kristian-doolittle" : 2,
+    "paul-reed" : 5,
+    "gary-payton" : 2,
+    "kyle-anderson" : 3,
+    "thomas-robinson" : 2,
+    "josh-green" : 2,
+    "nick-richards" : 2,
+    "aj-lawson" : 12,
+    "reggie-perry" : 2,
+    "robert-woodard" : 2,
+    "greg-brown" : 9,
+    "lonnie-walker" : 2,
+    "anthony-davis" : 5,
+    "chris-walker" : 6,
+    "eric-mika" : 2,
+    "troy-brown" : 5,
+    "charlie-brown" : 2,
+    "rodney-williams" : 3,
+    "cameron-johnson" : 4,
+    "mark-williams" : 7,
+    "chris-smith" : 19,
+    "tyler-davis" : 5,
+    "jalen-johnson" : 24,
+    "david-johnson" : 13,
+    "jalen-williams" : 13,
+    "donovan-williams" : 3,
+    "jonathan-davis" : 3,
+    "jared-harper" : 12,
+    "keith-williams" : 10
+}
+
+BASKETBALL_REFERENCE_SCHOOL_NAME_EXCEPTIONS = {
+    "Central Florida" : "UCF",
+    "Illinois-Chicago" : "UIC",
+    "Louisiana Lafayette" : "Louisiana",
+    "UAB" : "Alabama-Birmingham",
+    "Southern Miss." : "Southern Miss",
+    "Tennessee-Martin" : "UT-Martin",
+    "Texas A&M Corpus Christi" : "Texas A&M-Corpus Christi",
+    "UC Santa Barbara" : "UCSB",
+    "Texas Arlington" : "UT Arlington"
+}
+
 def add_college_stats_from_basketball_reference(df):
     """Get all advanced college stats for each player's most recent year by scraping the relevant table from basketballreference.
     I also add on ORTG, DRTG, and AST/TOV% because I think they are really relevant stats for projecting NBA prospects.
@@ -37,7 +138,7 @@ def get_players_basketball_reference_page(row):
     """
 
     player_name_in_url = get_basketball_reference_formatted_url(row['Name'])
-    index_value_in_url = check_value_in_dictionary_of_exceptions(player_name_in_url, COLLEGE_INDEX_EXCEPTIONS, 1)
+    index_value_in_url = check_value_in_dictionary_of_exceptions(player_name_in_url, BASKETBALL_REFERENCE_INDEX_EXCEPTIONS, 1)
     if (index_value_in_url == 1):
         while index_value_in_url in range(1, MAX_PROFILES_TO_SEARCH_BY_NAME): 
             url = "https://www.sports-reference.com/cbb/players/" + player_name_in_url + "-" + str(index_value_in_url) + ".html"
@@ -45,7 +146,7 @@ def get_players_basketball_reference_page(row):
             soup_html, _ = find_site(url)
             if (soup_html.find('table', {'id':'players_advanced'})):
                 quick_player_info = get_basketball_reference_player_info(soup_html)
-                expected_school_name = get_basketball_reference_formatted_school(row['School'], COLLEGE_SCHOOL_NAME_EXCEPTIONS, row['School'])
+                expected_school_name = get_basketball_reference_formatted_school(row['School'], BASKETBALL_REFERENCE_SCHOOL_NAME_EXCEPTIONS, row['School'])
                 if (quick_player_info and expected_school_name in quick_player_info):
                     return soup_html
                 else:
@@ -153,4 +254,6 @@ def is_expected_advanced_stat_in_table(stat, index):
 def is_empty_dummy_column(stat):
     return stat['data-stat'] == 'ws-dum' or stat['data-stat'] == 'bpm-dum'
 
-
+def get_basketball_reference_formatted_url(name):
+    url_name = name.replace("'", "").replace(".", "").replace(" ", "-").lower()
+    return check_value_in_dictionary_of_exceptions(url_name, BASKETBALL_REFERENCE_PLAYER_NAME_EXCEPTIONS, url_name)
