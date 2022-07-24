@@ -2,7 +2,7 @@ import datetime
 import re
 import requests
 import time
-
+import urllib3
 import unidecode
 import numpy as np
 import pandas as pd
@@ -10,8 +10,6 @@ from bs4 import BeautifulSoup
 from fuzzywuzzy import fuzz
 
 FIRST_YEAR_OF_DRAFT_RANKINGS = 2009
-
-
 
 OVERALL_PLAYER_NAME_EXCEPTIONS = {
     "Moe Harkless" : "Maurice Harkless",
@@ -69,106 +67,6 @@ COMMON_NAMES = [
     "James Johnson",
     "Marcus Thornton"
 ]
-
-COLLEGE_PLAYER_NAME_EXCEPTIONS = {
-    "wendell-carter" : "wendell-carterjr",
-    "marvin-bagley" : "marvin-bagleyiii",
-    "trey-murphy" : "trey-murphyiii",
-    "fuquan-edwin" : "edwin-fuquan",
-    "derrick-jones" : "derrick-jonesjr",
-    "brandon-boston" : "brandon-bostonjr",
-    "jaren-jackson" : "jaren-jacksonjr",
-    "james-mcadoo" : "james-michael-mcadoo",
-    "glen-rice" : "glen-rice-jr",
-    "tim-hardaway" : "tim-hardaway-jr",
-    "tu-holloway" : "terrell-holloway",
-    "bernard-james" : "bernard-james-",
-    "simi-shittu" : "simisola-shittu",
-    "kira-lewis" : "kira-lewisjr",
-    "stephen-zimmerman" : "stephen-zimmermanjr",
-    "roy-devyn" : "roy-devyn-marble",
-    "rob-gray" : "robert-grayjr",
-    "vernon-carey" : "vernon-careyjr",
-    "zach-norvell" : "zach-norvelljr",
-    "kz-okpala" : "kezie-okpala",
-    "ja-morant" : "temetrius-morant",
-    "jo-lual-acuil" : "jo-acuil",
-    "michael-porter" : "michael-porterjr",
-    "shake-milton" : "malik-milton",
-    "andrew-white" : "andrew-whiteiii",
-    "wesley-johnson" : "wes-johnson",
-    "cam-oliver" : "cameron-oliver",
-    "bam-adebayo" : "edrice-adebayo",
-    "dennis-smith" : "dennis-smithjr",
-    "yogi-ferrell" : "kevin-ferrell",
-    "anthony-barber" : "anthony-cat-barber",
-    "christ-koumadje" : "jeanmarc-koumadje",
-    "dewan-hernandez" : "dewan-huell",
-    "dez-wells" : "dezmine-wells",
-    "bryce-dejean-jones" : "bryce-jones",
-    "ronald-roberts" : "ronald-roberts-",
-    "ed-daniel" : "edward-daniel",
-    "cam-long" : "cameron-long",
-    "art-parakhouski" : "artsiom-parakhouski",
-    "landers-nolley" : "landers-nolleyii",
-    "terrence-shannon" : "terrence-shannonjr",
-    "obi-toppin" : "obadiah-toppin",
-    "duane-washington" : "duane-washingtonjr",
-    "mac-mcclung" : "matthew-mcclung",
-    "mckinley-wright" : "mckinley-wrightiv",
-    "oscar-da-silva" : "oscar-dasilva",
-    "johnny-davis" : "jonathan-davis",
-    "tyty-washington" : "tyty-washingtonjr",
-    "wendell-moore" : "wendell-moorejr",
-    "kenneth-lofton" : "kenneth-loftonjr",
-    "joe-harris" : "joe-harris-",
-    "garrison-mathews" : "garrison-matthews",
-    "kc-ndefo" : "kenechukwu-ndefo"
-}
-
-COLLEGE_INDEX_EXCEPTIONS = {
-    "anthony-lamb" : 2,
-    "kristian-doolittle" : 2,
-    "paul-reed" : 5,
-    "gary-payton" : 2,
-    "kyle-anderson" : 3,
-    "thomas-robinson" : 2,
-    "josh-green" : 2,
-    "nick-richards" : 2,
-    "aj-lawson" : 12,
-    "reggie-perry" : 2,
-    "robert-woodard" : 2,
-    "greg-brown" : 9,
-    "lonnie-walker" : 2,
-    "anthony-davis" : 5,
-    "chris-walker" : 6,
-    "eric-mika" : 2,
-    "troy-brown" : 5,
-    "charlie-brown" : 2,
-    "rodney-williams" : 3,
-    "cameron-johnson" : 4,
-    "mark-williams" : 7,
-    "chris-smith" : 19,
-    "tyler-davis" : 5,
-    "jalen-johnson" : 24,
-    "david-johnson" : 13,
-    "jalen-williams" : 13,
-    "donovan-williams" : 3,
-    "jonathan-davis" : 3,
-    "jared-harper" : 12
-}
-
-COLLEGE_SCHOOL_NAME_EXCEPTIONS = {
-    "Central Florida" : "UCF",
-    "Illinois-Chicago" : "UIC",
-    "Louisiana Lafayette" : "Louisiana",
-    "UAB" : "Alabama-Birmingham",
-    "Southern Miss." : "Southern Miss",
-    "Tennessee-Martin" : "UT-Martin",
-    "Texas A&M Corpus Christi" : "Texas A&M-Corpus Christi",
-    "UC Santa Barbara" : "UCSB",
-    "Texas Arlington" : "UT Arlington"
-}
 
 NBA_PLAYER_NAME_EXCEPTIONS = {
     "BJ Mullens" : "Byron Mullens",
@@ -229,31 +127,30 @@ COLUMN_NAMES = ['G','GS','MP','PER','TS%','eFG%','3PAr','FTr','PProd','ORB%','DR
 
 LOG_REG_COLUMNS = ['Height','RSCI','Class','TS%','3PAr','TRB%','AST%','BLK%','STL%','WS/40','AST/TOV']
 
-USER_AGENT = "Mozilla/5.0 (Android 4.4; Mobile; rv:41.0) Gecko/41.0 Firefox/41.0"
-HEADERS = { 'User-Agent': USER_AGENT}
+HEADERS = { 'User-Agent': "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:61.0) Gecko/20100101 Firefox/61.0"}
 
 ERROR_VALUES = [None, np.nan, '', '-', '-%']
 COLUMNS_TO_CAST = ['MP', 'STL%', 'BLK%','TOV%','USG%','OWS','DWS','WS', '# Dunks', '% Shots @ Rim', 'FG% @ Rim', '%Astd @ Rim', '% Shots @ Mid', 'FG% @ Mid', 'FGA/100Poss']
 
 def find_site(url, max_retry_count=3):
-	"""Use BeautifulSoup to head to designated URL and return BeautifulSoup object.
-	It's very important to decode + sub out all comments! (Basketball-Reference's HTML comments throw everything out of wack)"""
-	
-	count = 0
-	while count < max_retry_count:
-		try: 
-			response = requests.get(url, headers=HEADERS)
-		except requests.exceptions.ConnectionError:
-			print("Connection error, giving it 10 and retrying")
-			time.sleep(10)
-			count += 1
-	if not response:
-		return None, None
-	try:
-		html = response.content.decode("utf-8")
-	except UnicodeDecodeError:
-		html = response.content.decode("latin-1")
-	return BeautifulSoup(re.sub("<!--|-->","", html), "html.parser"), response.url
+    """Use BeautifulSoup to head to designated URL and return BeautifulSoup object.
+    It's very important to decode + sub out all comments! (Basketball-Reference's HTML comments throw everything out of wack)"""
+    count = 0
+    while count < max_retry_count:
+        try:
+            response = requests.get(url, headers=HEADERS, timeout=10)
+            break
+        except requests.exceptions.ConnectionError:
+            print("Connection error, giving it 10 and retrying")
+            time.sleep(10)
+            count += 1
+    if not response:
+        return None, None
+    try:
+        html = response.content.decode("utf-8")
+    except UnicodeDecodeError:
+        html = response.content.decode("latin-1")
+    return BeautifulSoup(re.sub("<!--|-->","", html), "html.parser"), response.url
 
 def read_csv_and_cast_columns(file_name):
     df = pd.read_csv(file_name)
@@ -291,16 +188,17 @@ def get_basketball_reference_formatted_school(school, exceptions, default):
 def get_basketball_reference_formatted_name(name, exceptions):
     return remove_non_alphabetic_characters(check_value_in_dictionary_of_exceptions(name, exceptions, name))
 
-def get_basketball_reference_formatted_url(name):
-    url_name = name.replace("'", "").replace(".", "").replace(" ", "-").lower()
-    return check_value_in_dictionary_of_exceptions(url_name, COLLEGE_PLAYER_NAME_EXCEPTIONS, url_name)
-
 def remove_non_alphabetic_characters(name):
     return unidecode.unidecode(re.sub(r'[^A-Za-z- ]+', '', name))
 
 def convert_class_to_number(df):
     class_to_number = {'Fr.':1, 'So.':2, 'Jr.':3, 'Sr.':4}
     df.replace(to_replace=class_to_number, inplace=True)
+    return df
+
+def convert_number_to_class(df):
+    number_to_class = {1:'Freshman', 2:'Sophomore', 3:'Junior', 4:'Senior'}
+    df['Class'] = df['Class'].replace(to_replace=number_to_class)
     return df
 
 def convert_height_to_inches(df):
@@ -373,7 +271,7 @@ def get_percentile_rank(df, col_name, player_name, is_inverse_percentile=False, 
         d = {1 : 'st', 2 : 'nd', 3 : 'rd'}
         print(f"This value for {col_name} is in the {percentile}{d.get(percentile % 10, 'th')} percentile.")
         print('=========================================')
-    df.drop(['Rank'], axis=1, inplace=True)
+    df = df.drop(['Rank'], axis=1)
     return percentile
     
 def cast_column_to_float(df, col_name):
@@ -398,60 +296,59 @@ def draw_conclusions_on_column(df, col_name, num_top=10):
     
 def draw_conclusions_on_player(df, player_name):
     row = df.loc[df['Name'] == player_name].iloc[0]
-    name = row['Name']
     pos2 = row['Position 2']
     df = df.append(row, ignore_index = True)
     df = df[df['Position 1'] == row['Position 1']]
     if (pos2):
         df = pd.concat([df, df[df['Position 2'] == pos2]], axis=0)
-    print(f"================ {name} ==================")
+    print(f"================ {player_name} ==================")
     # Measurables
-    get_percentile_rank(df, 'Draft Day Age', name, True)
-    get_percentile_rank(df, 'Height', name)
-    get_percentile_rank(df, 'Weight', name)
+    get_percentile_rank(df, 'Draft Day Age', player_name, True)
+    get_percentile_rank(df, 'Height', player_name)
+    get_percentile_rank(df, 'Weight', player_name)
     # Athleticism 
-    p1 = get_percentile_rank(df, 'FTr', name, to_print=False)
-    p2 = get_percentile_rank(df, '# Dunks', name, to_print=False)
+    p1 = get_percentile_rank(df, 'FTr', player_name, to_print=False)
+    p2 = get_percentile_rank(df, '# Dunks', player_name, to_print=False)
     avg = round((p1+p2)/2, 1)
     print(f"Athleticism Score: " + str(float(avg)))
     # Passing
-    p1 = get_percentile_rank(df, 'Pure Point Rating', name, to_print=False)
-    p2 = get_percentile_rank(df, 'AST%', name, to_print=False)
-    p3 = get_percentile_rank(df, 'AST/TOV', name, to_print=False)
+    p1 = get_percentile_rank(df, 'Pure Point Rating', player_name, to_print=False)
+    p2 = get_percentile_rank(df, 'AST/40', player_name, to_print=False)
+    p3 = get_percentile_rank(df, 'AST/TOV', player_name, to_print=False)
     avg = round((p1+p2+p3)/3, 1)
     print(f"Passing Score: " + str(float(avg)))
     # Rebounding
-    p1 = get_percentile_rank(df, 'TRB%', name, to_print=False)
+    p1 = get_percentile_rank(df, 'TRB%', player_name, to_print=False)
     print(f"Rebounding Score: " + str(float(p1)))
     # Shooting
-    p1 = get_percentile_rank(df, '3PAr', name, to_print=False)
-    p2 = get_percentile_rank(df, '3FG%', name, to_print=False)
-    p3 = get_percentile_rank(df, 'FG% @ Mid', name, to_print=False)
+    p1 = get_percentile_rank(df, '3PAr', player_name, to_print=False)
+    p2 = get_percentile_rank(df, '3FG%', player_name, to_print=False)
+    p3 = get_percentile_rank(df, 'FG% @ Mid', player_name, to_print=False)
     avg = round((p1+p2+p3)/3, 1)
     print(f"Shooting Score: " + str(float(avg)))
     # Finishing
-    p1 = get_percentile_rank(df, 'FG% @ Rim', name, to_print=False)
-    p2 = get_percentile_rank(df, '% Shots @ Rim', name, to_print=False)
+    p1 = get_percentile_rank(df, 'FG% @ Rim', player_name, to_print=False)
+    p2 = get_percentile_rank(df, '% Shots @ Rim', player_name, to_print=False)
     avg = round((p1+p2)/2, 1)
     print(f"Finishing Score: " + str(float(avg)))
     # Defense
-    p1 = get_percentile_rank(df, 'STL%', name, to_print=False)
-    p2 = get_percentile_rank(df, 'BLK%', name, to_print=False)
-    p3 = get_percentile_rank(df, 'DEF RTG', name, True, to_print=False)
+    p1 = get_percentile_rank(df, 'STL%', player_name, to_print=False)
+    p2 = get_percentile_rank(df, 'BLK%', player_name, to_print=False)
+    p3 = get_percentile_rank(df, 'DEF RTG', player_name, True, to_print=False)
     avg = round((p1+p2+p3)/3, 1)
     print(f"Defense Score: " + str(float(avg)))
     # Shot Creator
-    p1 = get_percentile_rank(df, '%Astd @ Mid', name, True, to_print=False)
-    p2 = get_percentile_rank(df, 'Hands-On Buckets', name, to_print=False)
-    p3 = get_percentile_rank(df, 'USG%', name, to_print=False)
-    p4 = get_percentile_rank(df, '%Astd @ Rim', name, True, to_print=False)
-    p5 = get_percentile_rank(df, '%Astd @ 3', name, True, to_print=False)
+    p1 = get_percentile_rank(df, '%Astd @ Mid', player_name, True, to_print=False)
+    p2 = get_percentile_rank(df, 'Hands-On Buckets', player_name, to_print=False)
+    p3 = get_percentile_rank(df, 'USG%', player_name, to_print=False)
+    p4 = get_percentile_rank(df, '%Astd @ Rim', player_name, True, to_print=False)
+    p5 = get_percentile_rank(df, '%Astd @ 3', player_name, True, to_print=False)
     avg = round((p1+p2+p3+p4+p5)/5, 1)
     print(f"Shot Creation Score: " + str(float(avg)))
     # College Productivity
-    p1 = get_percentile_rank(df, 'SOS', name, to_print=False)
-    p2 = get_percentile_rank(df, 'WS/40', name, to_print=False)
-    p3 = get_percentile_rank(df, 'BPM', name, to_print=False)
+    p1 = get_percentile_rank(df, 'SOS', player_name, to_print=False)
+    p2 = get_percentile_rank(df, 'WS/40', player_name, to_print=False)
+    p3 = get_percentile_rank(df, 'BPM', player_name, to_print=False)
     avg = round((p1+p2+p3)/3, 1)
     print(f"College Productivity Score: " + str(float(avg)))
     # AAU Success?
