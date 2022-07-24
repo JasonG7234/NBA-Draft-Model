@@ -14,6 +14,7 @@ def percent_assisted_overall(df):
         (df['% Shots @ Mid']/100*df['%Astd @ Mid']) +
         (df['%Astd @ 3']/100*df['% Shots @ 3'])
     )
+    draw_conclusions_on_column(df, '% Assisted')
     return df
 
 def self_created_dunks(df):
@@ -147,12 +148,24 @@ def athleticism(df):
     get_value_at_column_by_player_name(df, "Josh Minott", "Dunks per Minute Played")
     get_value_at_column_by_player_name(df, "Dereon Seabron", "Athleticism?")
 
+def touch(df):
+    df = normalize(df, 'Height', True)
+    df = df[df['Height'] < 78]
+    df = df[df['# Dunks'] < 5]
+    df["Midrange Game"] = 2/(1/(100-df['%Astd @ Mid'])+1/df['FG% @ Mid'])
+    df["Rim Game"] = 2/(1/(100-df['%Astd @ Rim'])+1/df['FG% @ Rim'])
+    #draw_conclusions_on_column(df, 'Midrange Game', num_top=25)
+    
+    df["Touch Indicators"] = 2/(1/df['Midrange Game']+1/df['Rim Game'])
+    draw_conclusions_on_column(df, 'Touch Indicators', num_top=25)
+    get_value_at_column_by_player_name(df, "TyTy Washington", "Touch Indicators")
+
 def add_aux_columns(df):
     df = bentaylor_stats(df)
     df = percent_assisted_overall(df)
     df = self_created_dunks(df)
     df = play_styles(df)
-    df['Stock%'] = df['STL%'] * df['BLK%']
+    df['Stock%'] = 2/(1/df['STL%'] + 1/df['BLK%'])
     df = normalize(df, 'Height')
     df = normalize(df, 'SOS')
     df = normalize(df, 'Draft Day Age', True)
@@ -183,8 +196,7 @@ def reorder_aux_columns(df):
                 'Event Year','Event Name','Event GP','Event MIN','Event PTS','Event FGM','Event FGA','Event FG%','Event 3PM','Event 3PA','Event 3P%','Event FTM','Event FTA','Event FT%','Event TRB','Event AST','Event STL','Event BLK','Event TOV','Event PF','Event Placement',
                 'Box Score Creation','Helio Score']]
     
-# Shooting, Measurables, Athleticism, Passing, Rebounding, Defense (Per position)
-    
+
 #df = read_csv_and_cast_columns('data/jason_db.csv')
 #add_aux_columns(df).to_csv("data/jason_db.csv", index=False)
 #draw_conclusions_on_column(df, "% Dunks Unassisted")
@@ -194,7 +206,14 @@ def reorder_aux_columns(df):
 #get_value_at_column_by_player_name(df, "Zion Williamson", "% Dunks Unassisted")
 #get_value_at_column_by_player_name(df, "Dereon Seabron", "% Dunks Unassisted")
 df = read_csv_and_cast_columns('data/main.csv')
-draw_conclusions_on_player(df, "Sharife Cooper")
+#df['Rank'] = df['Weight'].rank(pct=True)
+#draw_conclusions_on_column(df, 'Rank')
+#get_value_at_column_by_player_name(df, "Victor Oladipo", "Rank")
+#draw_conclusions_on_column(df, 'Weight')
+#df['Ben Rubin LOVES this'] = 
+#for index, row in df.iterrows():
+draw_conclusions_on_player(df, "Zion Williamson")
+
 
 
 
