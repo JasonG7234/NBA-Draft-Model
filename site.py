@@ -30,8 +30,23 @@ def set_up_streamlit(df):
     df_selection = df.query("Position == @position & Season == @season & Class == @classification")
 
     st.dataframe(df_selection)
+    
+    st.markdown("##")
+    num_prospects = len(df_selection.index)
+    best_3pt_shooter = df_selection.loc[df_selection['3 Point Confidence'].idxmax()]
+    best_finisher = df_selection.loc[df_selection['Rim Shot Creation'].idxmax()]
+    
+    left_column, middle_column, right_column = st.columns(3)
+    with left_column:
+        st.subheader("Number of prospects:")
+        st.subheader(f"{num_prospects}")
+    with middle_column:
+        st.subheader("Best shooter:")
+        st.subheader(f"{best_3pt_shooter['Name']}")
+    with right_column:
+        st.subheader("Best finisher:")
+        st.subheader(f"{best_finisher['Name']}")
 
-    #left_column, right_column = st.columns(2)
     hide_st_style = """
                 <style>
                 #dfMenu {visibility: hidden;}
@@ -42,16 +57,20 @@ def set_up_streamlit(df):
     st.markdown(hide_st_style, unsafe_allow_html=True)
 
 def set_up_dataframe(df):
-    df['SOS'] = df['SOS'].round(decimals=2).astype(float)
-    df['SOS'] = df['SOS'].apply('{:0<2}'.format)
+
     df.rename(columns={"Position 1": "Position"}, inplace=True)
+    column_names_with_na_values = ['Position 2', 'Height w/o Shoes', 'Height w/ Shoes', 'Wingspan']
     df['Position 2'] = df['Position 2'].fillna('')
     
-    df['Wins'] = df['Wins'].astype(str).apply(lambda x: x.replace('.0',''))
-    df['Losses'] = df['Losses'].astype(str).apply(lambda x: x.replace('.0',''))
-    df['Class'] = df['Class'].astype(str).apply(lambda x: x.replace('.0',''))
-    #print(df.at[0, 'SOS'])
+    float_column_names = ['SOS', 'Draft Day Age', 'Weight']
+    for col_name in float_column_names:
+        df[col_name] = df[col_name].round(decimals=2).astype(float)
+        df[col_name] = df[col_name].apply('{:0<2}'.format)
+    
+    int_column_names = ['Wins', 'Losses', 'Class']
+    for col_name in int_column_names:
+        df[col_name] = df[col_name].astype(str).apply(lambda x: x.replace('.0',''))
     return df
 
-df = set_up_dataframe(pd.read_csv('data/main.csv'))
+df = set_up_dataframe(pd.read_csv('data/jason_db.csv'))
 set_up_streamlit(df)
