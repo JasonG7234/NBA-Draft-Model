@@ -43,7 +43,8 @@ HOOP_MATH_SCHOOL_EXCEPTIONS = {
 	"TexasArlington" : "UTArlington",
 	"EasternWashington" : "EasternWash.",
 	"LouisianaLafayette" : "Louisiana",
-	"UMass" : "Massachusetts"
+	"UMass" : "Massachusetts",
+    "StephenF.Austin" : "SFA"
 }
 
 def add_college_stats_from_hoopmath(df):

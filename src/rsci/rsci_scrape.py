@@ -73,6 +73,8 @@ OVERALL_RSCI_EXCEPTIONS = {
     "Shaq Buchanan" : 400,
     "Daeqwon Plowden" : 400,
     "Dakota Mathias" : 218,
+    "Kevon Harris" : 400,
+    "DeAnthony Melton" : 134
 }
 
 def add_rsci_rank_as_column(df, find_single_player=False):
@@ -88,9 +90,12 @@ def add_rsci_rank_as_column(df, find_single_player=False):
     df = add_initial_rsci_rankings(df)
     if (find_single_player and df.at[0, 'RSCI']):
         return df
-    start_year = FIRST_YEAR_OF_DRAFT_RANKINGS if not find_single_player else get_year_from_season(df.at[0, 'Season'])-1
-    year_counter = start_year - MAX_LENGTH_OF_PROSPECT_CAREER 
-    end_year = get_year_from_season(df.at[0, 'Season']) if find_single_player else get_current_year()
+    if (find_single_player):
+        year_counter = get_year_from_season(df.at[0, 'Season']) - df.at[0, 'Class']-1
+        end_year = get_year_from_season(df.at[0, 'Season'])
+    else:
+        year_counter = FIRST_YEAR_OF_DRAFT_RANKINGS - MAX_LENGTH_OF_PROSPECT_CAREER
+        end_year = get_current_year()
     while year_counter < end_year:
         print("Getting RSCI rank for players from the class of " + str(year_counter))
         page = 1

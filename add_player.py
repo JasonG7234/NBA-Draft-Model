@@ -50,6 +50,5 @@ df = reorder_final_columns(df)
 df.to_csv('temp.csv', index=False)
 #draw_conclusions_on_player(pd.read_csv('data/main.csv'), df.iloc[[0]])
 # Add Cameron Long George Mason
-# Add Keith Williams, 2020-21 Cincinnati
 # Add DeAnthony Melton, USC
 # Davide Morretti Texas Tech
