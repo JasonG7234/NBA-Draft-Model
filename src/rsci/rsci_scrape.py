@@ -133,7 +133,7 @@ def fetch_247_html(year_counter, page):
         List: The html of the 247 rankings page.
     """
     base_url = "http://247sports.com/Season/" + str(year_counter) + "-Basketball/CompositeRecruitRankings"
-    params = "?View=Detailed&InstitutionGroup=HighSchool&Page=" + str(page)
+    params = "?InstitutionGroup=HighSchool&Page=" + str(page)
     return find_site(base_url + params)[0]
     
 def add_initial_rsci_rankings(df):
