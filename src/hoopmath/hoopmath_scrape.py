@@ -44,6 +44,7 @@ HOOP_MATH_SCHOOL_EXCEPTIONS = {
 	"EasternWashington" : "EasternWash.",
 	"LouisianaLafayette" : "Louisiana",
 	"UMass" : "Massachusetts",
+    "UNCWilmington" : "UNCW",
     "StephenF.Austin" : "SFA"
 }
 
