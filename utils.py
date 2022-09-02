@@ -253,7 +253,7 @@ def reorder_final_columns(df):
                 'Event Year','Event Name','Event GP','Event MIN','Event PTS','Event FGM','Event FGA','Event FG%','Event 3PM','Event 3PA','Event 3P%','Event FTM','Event FTA','Event FT%','Event TRB','Event AST','Event STL','Event BLK','Event TOV','Event PF','Event Placement'
                 ]]
     
-def get_value_at_column_by_player_name(df, player_name, col_name):
+def get_value_at_column_by_player_name(df, player_name, col_name, is_inverse_percentile=False, to_print_percentile=True):
     print('=========================================')
     try:
         val = df.loc[df['Name'] == player_name].iloc[0][col_name]
@@ -261,17 +261,19 @@ def get_value_at_column_by_player_name(df, player_name, col_name):
         print(f"ERROR: The name {player_name} has no exact match.")
         return
     print(f"{player_name}'s value for column '{col_name}' is: {val}")
-    get_percentile_rank(df, col_name, player_name)
+    if to_print_percentile:
+        get_percentile_rank(df, col_name, player_name, is_inverse_percentile)
 
-def get_percentile_rank(df, col_name, player_name, is_inverse_percentile=False, to_print=True):
-    df['Rank'] = df[col_name].rank(pct=True)
-    percentile = round(df.loc[df['Name'] == player_name].iloc[0]['Rank']*100)
+def get_percentile_rank(df, col_name, player_name, is_inverse_percentile=False, to_print=True, rank_col_name="Rank", to_drop_column=True):
+    df[rank_col_name] = df[col_name].rank(pct=True, ascending=(not is_inverse_percentile))
+    percentile = round(df.loc[df['Name'] == player_name].iloc[0][rank_col_name]*100)
     percentile = 100-percentile if is_inverse_percentile else percentile
     if to_print:
         d = {1 : 'st', 2 : 'nd', 3 : 'rd'}
         print(f"This value for {col_name} is in the {percentile}{d.get(percentile % 10, 'th')} percentile.")
         print('=========================================')
-    df = df.drop(['Rank'], axis=1)
+    if to_drop_column:
+        df = df.drop([rank_col_name], axis=1)
     return percentile
     
 def cast_column_to_float(df, col_name):
@@ -303,54 +305,75 @@ def draw_conclusions_on_player(df, player_name):
         df = pd.concat([df, df[df['Position 2'] == pos2]], axis=0)
     print(f"================ {player_name} ==================")
     # Measurables
-    get_percentile_rank(df, 'Draft Day Age', player_name, True)
-    get_percentile_rank(df, 'Height', player_name)
-    get_percentile_rank(df, 'Weight', player_name)
+    get_value_at_column_by_player_name(df, player_name, 'Draft Day Age', to_print_percentile=False)
+    get_value_at_column_by_player_name(df, player_name, 'Height', to_print_percentile=False)
+    get_value_at_column_by_player_name(df, player_name, 'Weight', to_print_percentile=False)
     # Athleticism 
-    p1 = get_percentile_rank(df, 'FTr', player_name, to_print=False)
-    p2 = get_percentile_rank(df, '# Dunks', player_name, to_print=False)
-    avg = round((p1+p2)/2, 1)
-    print(f"Athleticism Score: " + str(float(avg)))
+    get_percentile_rank(df, 'FTr', player_name, to_print=False, to_drop_column=False, rank_col_name="FTr Rank")
+    get_percentile_rank(df, '# Dunks', player_name, to_print=False, to_drop_column=False, rank_col_name="# Dunks Rank")
+    df['Athleticism Score'] = round((df['FTr Rank']+df['# Dunks Rank'])/2, 1)
+    print("Athleticism Score: " + str(get_percentile_rank(df, 'Athleticism Score', player_name, to_print=False)))
+    df = df.drop('FTr Rank', axis=1)
+    df = df.drop('# Dunks Rank', axis=1)
     # Passing
-    p1 = get_percentile_rank(df, 'Pure Point Rating', player_name, to_print=False)
-    p2 = get_percentile_rank(df, 'AST/40', player_name, to_print=False)
-    p3 = get_percentile_rank(df, 'AST/TOV', player_name, to_print=False)
-    avg = round((p1+p2+p3)/3, 1)
-    print(f"Passing Score: " + str(float(avg)))
+    get_percentile_rank(df, 'Pure Point Rating', player_name, to_print=False, to_drop_column=False, rank_col_name="PPR Rank")
+    get_percentile_rank(df, 'AST/40', player_name, to_print=False, to_drop_column=False, rank_col_name="AST/40 Rank")
+    get_percentile_rank(df, 'AST/TOV', player_name, to_print=False, to_drop_column=False, rank_col_name="AST/TOV Rank")
+    df['Passing Score'] = round((df['PPR Rank']+df['AST/40 Rank']+df['AST/TOV Rank'])/3, 1)
+    print(f"Passing Score: " + str(get_percentile_rank(df, 'Passing Score', player_name, to_print=False)))
+    df = df.drop('PPR Rank', axis=1)
+    df = df.drop('AST/40', axis=1)
+    df = df.drop('AST/TOV Rank', axis=1)
     # Rebounding
     p1 = get_percentile_rank(df, 'TRB%', player_name, to_print=False)
     print(f"Rebounding Score: " + str(float(p1)))
     # Shooting
-    p1 = get_percentile_rank(df, '3PAr', player_name, to_print=False)
-    p2 = get_percentile_rank(df, '3FG%', player_name, to_print=False)
-    p3 = get_percentile_rank(df, 'FG% @ Mid', player_name, to_print=False)
-    avg = round((p1+p2+p3)/3, 1)
-    print(f"Shooting Score: " + str(float(avg)))
+    get_percentile_rank(df, '3PAr', player_name, to_print=False, to_drop_column=False, rank_col_name="3PAr Rank")
+    get_percentile_rank(df, '3FG%', player_name, to_print=False, to_drop_column=False, rank_col_name="3FG% Rank")
+    get_percentile_rank(df, 'FG% @ Mid', player_name, to_print=False, to_drop_column=False, rank_col_name="FG% @ Mid Rank")
+    df['Shooting Score'] = round((df['3PAr Rank']+df['3FG% Rank']+df['FG% @ Mid Rank'])/3, 1)
+    print(f"Shooting Score: " + str(get_percentile_rank(df, 'Shooting Score', player_name, to_print=False)))
+    df = df.drop('3PAr Rank', axis=1)
+    df = df.drop('3FG% Rank', axis=1)
+    df = df.drop('FG% @ Mid Rank', axis=1)
     # Finishing
-    p1 = get_percentile_rank(df, 'FG% @ Rim', player_name, to_print=False)
-    p2 = get_percentile_rank(df, '% Shots @ Rim', player_name, to_print=False)
-    avg = round((p1+p2)/2, 1)
-    print(f"Finishing Score: " + str(float(avg)))
+    get_percentile_rank(df, 'FG% @ Rim', player_name, to_print=False, to_drop_column=False, rank_col_name="FG% @ Rim Rank")
+    get_percentile_rank(df, '% Shots @ Rim', player_name, to_print=False, to_drop_column=False, rank_col_name="% Shots @ Rim Rank")
+    df['Finishing Score'] = round((df['% Shots @ Rim Rank']+df['FG% @ Rim Rank'])/2, 1)
+    print(f"Finishing Score: " + str(get_percentile_rank(df, 'Finishing Score', player_name, to_print=False)))
+    df = df.drop('FG% @ Rim Rank', axis=1)
+    df = df.drop('% Shots @ Rim Rank', axis=1)
     # Defense
-    p1 = get_percentile_rank(df, 'STL%', player_name, to_print=False)
-    p2 = get_percentile_rank(df, 'BLK%', player_name, to_print=False)
-    p3 = get_percentile_rank(df, 'DEF RTG', player_name, True, to_print=False)
-    avg = round((p1+p2+p3)/3, 1)
-    print(f"Defense Score: " + str(float(avg)))
+    get_percentile_rank(df, 'STL%', player_name, to_print=False, to_drop_column=False, rank_col_name="STL% Rank")
+    get_percentile_rank(df, 'BLK%', player_name, to_print=False, to_drop_column=False, rank_col_name="BLK% Rank")
+    get_percentile_rank(df, 'DEF RTG', player_name, True, to_print=False, to_drop_column=False, rank_col_name="DEF RTG Rank")
+    df['Defense Score'] = round((df['STL% Rank']+df['BLK% Rank']+df['DEF RTG Rank'])/3, 1)
+    print(f"Defense Score: " + str(get_percentile_rank(df, 'Defense Score', player_name, to_print=False)))
+    df = df.drop('STL% Rank', axis=1)
+    df = df.drop('BLK% Rank', axis=1)
+    df = df.drop('DEF RTG Rank', axis=1)
     # Shot Creator
-    p1 = get_percentile_rank(df, '%Astd @ Mid', player_name, True, to_print=False)
-    p2 = get_percentile_rank(df, 'Hands-On Buckets', player_name, to_print=False)
-    p3 = get_percentile_rank(df, 'USG%', player_name, to_print=False)
-    p4 = get_percentile_rank(df, '%Astd @ Rim', player_name, True, to_print=False)
-    p5 = get_percentile_rank(df, '%Astd @ 3', player_name, True, to_print=False)
-    avg = round((p1+p2+p3+p4+p5)/5, 1)
-    print(f"Shot Creation Score: " + str(float(avg)))
+    get_percentile_rank(df, '%Astd @ Mid', player_name, to_print=False, is_inverse_percentile=True, to_drop_column=False, rank_col_name="%Astd @ Mid Rank")
+    get_percentile_rank(df, 'Hands-On Buckets', player_name, to_print=False, to_drop_column=False, rank_col_name="HOB Rank")
+    get_percentile_rank(df, 'USG%', player_name, to_print=False, to_drop_column=False, rank_col_name="USG% Rank")
+    get_percentile_rank(df, '%Astd @ Rim', player_name, is_inverse_percentile=True, to_print=False, to_drop_column=False, rank_col_name="%Astd @ Rim Rank")
+    get_percentile_rank(df, '%Astd @ 3', player_name, is_inverse_percentile=True, to_print=False, to_drop_column=False, rank_col_name="%Astd @ 3 Rank")
+    df['Shot Creation Score'] = round((df['%Astd @ Mid Rank']+df['HOB Rank']+df['USG% Rank']+df['%Astd @ Rim Rank']+df['%Astd @ 3 Rank'])/5, 1)
+    print(f"Shot Creation Score: " + str(get_percentile_rank(df, 'Shot Creation Score', player_name, to_print=False)))
+    df = df.drop('%Astd @ Mid Rank', axis=1)
+    df = df.drop('HOB Rank', axis=1)
+    df = df.drop('USG% Rank', axis=1)
+    df = df.drop('%Astd @ Rim Rank', axis=1)
+    df = df.drop('%Astd @ 3 Rank', axis=1)
     # College Productivity
-    p1 = get_percentile_rank(df, 'SOS', player_name, to_print=False)
-    p2 = get_percentile_rank(df, 'WS/40', player_name, to_print=False)
-    p3 = get_percentile_rank(df, 'BPM', player_name, to_print=False)
-    avg = round((p1+p2+p3)/3, 1)
-    print(f"College Productivity Score: " + str(float(avg)))
+    get_percentile_rank(df, 'SOS', player_name, to_print=False, to_drop_column=False, rank_col_name="SOS Rank")
+    get_percentile_rank(df, 'WS/40', player_name, to_print=False, to_drop_column=False, rank_col_name="WS/40 Rank")
+    get_percentile_rank(df, 'BPM', player_name, to_print=False, to_drop_column=False, rank_col_name="BPM Rank")
+    df['College Productivity Score'] = round((df['SOS Rank']+df['WS/40 Rank']+df['BPM Rank'])/3, 1)
+    print(f"College Productivity Score: " + str(get_percentile_rank(df, 'College Productivity Score', player_name, to_print=False)))
+    df = df.drop('SOS Rank', axis=1)
+    df = df.drop('WS/40 Rank', axis=1)
+    df = df.drop('BPM Rank', axis=1)
     # AAU Success?
     
     
