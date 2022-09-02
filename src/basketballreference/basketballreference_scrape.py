@@ -6,6 +6,7 @@ INDEX_OF_POSSESSION_STATS_IN_TABLE = 25
 MAX_PROFILES_TO_SEARCH_BY_NAME = 6
 
 BASKETBALL_REFERENCE_PLAYER_NAME_EXCEPTIONS = {
+    "juan-toscano-anderson" : "juan-anderson",
     "wendell-carter" : "wendell-carterjr",
     "marvin-bagley" : "marvin-bagleyiii",
     "trey-murphy" : "trey-murphyiii",
@@ -62,6 +63,7 @@ BASKETBALL_REFERENCE_PLAYER_NAME_EXCEPTIONS = {
 }
 
 BASKETBALL_REFERENCE_INDEX_EXCEPTIONS = {
+    "brandon-williams" : 8,
     "anthony-lamb" : 2,
     "kristian-doolittle" : 2,
     "paul-reed" : 5,
