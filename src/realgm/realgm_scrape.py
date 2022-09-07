@@ -5,14 +5,17 @@ class RealGM:
         "NCAA Season Stats - Advanced Stats",
         "AAU Stats - Per Game",
         "FIBA Junior Team Events Stats",
-        "Non-FIBA Events Stats"
+        "Non-FIBA Events Stats",
+        "NBA Regular Season Stats - Per Game"
     ]}
     RELEVANT_PROFILE_INFO = {key: None for key in [
         "Born:",
         "Height:",
-        "Pre-Draft"
+        "Pre-Draft",
+        "Drafted:"
     ]}
     
+    NBA_MIN_INDEX = 4
     HOB_INDEX = 10
     WIN_INDEX = 14
     LOSS_INDEX = 15
@@ -61,6 +64,14 @@ class RealGM:
         if not grade:
             return None
         return grade[-1].strip('()') + '.'
+    
+    def get_draft_pick(self):
+        pick = self.RELEVANT_PROFILE_INFO.get('Drafted:')
+        if (not pick) or (pick[1] == "Undrafted"):
+            return None
+        draft_round = int(pick[2].replace(',', ''))
+        draft_pick = int(pick[4].replace(',', ''))
+        return int((draft_round-1)*30+draft_pick)
 
     def get_ncaa_hob(self, row_to_get=-1):
         table = self.RELEVANT_TABLES.get("NCAA Season Stats - Misc Stats")
@@ -130,18 +141,30 @@ class RealGM:
                 international_stats.append(stats_row[i].text)
         return international_stats
     
+    def get_nba_stats(self, row_to_get=-1):
+        table = self.RELEVANT_TABLES.get("NBA Regular Season Stats - Per Game")
+        if not table:
+            return None
+        row = table.find('tfoot').find_all('tr')[row_to_get]
+        try:
+            return float(row.find_all('td')[self.NBA_MIN_INDEX].text)
+        except Exception:
+            return None
+    
     def reset_relevant_info(self):
         self.RELEVANT_TABLES = {key: None for key in [
         "NCAA Season Stats - Misc Stats",
         "NCAA Season Stats - Advanced Stats",
         "AAU Stats - Per Game",
         "FIBA Junior Team Events Stats",
-        "Non-FIBA Events Stats"
+        "Non-FIBA Events Stats",
+        "NBA Regular Season Stats - Per Game"
     ]}
         self.RELEVANT_PROFILE_INFO = {key: None for key in [
         "Born:",
         "Height:",
-        "Pre-Draft"
+        "Pre-Draft",
+        "Drafted:"
     ]}
 
 import sys
@@ -159,6 +182,7 @@ def get_realgm_stats(df, find_single_player=False, need_profile_info=False):
     df["RealGM ID"] = ''
     df["Birthday"] = ''
     df["Draft Day Age"] = ''
+    df["Draft Pick"] = ''
     df["Hands-On Buckets"] = ''
     df["Wins"] = ''
     df["Losses"] = ''
@@ -190,6 +214,7 @@ def get_realgm_stats(df, find_single_player=False, need_profile_info=False):
                     populate_profile_info(df, player_page)
                 is_row_data_populated = True
             except Exception as e:
+                print(e)
                 if (find_single_player):
                     realgm_id = input("Cannot find player page. Can you try manually inputting the RealGM ID? ")
                     df.loc[0, 'RealGM ID'] = realgm_id
@@ -199,6 +224,7 @@ def get_realgm_stats(df, find_single_player=False, need_profile_info=False):
     return df
 
 def populate_stats(df, player_page, index, row):
+    df.loc[index, 'Draft Pick'] = player_page.get_draft_pick()
     birthday = player_page.get_birthday()
     if (birthday):
         df.loc[index, 'Birthday'] = " ".join(birthday)
@@ -229,5 +255,30 @@ def populate_profile_info(df, player_page):
     df["Height"] = player_page.get_height()
     df["Weight"] = player_page.get_weight()
     df["Class"] = player_page.get_class()
+
+def populate_draft_picks(df):
+    df["Draft Pick"] = ""
+    df["NBA MPG"] = ""
     
-    
+    for index, row in df.iterrows():
+        url_name = get_matchable_name(row['Name'])
+        try: 
+            summary_index = df.at[index, 'RealGM ID']
+            if (not summary_index or summary_index in ERROR_VALUES):
+                realgm_url = "https://basketball.realgm.com/search?q=" + url_name.replace(" ", "+")
+            else:
+                realgm_url = "https://basketball.realgm.com/player/" + url_name.replace(" ", "-") + "/Summary/" + str(summary_index)
+        except KeyError:
+            print('KEYERROR')
+            realgm_url = "https://basketball.realgm.com/search?q=" + url_name.replace(" ", "+")
+        try:
+            site, _ = find_site(realgm_url)
+            player_page = RealGM(site)
+            pick = player_page.get_draft_pick()
+            df.loc[index, 'NBA Draft Pick'] = player_page.get_draft_pick()
+            nba_mpg = player_page.get_nba_stats()
+            df.loc[index, 'NBA MPG'] = nba_mpg
+            print(f"{row['Name']} played {pick} minutes per game in the NBA.")
+        except Exception as e:
+            print(e)
+    return df

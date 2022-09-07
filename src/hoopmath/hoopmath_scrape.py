@@ -45,7 +45,10 @@ HOOP_MATH_SCHOOL_EXCEPTIONS = {
 	"LouisianaLafayette" : "Louisiana",
 	"UMass" : "Massachusetts",
     "UNCWilmington" : "UNCW",
-    "StephenF.Austin" : "SFA"
+    "StephenF.Austin" : "SFA",
+    "St. John's" : "St. John's (NY)",
+    "UCSB" : "UCSantaBarbara",
+    "FloridaGulfCoast" : "FGCU"
 }
 
 def add_college_stats_from_hoopmath(df):
@@ -101,8 +104,10 @@ def fetch_hoop_math_page_url(row):
 
     team_name_in_url = get_hoop_math_formatted_school(row['School'])
     season_in_url = '20' + row['Season'].split('-')[-1]
-    if (int(season_in_url) < 2018 and team_name_in_url == 'NCState'):
+    if (int(season_in_url) < 2018 and team_name_in_url == "NCState"):
         team_name_in_url = "NorthCarolinaSt."
+    if (int(season_in_url) < 2018 and team_name_in_url == "SaintMary's(CA)"):
+        team_name_in_url = "St.Mary's(CA)"
     url = 'https://hoop-math.com/' + team_name_in_url + season_in_url + '.php'
     return find_site(url)[0]
 
