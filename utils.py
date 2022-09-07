@@ -266,8 +266,11 @@ def get_value_at_column_by_player_name(df, player_name, col_name, is_inverse_per
 
 def get_percentile_rank(df, col_name, player_name, is_inverse_percentile=False, to_print=True, rank_col_name="Rank", to_drop_column=True):
     df[rank_col_name] = df[col_name].rank(pct=True, ascending=(not is_inverse_percentile))
-    percentile = round(df.loc[df['Name'] == player_name].iloc[0][rank_col_name]*100)
-    percentile = 100-percentile if is_inverse_percentile else percentile
+    try:
+        percentile = round(df.loc[df['Name'] == player_name].iloc[0][rank_col_name]*100)
+        percentile = 100-percentile if is_inverse_percentile else percentile
+    except:
+        percentile = 1
     if to_print:
         d = {1 : 'st', 2 : 'nd', 3 : 'rd'}
         print(f"This value for {col_name} is in the {percentile}{d.get(percentile % 10, 'th')} percentile.")
@@ -332,6 +335,9 @@ def draw_conclusions_on_player(df, player_name):
     get_percentile_rank(df, '3FG%', player_name, to_print=False, to_drop_column=False, rank_col_name="3FG% Rank")
     get_percentile_rank(df, 'FG% @ Mid', player_name, to_print=False, to_drop_column=False, rank_col_name="FG% @ Mid Rank")
     df['Shooting Score'] = round((df['3PAr Rank']+df['3FG% Rank']+df['FG% @ Mid Rank'])/3, 1)
+    #print(get_value_at_column_by_player_name(df, player_name, "3PAr Rank"))
+    ##print(get_value_at_column_by_player_name(df, player_name, "Shooting Score"))
+    #print(get_value_at_column_by_player_name(df, player_name, "FG% @ Mid Rank"))
     print(f"Shooting Score: " + str(get_percentile_rank(df, 'Shooting Score', player_name, to_print=False)))
     df = df.drop('3PAr Rank', axis=1)
     df = df.drop('3FG% Rank', axis=1)
@@ -340,13 +346,16 @@ def draw_conclusions_on_player(df, player_name):
     get_percentile_rank(df, 'FG% @ Rim', player_name, to_print=False, to_drop_column=False, rank_col_name="FG% @ Rim Rank")
     get_percentile_rank(df, '% Shots @ Rim', player_name, to_print=False, to_drop_column=False, rank_col_name="% Shots @ Rim Rank")
     df['Finishing Score'] = round((df['% Shots @ Rim Rank']+df['FG% @ Rim Rank'])/2, 1)
+    #print(get_value_at_column_by_player_name(df, player_name, "FG% @ Rim"))
+    #print(get_value_at_column_by_player_name(df, player_name, "% Shots @ Rim"))
     print(f"Finishing Score: " + str(get_percentile_rank(df, 'Finishing Score', player_name, to_print=False)))
     df = df.drop('FG% @ Rim Rank', axis=1)
     df = df.drop('% Shots @ Rim Rank', axis=1)
     # Defense
     get_percentile_rank(df, 'STL%', player_name, to_print=False, to_drop_column=False, rank_col_name="STL% Rank")
     get_percentile_rank(df, 'BLK%', player_name, to_print=False, to_drop_column=False, rank_col_name="BLK% Rank")
-    get_percentile_rank(df, 'DEF RTG', player_name, True, to_print=False, to_drop_column=False, rank_col_name="DEF RTG Rank")
+    get_percentile_rank(df, 'DEF RTG', player_name, to_print=False, to_drop_column=False, rank_col_name="DEF RTG Rank")
+    #print(get_value_at_column_by_player_name(df, player_name, "STL% Rank"))
     df['Defense Score'] = round((df['STL% Rank']+df['BLK% Rank']+df['DEF RTG Rank'])/3, 1)
     print(f"Defense Score: " + str(get_percentile_rank(df, 'Defense Score', player_name, to_print=False)))
     df = df.drop('STL% Rank', axis=1)
@@ -379,9 +388,32 @@ def draw_conclusions_on_player(df, player_name):
     
 
 def print_dataframe(df):
-    with pd.option_context('display.max_rows', None, 'display.max_columns', None):
+    
+    with pd.option_context('display.max_rows', 100, 'display.max_columns', None):
         print(df)
 
 def populate_dataframe_with_average_values(df):
     df = df.replace('', np.nan)
     return df.fillna(df.mean())
+
+def clean_up_data(df):
+    df = df.replace('', np.nan)
+    
+    pg = df[df['Position 1'] == 'PG']
+    df.loc[(df['Position 1'] == 'PG') & (df['# Dunks'].isnull()), '# Dunks'] = pg['# Dunks'].mean()
+    df.loc[(df['Position 1'] == 'PG') & (df['STL%'].isnull()), 'STL%'] = pg['STL%'].mean()
+    sg = df[df['Position 1'] == 'SG']
+    df.loc[(df['Position 1'] == 'SG') & (df['# Dunks'].isnull()), '# Dunks'] = sg['# Dunks'].mean()
+    df.loc[(df['Position 1'] == 'SG') & (df['STL%'].isnull()), 'STL%'] = sg['STL%'].mean()
+    sf = df[df['Position 1'] == 'SF']
+    df.loc[(df['Position 1'] == 'SF') & (df['# Dunks'].isnull()), '# Dunks'] = sf['# Dunks'].mean()
+    df.loc[(df['Position 1'] == 'SF') & (df['STL%'].isnull()), 'STL%'] = sf['STL%'].mean()
+    pf = df[df['Position 1'] == 'PF']
+    df.loc[(df['Position 1'] == 'PF') & (df['# Dunks'].isnull()), '# Dunks'] = pf['# Dunks'].mean()
+    df.loc[(df['Position 1'] == 'PF') & (df['STL%'].isnull()), 'STL%'] = pf['STL%'].mean()
+    c = df[df['Position 1'] == 'C']
+    df.loc[(df['Position 1'] == 'C') & (df['# Dunks'].isnull()), '# Dunks'] = c['# Dunks'].mean()
+    df.loc[(df['Position 1'] == 'C') & (df['STL%'].isnull()), 'STL%'] = c['STL%'].mean()
+    
+    df.fillna(df.mean(), inplace = True)
+    return df

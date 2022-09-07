@@ -92,6 +92,8 @@ def add_conference(df):
         if school in A10:
             df.loc[index, 'Conference'] = 'AAC'
     return df
+
+
     
 def play_styles(df):
     pg = df[df['Position 1'] == 'PG']
@@ -202,25 +204,30 @@ def reorder_aux_columns(df):
                 'Event Year','Event Name','Event GP','Event MIN','Event PTS','Event FGM','Event FGA','Event FG%','Event 3PM','Event 3PA','Event 3P%','Event FTM','Event FTA','Event FT%','Event TRB','Event AST','Event STL','Event BLK','Event TOV','Event PF','Event Placement',
                 'Box Score Creation','Rim Shot Creation','Helio Score']]
     
+import sys
+sys.path.append("./src")
 
-df = read_csv_and_cast_columns('data/main.csv')
-add_aux_columns(df).to_csv("data/jason_db.csv", index=False)
-#draw_conclusions_on_column(df, "% Dunks Unassisted")
-#get_value_at_column_by_player_name(df, "DJ Stephens", "% Dunks Unassisted")
-#get_value_at_column_by_player_name(df, "OG Anunoby", "% Dunks Unassisted")
-#get_value_at_column_by_player_name(df, "Zhaire Smith", "% Dunks Unassisted")
-#get_value_at_column_by_player_name(df, "Zion Williamson", "% Dunks Unassisted")
-#get_value_at_column_by_player_name(df, "Dereon Seabron", "% Dunks Unassisted")
-#df = read_csv_and_cast_columns('data/main.csv')
-#df['Rank'] = df['Weight'].rank(pct=True)
-#draw_conclusions_on_column(df, 'Rank')
-#get_value_at_column_by_player_name(df, "Victor Oladipo", "Rank")
-#draw_conclusions_on_column(df, 'Weight')
-#df['Ben Rubin LOVES this'] = 
+from realgm import realgm_scrape
+
+df = read_csv_and_cast_columns('modelv1.0.csv')
+df = df.sort_values(by=['Result'], ascending=False)
+df.to_csv('modelv1.0.csv', index=False)
+#get_value_at_column_by_player_name(df, "Ja Morant", "Helio Score")
+#add_aux_columns(df).to_csv("data/jason_db.csv", index=False)
 #for index, row in df.iterrows():
-#draw_conclusions_on_player(df, "Zion Williamson")
+#draw_conclusions_on_player(df, "Baylor Scheierman")
 
-
-
-
-
+#print(get_value_at_column_by_player_name(df, "Baylor Scheierman", 'USG%'))
+#draw_conclusions_on_column(df, 'USG%')
+# Scheierman, Terq, Harrison Ingram, Sasser, Tshiebwe, Matthew Cleveland, Strawther, Tyrese Hunter, Taran Armstrong, Kaluma
+'''1. Terq?
+2. Kaluma
+3. Scheierman
+4. Tshiebwe
+5. Taran Armstrong
+6. Strawther
+7. Tyrese Hunter
+8. Marcus Sasser
+9. Harrison Ingram
+10. Cleveland
+'''
