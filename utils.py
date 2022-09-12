@@ -138,7 +138,7 @@ def find_site(url, max_retry_count=3):
     count = 0
     while count < max_retry_count:
         try:
-            response = requests.get(url, headers=HEADERS, timeout=10)
+            response = requests.get(url, headers=HEADERS, timeout=15)
             break
         except requests.exceptions.ConnectionError:
             print("Connection error, giving it 10 and retrying")
