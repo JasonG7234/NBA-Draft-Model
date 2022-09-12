@@ -20,6 +20,7 @@ LOGREG_ITER = 500
 
 def main():
     master = pd.read_csv("main.csv")
+    
     sum_list = [0.0] * len(master.loc[master['Season'] == CURRENT_YEAR])
     for _ in range(10):
         x_train, x_test, y_train, y_test, prospects, norm_x_train, norm_x_test = get_train_test_split(master)
@@ -33,8 +34,8 @@ def main():
     prospects.to_csv('modelv1.0.csv', index=False)
 
 def get_train_test_split(master):
-    master = master['Draft Pick'].replace('', 0)
-    
+    master['NBA Draft Pick'] = master['NBA Draft Pick'].fillna(value=0)
+    master = clean_up_data(master)
     Y = pd.DataFrame(index=np.arange(len(master)), columns=['Result'])
     
     prospects = master.loc[master['Season'] == CURRENT_YEAR]
@@ -43,11 +44,11 @@ def get_train_test_split(master):
             master = master.drop(index)
             Y = Y.drop(index)
             continue
-        Y.loc[index, 'Result'] = 1 if row['Draft Pick'] != 0 else 0
+        Y.loc[index, 'Result'] = 1 if (row['NBA Draft Pick'] > 0) else 0
     
     print("# prospects: " + str(len(prospects)))
     X = master[MACHINE_LEARNING_COLUMNS]
-    print_dataframe(X)
+    
     Y=Y.astype('int')
     x_train, x_test, y_train, y_test = train_test_split(X, Y, test_size=0.25, shuffle=True)
     norm_x_train = normalize(x_train, x_train.describe().transpose())
@@ -113,6 +114,7 @@ def perform_gradient_boosting(x_train, x_test, y_train, y_test, prospects):
     print("\n\n")
     print("----------------------------------")
     classifier = GradientBoostingClassifier()
+    print(y_train.values.ravel())
     classifier.fit(x_train, y_train.values.ravel())
     print("GBM Training score: ", classifier.score(x_train, y_train))
     print("GBM Testing score: ", classifier.score(x_test, y_test))
