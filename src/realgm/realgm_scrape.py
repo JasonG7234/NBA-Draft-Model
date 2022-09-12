@@ -215,12 +215,8 @@ def get_realgm_stats(df, find_single_player=False, need_profile_info=False):
                 is_row_data_populated = True
             except Exception as e:
                 print(e)
-                if (find_single_player):
-                    realgm_id = input("Cannot find player page. Can you try manually inputting the RealGM ID? ")
-                    df.loc[0, 'RealGM ID'] = realgm_id
-                else:
-                    print(e)
-                    is_row_data_populated = True
+                realgm_id = input(f"Cannot find player page for {row['Name']}. Can you try manually inputting the RealGM ID? ")
+                df.loc[index, 'RealGM ID'] = realgm_id
     return df
 
 def populate_stats(df, player_page, index, row):
