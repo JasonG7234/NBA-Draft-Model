@@ -51,44 +51,24 @@ HOOP_MATH_SCHOOL_EXCEPTIONS = {
     "FloridaGulfCoast" : "FGCU"
 }
 
-def add_college_stats_from_hoopmath(df):
+def add_college_stats_from_hoopmath(df, is_same_team=False):
 
     hoop_math_stats = []
     
+    if is_same_team:
+        soup_html = fetch_hoop_math_page_url(df.iloc[0])
+        
     for _, row in df.iterrows():
         if (row['Season'] in ['2008-09', '2009-10', '2010-11']):
             hoop_math_stats.append(['']*len(HOOP_MATH_COLUMN_INDEXES))
             continue
-        player_stats = []
         # print("Getting most recent hoop-math stats for " + row['Name'])
-        soup_html = fetch_hoop_math_page_url(row)
+        if not is_same_team:
+            soup_html = fetch_hoop_math_page_url(row)
         if not soup_html:
             print("ERROR: Unable to connect to hoop-math. Stats will have to be entered in manually.")
-        pbp_table = soup_html.find('table', {'id': 'OffTable1'})
-        if (pbp_table):
-            player_found = False
-            items = pbp_table.find_all('td')
-            for i in range(int(len(items) / HOOP_MATH_TABLE_COLUMN_COUNT)):
-                hoop_math_row = items[i*HOOP_MATH_TABLE_COLUMN_COUNT:(i+1)*HOOP_MATH_TABLE_COLUMN_COUNT]
-                hoop_math_name = ' '.join(reversed(hoop_math_row[0].getText().strip().split(', ')))
-                if(is_fuzzy_name_match(hoop_math_name, row['Name'], HOOP_MATH_NAME_EXCEPTIONS)):
-                    for i in HOOP_MATH_COLUMN_INDEXES:
-                        val = hoop_math_row[i].getText() 
-                        if (val == '---'):
-                            player_stats.append(0)
-                        else:
-                            player_stats.append(val.replace('%', ''))
-                    player_found = True
-                    break
-            if not player_found:
-                print(f"ERROR: Could not find hoop-math data for player {row['Name']}")
-                hoop_math_stats.append(['']*len(HOOP_MATH_COLUMN_INDEXES))
-            else:
-                # print(hoop_math_stats)
-                hoop_math_stats.append(player_stats)
-        else:
-            print(f"ERROR: Could not find hoop-math site for player {row['Name']}")
-            hoop_math_stats.append(['']*len(HOOP_MATH_COLUMN_INDEXES))
+            continue
+        hoop_math_stats.append(get_hoop_math_data(soup_html, row))
     df = pd.concat([df, pd.DataFrame(hoop_math_stats,index=df.index,columns=HOOP_MATH_COLUMN_NAMES)], axis=1)
     return df
 
@@ -114,3 +94,31 @@ def fetch_hoop_math_page_url(row):
 def get_hoop_math_formatted_school(name):
     url_name = name.replace(" State", "St.").replace(" ", "")
     return check_value_in_dictionary_of_exceptions(url_name, HOOP_MATH_SCHOOL_EXCEPTIONS, url_name)
+
+def get_hoop_math_data(soup_html, row):
+    
+    pbp_table = soup_html.find('table', {'id': 'OffTable1'})
+    if (pbp_table):
+        player_stats = []
+        player_found = False
+        items = pbp_table.find_all('td')
+        for i in range(int(len(items) / HOOP_MATH_TABLE_COLUMN_COUNT)):
+            hoop_math_row = items[i*HOOP_MATH_TABLE_COLUMN_COUNT:(i+1)*HOOP_MATH_TABLE_COLUMN_COUNT]
+            hoop_math_name = ' '.join(reversed(hoop_math_row[0].getText().strip().split(', ')))
+            if(is_fuzzy_name_match(hoop_math_name, row['Name'], HOOP_MATH_NAME_EXCEPTIONS)):
+                for i in HOOP_MATH_COLUMN_INDEXES:
+                    val = hoop_math_row[i].getText() 
+                    if (val == '---'):
+                        player_stats.append(0)
+                    else:
+                        player_stats.append(val.replace('%', ''))
+                player_found = True
+                break
+        if not player_found:
+            print(f"ERROR: Could not find hoop-math data for player {row['Name']}")
+            return ['']*len(HOOP_MATH_COLUMN_INDEXES)
+        else:
+            return player_stats
+    else:
+        print(f"ERROR: Could not find hoop-math site for player {row['Name']}")
+        return ['']*len(HOOP_MATH_COLUMN_INDEXES)

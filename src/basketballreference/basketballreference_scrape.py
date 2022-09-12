@@ -128,7 +128,6 @@ def add_college_stats_from_basketball_reference(df):
         else:
             df.drop(index, inplace=True)
             continue
-        print(player_stats)
         college_stats.append(player_stats)
 
     df = pd.concat([df, pd.DataFrame(college_stats,index=df.index,columns=COLUMN_NAMES)], axis=1)
@@ -144,7 +143,6 @@ def get_players_basketball_reference_page(row):
     if (index_value_in_url == 1):
         while index_value_in_url in range(1, MAX_PROFILES_TO_SEARCH_BY_NAME): 
             url = "https://www.sports-reference.com/cbb/players/" + player_name_in_url + "-" + str(index_value_in_url) + ".html"
-            print(url)
             soup_html, _ = find_site(url)
             if (soup_html.find('table', {'id':'players_advanced'})):
                 quick_player_info = get_basketball_reference_player_info(soup_html)

@@ -77,7 +77,7 @@ OVERALL_RSCI_EXCEPTIONS = {
     "DeAnthony Melton" : 134
 }
 
-def add_rsci_rank_as_column(df, find_single_player=False):
+def add_rsci_rank_as_column(df, find_single_player=False, starting_year=FIRST_YEAR_OF_DRAFT_RANKINGS):
     """Get the RSCI rank from 247Sports (not rivals) and add it as a column to the main DataFrame.
     
     Args:
@@ -94,7 +94,7 @@ def add_rsci_rank_as_column(df, find_single_player=False):
         year_counter = get_year_from_season(df.at[0, 'Season']) - df.at[0, 'Class']-1
         end_year = get_year_from_season(df.at[0, 'Season'])
     else:
-        year_counter = FIRST_YEAR_OF_DRAFT_RANKINGS - MAX_LENGTH_OF_PROSPECT_CAREER
+        year_counter = starting_year - MAX_LENGTH_OF_PROSPECT_CAREER
         end_year = get_current_year()
     while year_counter < end_year:
         print("Getting RSCI rank for players from the class of " + str(year_counter))
