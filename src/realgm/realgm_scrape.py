@@ -45,6 +45,8 @@ class RealGM:
             return 'PF/SF'
         if self.position == 'GF':
             return 'SG/SF'
+        if self.position == 'FC':
+            return 'PF/C'
         return self.position
     
     def get_birthday(self):
@@ -211,7 +213,11 @@ def get_realgm_stats(df, find_single_player=False, need_profile_info=False):
                 df.loc[index, 'RealGM ID'] = url.split("/")[-1]
                 populate_stats(df, player_page, index, row)
                 if (need_profile_info):
-                    populate_profile_info(df, player_page)
+                    populate_profile_info(df, player_page, index)
+                is_row_data_populated = True
+            except IndexError:
+                print(f"Dropping {row['Name']}")
+                df.drop(index, inplace=True)
                 is_row_data_populated = True
             except Exception as e:
                 print(e)
@@ -220,6 +226,7 @@ def get_realgm_stats(df, find_single_player=False, need_profile_info=False):
     return df
 
 def populate_stats(df, player_page, index, row):
+
     df.loc[index, 'Draft Pick'] = player_page.get_draft_pick()
     birthday = player_page.get_birthday()
     if (birthday):
@@ -246,11 +253,11 @@ def populate_stats(df, player_page, index, row):
         for i in range(len(event_stats)):
             df.loc[index, INTERNATIONAL_STATS_TABLE_COLUMNS[i]] = event_stats[i]
             
-def populate_profile_info(df, player_page):
-    df["Position"] = player_page.get_position()
-    df["Height"] = player_page.get_height()
-    df["Weight"] = player_page.get_weight()
-    df["Class"] = player_page.get_class()
+def populate_profile_info(df, player_page, index):
+    df.loc[index, "Position"] = player_page.get_position()
+    df.loc[index, "Height"] = player_page.get_height()
+    df.loc[index, "Weight"] = player_page.get_weight()
+    df.loc[index, "Class"] = player_page.get_class()
 
 def populate_draft_picks(df):
     df["Draft Pick"] = ""

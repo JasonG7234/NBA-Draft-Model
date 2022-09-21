@@ -22,7 +22,8 @@ HOOP_MATH_NAME_EXCEPTIONS = {
 	"Phl Pressey" : "Phil Pressey",
 	"Edward Daniel" : "Ed Daniel",
 	"Moe Harkless" : "Maurice Harkless",
-	"KEVIN JONES" : "Kevin Jones"
+	"KEVIN JONES" : "Kevin Jones",
+    "Kam Jones" : "Kameron Jones"
 }
 
 HOOP_MATH_SCHOOL_EXCEPTIONS = {

@@ -78,9 +78,9 @@ def get_torvik_dunks(df):
             else:
                 for player in torvik_json:
                     if (is_fuzzy_name_match(player[0], df_player['Name'], BART_TORVIK_NAME_EXCEPTIONS, 95)):
-                        print(f"Found match for {df_player['Name']}")
-                        print(player[42])
-                        df.loc[index, '# Dunks'] = player[42]
+                        dunk_count = player[42]
+                        print(f"Found # Dunks for {df_player['Name']}: {dunk_count}")
+                        df.loc[index, '# Dunks'] = dunk_count
                         break
     return df
 

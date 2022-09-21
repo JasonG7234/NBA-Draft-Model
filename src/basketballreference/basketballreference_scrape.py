@@ -6,6 +6,17 @@ INDEX_OF_POSSESSION_STATS_IN_TABLE = 25
 MAX_PROFILES_TO_SEARCH_BY_NAME = 6
 
 BASKETBALL_REFERENCE_PLAYER_NAME_EXCEPTIONS = {
+    "eric-hunter" : "eric-hunterjr",
+    "roy-dixon" : "roy-dixoniii",
+    "julian-roper-ii" : "julian-roperii",
+    "eugene-brown" : "eugene-browniii",
+    "alonzo-verge" : "alonzo-vergejr",
+    "brandon-johns-jr" : "brandon-johnsjr",
+    "terrance-williams" : "terrance-williamsii",
+    "lorne-bowman" : "lorne-bowmanii",
+    "ron-harper" : "ron-harperjr",
+    "keion-brooks" : "keion-brooksjr",
+    "kim-aiken" : "kim-aikenjr",
     "juan-toscano-anderson" : "juan-anderson",
     "wendell-carter" : "wendell-carterjr",
     "marvin-bagley" : "marvin-bagleyiii",
@@ -63,6 +74,9 @@ BASKETBALL_REFERENCE_PLAYER_NAME_EXCEPTIONS = {
 }
 
 BASKETBALL_REFERENCE_INDEX_EXCEPTIONS = {
+    "ryan-young" : 2,
+    "jordan-davis" : 24,
+    "ian-burns" : 3,
     "brandon-williams" : 8,
     "anthony-lamb" : 2,
     "kristian-doolittle" : 2,
@@ -93,7 +107,12 @@ BASKETBALL_REFERENCE_INDEX_EXCEPTIONS = {
     "donovan-williams" : 3,
     "jonathan-davis" : 3,
     "jared-harper" : 12,
-    "keith-williams" : 10
+    "keith-williams" : 10,
+    "nate-johnson" : 6,
+    "andre-jackson" : 8,
+    "brandon-johnson" : 56,
+    "david-jones" : 10,
+    "terrell-brown" : 55
 }
 
 BASKETBALL_REFERENCE_SCHOOL_NAME_EXCEPTIONS = {
@@ -144,6 +163,13 @@ def get_players_basketball_reference_page(row):
         while index_value_in_url in range(1, MAX_PROFILES_TO_SEARCH_BY_NAME): 
             url = "https://www.sports-reference.com/cbb/players/" + player_name_in_url + "-" + str(index_value_in_url) + ".html"
             soup_html, _ = find_site(url)
+            if ((not soup_html) and (player_name_in_url[-3:] == '-jr')):
+                player_name_in_url = player_name_in_url[:-3] + 'jr'
+                url = "https://www.sports-reference.com/cbb/players/" + player_name_in_url + "-" + str(index_value_in_url) + ".html"
+                soup_html, _ = find_site(url)
+            if not soup_html:
+                url = input(f"Cannot find basketball-reference player page for {row['Name']}. Can you try manually inputting the URL? ")
+                soup_html, _ = find_site(url)
             if (soup_html.find('table', {'id':'players_advanced'})):
                 quick_player_info = get_basketball_reference_player_info(soup_html)
                 expected_school_name = get_basketball_reference_formatted_school(row['School'], BASKETBALL_REFERENCE_SCHOOL_NAME_EXCEPTIONS, row['School'])
@@ -153,7 +179,6 @@ def get_players_basketball_reference_page(row):
                     print(row['Name'] + " might be a common name - trying again at next profile index")
                     if (player_name_in_url[-3:] == '-jr'):
                         player_name_in_url = player_name_in_url[:-3] + 'jr'
-                        print(player_name_in_url)
                     else:
                         index_value_in_url = index_value_in_url + 1
             else:
