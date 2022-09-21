@@ -127,7 +127,6 @@ COLUMN_NAMES = ['G','GS','MP','PER','TS%','eFG%','3PAr','FTr','PProd','ORB%','DR
 
 LOG_REG_COLUMNS = ['Height','RSCI','Class','TS%','3PAr','TRB%','AST%','BLK%','STL%','WS/40','AST/TOV']
 
-HEADERS = { 'User-Agent': "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:61.0) Gecko/20100101 Firefox/61.0"}
 
 ERROR_VALUES = [None, np.nan, '', '-', '-%']
 COLUMNS_TO_CAST = ['MP', 'STL%', 'BLK%','TOV%','USG%','OWS','DWS','WS', '# Dunks', '% Shots @ Rim', 'FG% @ Rim', '%Astd @ Rim', '% Shots @ Mid', 'FG% @ Mid', 'FGA/100Poss']
@@ -136,12 +135,18 @@ def find_site(url, max_retry_count=3):
     """Use BeautifulSoup to head to designated URL and return BeautifulSoup object.
     It's very important to decode + sub out all comments! (Basketball-Reference's HTML comments throw everything out of wack)"""
     count = 0
+    header = { 'User-Agent': "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/34.0.1847.131 Safari/537.36"}
     while count < max_retry_count:
         try:
-            response = requests.get(url, headers=HEADERS, timeout=15)
+            response = requests.get(url, headers=header, timeout=15)
             break
         except requests.exceptions.ConnectionError:
             print("Connection error, giving it 10 and retrying")
+            time.sleep(10)
+            count += 1
+        except requests.exceptions.TooManyRedirects:
+            print("Redirect error, giving it 10 and then retrying")
+            header = { 'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:77.0) Gecko/20100101 Firefox/77.0"}
             time.sleep(10)
             count += 1
     if not response:
