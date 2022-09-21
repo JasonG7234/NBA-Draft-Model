@@ -17,6 +17,9 @@ def draw_conclusions_on_player(df, player_name):
     get_value_at_column_by_player_name(df, player_name, 'Weight', to_print_percentile=False)
     # Athleticism 
     get_percentile_rank(df, 'FTr', player_name, to_print=False, to_drop_column=False, rank_col_name="FTr Rank")
+    get_percentile_rank(df, 'STL%', player_name, to_print=False, to_drop_column=False, rank_col_name="FTr Rank")
+    get_percentile_rank(df, 'BLK%', player_name, to_print=False, to_drop_column=False, rank_col_name="FTr Rank")
+    get_percentile_rank(df, '%Astd @ Rim', player_name, is_inverse_percentile=True, to_print=False, to_drop_column=False, rank_col_name="FTr Rank")
     get_percentile_rank(df, '# Dunks', player_name, to_print=False, to_drop_column=False, rank_col_name="# Dunks Rank")
     print(get_value_at_column_by_player_name(df, player_name, "FTr"))
     print(get_value_at_column_by_player_name(df, player_name, "# Dunks"))
@@ -93,6 +96,6 @@ def draw_conclusions_on_player(df, player_name):
     df = df.drop('BPM Rank', axis=1)
     # AAU Success?
     
-df = read_csv_and_cast_columns('data/main.csv')
+df = read_csv_and_cast_columns('data/draft_db_2022.csv')
 name = " ".join(sys.argv[1:])
 draw_conclusions_on_player(df, name)

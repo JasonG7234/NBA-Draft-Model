@@ -26,8 +26,9 @@ def reorder_final_team_columns(df):
 
 df_players = []
 season = "2021-22"
-team = "Gonzaga"
-url = f"https://www.sports-reference.com/cbb/schools/{team.lower()}/2022.html"
+team = " ".join(sys.argv[1:])
+url = f"https://www.sports-reference.com/cbb/schools/{team.replace(' ', '-').lower()}/2022.html"
+#team = "USC"
 soup_html, _ = find_site(url)
 table = soup_html.find('table', {'id':'roster'}).find('tbody')
 players = table.find_all('tr')
@@ -44,8 +45,6 @@ df = basketballreference_scrape.add_college_stats_from_basketball_reference(df)
 df = torvik_fetch.get_torvik_dunks(df)
 df = hoopmath_scrape.add_college_stats_from_hoopmath(df)
 df = rsci_scrape.add_rsci_rank_as_column(df, starting_year=2021)
-if (df.at[0, 'RSCI'] == ""):
-    df.loc[0, 'RSCI'] = 400
 df = update_position_columns(df)
 df = reorder_final_team_columns(df)
 df.to_csv('temp.csv', index=False)
