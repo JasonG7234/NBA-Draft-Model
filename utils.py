@@ -197,7 +197,7 @@ def remove_non_alphabetic_characters(name):
     return unidecode.unidecode(re.sub(r'[^A-Za-z- ]+', '', name))
 
 def convert_class_to_number(df):
-    class_to_number = {'Fr.':1, 'So.':2, 'Jr.':3, 'Sr.':4}
+    class_to_number = {'Fr.':1, 'RS-Fr': 1, 'So.':2, 'Jr.':3, 'Sr.':4, 'RS-Sr.': 4}
     df.replace(to_replace=class_to_number, inplace=True)
     return df
 
