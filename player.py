@@ -17,16 +17,13 @@ def draw_conclusions_on_player(df, player_name):
     get_value_at_column_by_player_name(df, player_name, 'Weight', to_print_percentile=False)
     # Athleticism 
     get_percentile_rank(df, 'FTr', player_name, to_print=False, to_drop_column=False, rank_col_name="FTr Rank")
-    get_percentile_rank(df, 'STL%', player_name, to_print=False, to_drop_column=False, rank_col_name="FTr Rank")
-    get_percentile_rank(df, 'BLK%', player_name, to_print=False, to_drop_column=False, rank_col_name="FTr Rank")
-    get_percentile_rank(df, '%Astd @ Rim', player_name, is_inverse_percentile=True, to_print=False, to_drop_column=False, rank_col_name="FTr Rank")
+    get_percentile_rank(df, 'Stock%', player_name, to_print=False, to_drop_column=False, rank_col_name="Stock% Rank")
+    get_percentile_rank(df, '%Astd @ Rim', player_name, is_inverse_percentile=True, to_print=False, to_drop_column=False, rank_col_name='%Astd @ Rim Rank')
     get_percentile_rank(df, '# Dunks', player_name, to_print=False, to_drop_column=False, rank_col_name="# Dunks Rank")
-    print(get_value_at_column_by_player_name(df, player_name, "FTr"))
-    print(get_value_at_column_by_player_name(df, player_name, "# Dunks"))
+
     df['Athleticism Score'] = round((df['FTr Rank']+df['# Dunks Rank'])/2, 1)
     print("Athleticism Score: " + str(get_percentile_rank(df, 'Athleticism Score', player_name, to_print=False)))
-    df = df.drop('FTr Rank', axis=1)
-    df = df.drop('# Dunks Rank', axis=1)
+    df.drop(['FTr Rank', '# Dunks Rank', "Stock% Rank", '%Astd @ Rim Rank'], axis=1, inplace=True)
     # Passing
     get_percentile_rank(df, 'Pure Point Rating', player_name, to_print=False, to_drop_column=False, rank_col_name="PPR Rank")
     get_percentile_rank(df, 'AST/40', player_name, to_print=False, to_drop_column=False, rank_col_name="AST/40 Rank")

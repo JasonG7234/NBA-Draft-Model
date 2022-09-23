@@ -15,7 +15,7 @@ def percent_assisted_overall(df):
         (df['% Shots @ Mid']/100*df['%Astd @ Mid']) +
         (df['%Astd @ 3']/100*df['% Shots @ 3'])
     )
-    draw_conclusions_on_column(df, '% Assisted')
+    #draw_conclusions_on_column(df, '% Assisted')
     return df
 
 def self_created_dunks(df):
@@ -36,24 +36,27 @@ def bentaylor_stats(df):
     df['Offensive Load'] = ""
     df['Adjusted TOV%'] = ""
     for index, row in df.iterrows():
-        if not pd.isna(row['3FGA/100Poss']):
-            _3PA = -abs(float(row['3FGA/100Poss']))
+        _3PA = -abs(float(row['3FGA/100Poss']))
+        if (_3PA == 0):
+            _3PP = 0
+        else:
             _3P = float(row['3FG%'])
-            _3PP = (((2/(1+math.pow(math.e, _3PA))-1)*_3P)+(float(row['3FG%'])*float(row['3PAr'])))/2
-            df.loc[index, '3 Point Proficiency'] = round(_3PP, 3)
-            _AST = float(row['AST/100Poss'])
-            _PTS = float(row['PTS/100Poss'])
-            _TOV = float(row['TOV/100Poss'])
-            _BSC = _AST*0.1843+(_PTS+_TOV)*0.0969-2.3021*(_3PP)+0.0582*(_AST*(_PTS+_TOV)*_3PP)-1.1942
-            df.loc[index, 'Box Score Creation'] = round(_BSC, 3)
-            _FGA = float(row['FGA/100Poss'])
-            _FTA = float(row['FTA/100Poss'])
-            _OL = ((_AST-(0.38*_BSC))*0.75)+_FGA+_FTA*0.44+_BSC+_TOV
-            df.loc[index, 'Offensive Load'] = round(_OL, 3)
-            _cTOV = _TOV / _OL
-            df.loc[index, 'Adjusted TOV%'] = round(_cTOV, 3)
-    df['Box Score Creation'].replace('', np.nan, inplace=True)
-    df['Box Score Creation'].astype(float)
+            _3PP = (((2/(1+math.pow(math.e, _3PA))-1)*_3P)+(_3P*float(row['3PAr'])))/2
+        df.loc[index, '3 Point Proficiency'] = round(_3PP, 3)
+        _AST = float(row['AST/100Poss'])
+        _PTS = float(row['PTS/100Poss'])
+        _TOV = float(row['TOV/100Poss'])
+        _BSC = _AST*0.1843+(_PTS+_TOV)*0.0969-2.3021*(_3PP)+0.0582*(_AST*(_PTS+_TOV)*_3PP)-1.1942
+        df.loc[index, 'Box Score Creation'] = round(_BSC, 3)
+        _FGA = float(row['FGA/100Poss'])
+        _FTA = float(row['FTA/100Poss'])
+        _OL = ((_AST-(0.38*_BSC))*0.75)+_FGA+_FTA*0.44+_BSC+_TOV
+        df.loc[index, 'Offensive Load'] = round(_OL, 3)
+        _cTOV = _TOV / _OL
+        df.loc[index, 'Adjusted TOV%'] = round(_cTOV, 3)
+    #df[].fillna(df['Box Score Creation'].mean())
+    df['Box Score Creation'] = pd.to_numeric(df['Box Score Creation'], downcast="float")
+    print(df['Box Score Creation'].dtype)
     return df
 
 def add_conference(df):
@@ -147,13 +150,11 @@ def athleticism(df):
     df['Stock%'] = df['STL%'] * df['BLK%']
     df['%Unastd @ Rim'] = 100-df['%Astd @ Rim']
     df['Shots @ Rim / 100'] = df['% Shots @ Rim'] * df['FGA/100Poss'] / 100
-    df['Unassisted Shots @ Rim / 100 Possessions'] = df['%Unastd @ Rim'] * df['Shots @ Rim / 100'] / 100
+    df['Unassisted Shots @ Rim /100Poss'] = df['%Unastd @ Rim'] * df['Shots @ Rim / 100'] / 100
     df = normalize(df, 'Height', True)
     df = normalize(df, 'Stock%')
     df["Athleticism?"] = (df['Height Normalized']) * (df["Dunks per Minute Played"]+1) * (df["Stock% Normalized"]) * (df['Unassisted Shots @ Rim / 100 Possessions'])*50
-    draw_conclusions_on_column(df, 'Athleticism?', num_top=25)
-    get_value_at_column_by_player_name(df, "Josh Minott", "Dunks per Minute Played")
-    get_value_at_column_by_player_name(df, "Dereon Seabron", "Athleticism?")
+    return df
 
 def touch(df):
     df = normalize(df, 'Height', True)
@@ -164,12 +165,16 @@ def touch(df):
     #draw_conclusions_on_column(df, 'Midrange Game', num_top=25)
     
     df["Touch Indicators"] = 2/(1/df['Midrange Game']+1/df['Rim Game'])
-    draw_conclusions_on_column(df, 'Touch Indicators', num_top=25)
-    get_value_at_column_by_player_name(df, "TyTy Washington", "Touch Indicators")
+    return df
 
 def add_aux_columns(df):
+    df['3FGA/100Poss'].fillna(0)
+    df['3PAr'].fillna(0)
+    df['3FG%'].fillna(0)
+    df['Draft Day Age'].fillna(df['Draft Day Age'].mean())
     df = jason_3pt_confidence(df)
     df = bentaylor_stats(df)
+    df = athleticism(df)
     df = percent_assisted_overall(df)
     df = self_created_dunks(df)
     df = play_styles(df)
@@ -180,8 +185,10 @@ def add_aux_columns(df):
     
     df['Box Score Creation'].replace('', np.nan, inplace=True)
     df['Box Score Creation'].astype(float)
+    
     df['Helio Score'] = (df['Box Score Creation'] * (df['Height Normalized']+0.05) * (df['SOS Normalized']+1) * df['Draft Day Age Normalized'])
     df.loc[df['G'] <= 15, 'Helio Score'] = df['Helio Score']*(df['G']/15)
+    df['Box Score Creation'].astype(float)
     for index, row in df.nlargest(25, ['Helio Score']).iterrows():
         df.loc[index, 'Play Style'] = 'Primary'
     df.drop(['Height Normalized', 'SOS Normalized', 'Draft Day Age Normalized'], axis=1, inplace=True)
@@ -195,11 +202,11 @@ def reorder_aux_columns(df):
                 'Position 1','Position 2','Play Style',
                 'School','Conference','Wins','Losses','SOS',
                 'Class','Birthday','Draft Day Age',
-                'Height','Weight','Height w/o Shoes','Height w/ Shoes','Wingspan','Standing Reach','Body Fat %','Hand Length','Hand Width',
                 'RSCI','G','GS','MP','PER','TS%','eFG%','3PAr','FTr','PProd','ORB%','DRB%','TRB%','AST%','STL%','BLK%','Stock%','TOV%','Adjusted TOV%','USG%','Offensive Load','OWS','DWS','WS','WS/40','OBPM','DBPM','BPM','AST/TOV','OFF RTG','DEF RTG','Hands-On Buckets','Pure Point Rating',
                 'FG/40','FGA/40','FG%','2FGM/40','2FGA/40','2FG%','3FGM/40','3FGA/40','3FG%',"3 Point Proficiency",'3 Point Confidence','FT/40','FTA/40','FT%','TRB/40','AST/40','STL/40','BLK/40','TOV/40','PF/40','PTS/40',
                 'FGM/100Poss','FGA/100Poss','2FGM/100Poss','2FGA/100Poss','3FGM/100Poss','3FGA/100Poss','FT/100Poss','FTA/100Poss','TRB/100Poss','AST/100Poss','STL/100Poss','BLK/100Poss','TOV/100Poss','PF/100Poss','PTS/100Poss','FGA/100Poss',
-                '# Dunks',"Dunk vs Rim Shot Percentage","% Dunks Unassisted",'% Shots @ Rim','FG% @ Rim','%Astd @ Rim','% Shots @ Mid','FG% @ Mid','%Astd @ Mid','% Shots @ 3','%Astd @ 3','% Assisted',
+                '# Dunks',"Dunk vs Rim Shot Percentage","% Dunks Unassisted","Dunks per Minute Played",
+                '% Shots @ Rim','FG% @ Rim','%Astd @ Rim','% Shots @ Mid','FG% @ Mid','%Astd @ Mid','% Shots @ 3','%Astd @ 3','% Assisted',
                 'AAU Season','AAU Team','AAU League','AAU GP','AAU GS','AAU MIN','AAU PTS','AAU FGM','AAU FGA','AAU FG%','AAU 3PM','AAU 3PA','AAU 3P%','AAU FTM','AAU FTA','AAU FT%','AAU ORB','AAU DRB','AAU TRB','AAU AST','AAU STL','AAU BLK','AAU TOV','AAU PF',
                 'Event Year','Event Name','Event GP','Event MIN','Event PTS','Event FGM','Event FGA','Event FG%','Event 3PM','Event 3PA','Event 3P%','Event FTM','Event FTA','Event FT%','Event TRB','Event AST','Event STL','Event BLK','Event TOV','Event PF','Event Placement',
                 'Box Score Creation','Rim Shot Creation','Helio Score']]
@@ -207,11 +214,11 @@ def reorder_aux_columns(df):
 import sys
 sys.path.append("./src")
 
-from realgm import realgm_scrape
 
-df = read_csv_and_cast_columns('modelv1.0.csv')
-df = df.sort_values(by=['Result'], ascending=False)
-df.to_csv('modelv1.0.csv', index=False)
+df = pd.read_csv("data/db_2022.csv")
+df = df[df['MP'] >= 100]
+df = add_aux_columns(df)
+df.to_csv('data/db_2022_special.csv', index=False)
 #get_value_at_column_by_player_name(df, "Ja Morant", "Helio Score")
 #add_aux_columns(df).to_csv("data/jason_db.csv", index=False)
 #for index, row in df.iterrows():
