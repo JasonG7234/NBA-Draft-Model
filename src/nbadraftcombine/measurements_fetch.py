@@ -2,7 +2,7 @@ import sys
 sys.path.insert(0, '../../')
 from utils import *
 
-from nba_api.stats.endpoints import draftcombineplayeranthro
+from nba_api.stats.endpoints import draftcombineplayeranthro, draftcombinedrillresults
 import time
 
 DRAFT_COMBINE_ANTHRO_COLUMNS = ["POSITION", "HEIGHT_WO_SHOES", "HEIGHT_W_SHOES", "WEIGHT", "WINGSPAN", "STANDING_REACH", "BODY_FAT_PCT", "HAND_LENGTH", "HAND_WIDTH"]
@@ -43,7 +43,7 @@ def get_NBA_Combine_measurements(df):
             df[col] = ""
             
     for season in seasons:
-        combine_data = fetch_NBA_combine_data(season)
+        combine_data = fetch_NBA_combine_measurement_data(season)
         for _, combine_player in combine_data.iterrows():
             for i, df_player in df[df['Season'] == season].iterrows():
                 if (is_fuzzy_name_match(combine_player['PLAYER_NAME'], df_player['Name'], NBA_DRAFT_COMBINE_NAME_EXCEPTIONS)):
@@ -60,27 +60,7 @@ def populate_NBA_combine_measurements(df, index, combine_values):
         else:
             df.loc[index, DRAFT_COMBINE_DATAFRAME_COLUMN_NAMES[i]] = combine_value
         
-def fetch_NBA_combine_data(season):
-    """Fetches the NBA Combine measurement data for a specific season.
-    NOTE: This function takes in the collegiate season as a parameter, not the NBA season.
-    Ex. If you want data on Chet Holmgren/Paolo Banchero, who played during the 2021-22 cbb season, enter season as "2021-22".
-    Even though the NBA Combine data represents this data as the 2022-23 season.
-
-    Args:
-        season (string): The collegiate season to fetch the data for.
-        
-    Returns: 
-        DataFrame: The NBA Combine data for that season as a DataFrame.
-    """
-    season = str(int(season[:4])+1) + '-' + str(int(season[-2:])+1)
-    time.sleep(2)
-    count = 0
-    while count < 3:
-        try:
-            combine_data = draftcombineplayeranthro.DraftCombinePlayerAnthro(
-            league_id='00', 
-            season_year=season,
-            headers={'Accept': 'application/json, text/plain, */*',
+HEADERS = {'Accept': 'application/json, text/plain, */*',
             'Accept-Encoding': 'gzip, deflate, br',
             'Accept-Language': 'en-US,en;q=0.5',
             'Connection': 'keep-alive',
@@ -94,7 +74,62 @@ def fetch_NBA_combine_data(season):
             'Sec-Fetch-Site': 'same-site',
             'User-Agent': 'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.141 Mobile Safari/537.36',
             'x-nba-stats-origin': 'stats',
-            'x-nba-stats-token': 'true'}).results.get_data_frame()
+            'x-nba-stats-token': 'true'}        
+
+def fetch_NBA_combine_measurement_data(season):
+    """Fetches the NBA Combine measurement data for a specific season.
+    NOTE: This function takes in the collegiate season as a parameter, not the NBA season.
+    Ex. If you want data on Chet Holmgren/Paolo Banchero, who played during the 2021-22 cbb season, enter season as "2021-22".
+    Even though the NBA Combine data represents this data as the 2022-23 season.
+
+    Args:
+        season (string): The collegiate season to fetch the data for.
+        
+    Returns: 
+        DataFrame: The NBA Combine measurement data for that season as a DataFrame.
+    """
+    
+    season = str(int(season[:4])+1) + '-' + str(int(season[-2:])+1)
+    time.sleep(2)
+    count = 0
+    while count < 3:
+        try:
+            combine_data = draftcombineplayeranthro.DraftCombinePlayerAnthro(
+            league_id='00', 
+            season_year=season,
+            headers=HEADERS).results.get_data_frame()
+            return combine_data
+        except requests.exceptions.ConnectionError:
+            print("Connection error, giving it 10 and retrying")
+            time.sleep(10)
+            count += 1
+        except Exception:
+            print("Non-connection error, giving it 10 and retrying")
+            time.sleep(10)
+            count += 1
+    return None
+
+def fetch_NBA_combine_athleticism_data(season):
+    """Fetches the NBA Combine athletic testing data for a specific season.
+    NOTE: This function takes in the collegiate season as a parameter, not the NBA season.
+    Ex. If you want data on Chet Holmgren/Paolo Banchero, who played during the 2021-22 cbb season, enter season as "2021-22".
+    Even though the NBA Combine data represents this data as the 2022-23 season.
+
+    Args:
+        season (string): The collegiate season to fetch the data for.
+        
+    Returns: 
+        DataFrame: The NBA Combine athletic testing data for that season as a DataFrame.
+    """
+    season = str(int(season[:4])+1) + '-' + str(int(season[-2:])+1)
+    time.sleep(2)
+    count = 0
+    while count < 3:
+        try:
+            combine_data = draftcombinedrillresults.DraftCombineDrillResults(
+            league_id='00', 
+            season_year=season,
+            headers=HEADERS).results.get_data_frame()
             return combine_data
         except requests.exceptions.ConnectionError:
             print("Connection error, giving it 10 and retrying")
