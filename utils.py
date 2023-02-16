@@ -2,7 +2,6 @@ import datetime
 import re
 import requests
 import time
-import urllib3
 import unidecode
 import numpy as np
 import pandas as pd
@@ -116,7 +115,7 @@ PER_40_COLUMN_IDS = ['fg_per_min', 'fga_per_min', 'fg_pct', 'fg2_per_min', 'fg2a
 PER_100_COLUMN_IDS = ['fg_per_poss', 'fga_per_poss', 'fg2_per_poss', 'fg2a_per_poss', 'fg3_per_poss', 'fg3a_per_poss','ft_per_poss','fta_per_poss',
     'trb_per_poss', 'ast_per_poss', 'stl_per_poss', 'blk_per_poss', 'tov_per_poss', 'pf_per_poss', 'pts_per_poss', 'off_rtg', 'def_rtg']
 
-ADVANCED_COLUMN_IDS = ['g','gs','mp','per','ts_pct','efg_pct','fg3a_per_fga_pct','fta_per_fga_pct','pprod','orb_pct','drb_pct','trb_pct','ast_pct',
+ADVANCED_COLUMN_IDS = ['games','games_started','mp','per','ts_pct','efg_pct','fg3a_per_fga_pct','fta_per_fga_pct','pprod','orb_pct','drb_pct','trb_pct','ast_pct',
     'stl_pct','blk_pct','tov_pct','usg_pct','ws-dum','ows','dws','ws','ws_per_40','bpm-dum','obpm','dbpm','bpm']  
     
 COLUMN_NAMES = ['G','GS','MP','PER','TS%','eFG%','3PAr','FTr','PProd','ORB%','DRB%','TRB%','AST%',
@@ -124,9 +123,7 @@ COLUMN_NAMES = ['G','GS','MP','PER','TS%','eFG%','3PAr','FTr','PProd','ORB%','DR
     'FT/40','FTA/40','FT%', 'TRB/40', 'AST/40', 'STL/40', 'BLK/40', 'TOV/40', 'PF/40', 'PTS/40', 'FGM/100Poss', 'FGA/100Poss', '2FGM/100Poss', '2FGA/100Poss', '3FGM/100Poss', '3FGA/100Poss','FT/100Poss','FTA/100Poss',
     'TRB/100Poss', 'AST/100Poss', 'STL/100Poss', 'BLK/100Poss', 'TOV/100Poss', 'PF/100Poss', 'PTS/100Poss', 'OFF RTG', 'DEF RTG', 'AST/TOV', 'SOS', 'Conference']
 
-
 LOG_REG_COLUMNS = ['Height','RSCI','Class','TS%','3PAr','TRB%','AST%','BLK%','STL%','WS/40','AST/TOV']
-
 
 ERROR_VALUES = [None, np.nan, '', '-', '-%']
 COLUMNS_TO_CAST = ['MP', 'STL%', 'BLK%','TOV%','USG%','OWS','DWS','WS', '# Dunks', '% Shots @ Rim', 'FG% @ Rim', '%Astd @ Rim', '% Shots @ Mid', 'FG% @ Mid', 'FGA/100Poss']
@@ -135,10 +132,13 @@ def find_site(url, max_retry_count=3):
     """Use BeautifulSoup to head to designated URL and return BeautifulSoup object.
     It's very important to decode + sub out all comments! (Basketball-Reference's HTML comments throw everything out of wack)"""
     count = 0
-    header = { 'User-Agent': "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/34.0.1847.131 Safari/537.36"}
+    req_headers = { 'User-Agent': "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36",
+                   'referer': "ttps://www.sports-reference.com/cbb/schools/pepperdine/2022.html",
+                   'accept-language': "en-US,en;q=0.6",
+                   'accept-encoding': "gzip, deflate, br"}
     while count < max_retry_count:
         try:
-            response = requests.get(url, headers=header, timeout=15)
+            response = requests.get(url, headers=req_headers, timeout=30)
             break
         except requests.exceptions.ConnectionError:
             print("Connection error, giving it 10 and retrying")
@@ -146,10 +146,11 @@ def find_site(url, max_retry_count=3):
             count += 1
         except requests.exceptions.TooManyRedirects:
             print("Redirect error, giving it 10 and then retrying")
-            header = { 'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:77.0) Gecko/20100101 Firefox/77.0"}
+            req_headers = { 'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:77.0) Gecko/20100101 Firefox/77.0"}
             time.sleep(10)
             count += 1
     if not response:
+        print('no response')
         return None, None
     try:
         html = response.content.decode("utf-8")
@@ -244,7 +245,7 @@ def normalize(df, col_name, is_inverse_normalization=False):
         df[f'{col_name} Normalized'] = (df[col_name] - min_value) / (max_value - min_value)
     return df
 
-def reorder_final_columns(df):
+def reorder_final_draft_db_columns(df):
     return df[['RealGM ID','Season','Name',
                 'Position 1','Position 2',
                 'School','Conference','Wins','Losses','SOS',
@@ -258,6 +259,20 @@ def reorder_final_columns(df):
                 'Event Year','Event Name','Event GP','Event MIN','Event PTS','Event FGM','Event FGA','Event FG%','Event 3PM','Event 3PA','Event 3P%','Event FTM','Event FTA','Event FT%','Event TRB','Event AST','Event STL','Event BLK','Event TOV','Event PF','Event Placement'
                 ]]
     
+def reorder_final_season_db_columns(df):
+    return df[['RealGM ID','Season','Name',
+                'Position 1','Position 2',
+                'School','Conference','Wins','Losses','SOS',
+                'Class','Birthday','Draft Day Age',
+                'Height','Weight',
+                'RSCI','G','GS','MP','PER','TS%','eFG%','3PAr','FTr','PProd','ORB%','DRB%','TRB%','AST%','STL%','BLK%','TOV%','USG%','OWS','DWS','WS','WS/40','OBPM','DBPM','BPM','AST/TOV','OFF RTG','DEF RTG','Hands-On Buckets','Pure Point Rating',
+                'FG/40','FGA/40','FG%','2FGM/40','2FGA/40','2FG%','3FGM/40','3FGA/40','3FG%','FT/40','FTA/40','FT%','TRB/40','AST/40','STL/40','BLK/40','TOV/40','PF/40','PTS/40',
+                'FGM/100Poss','FGA/100Poss','2FGM/100Poss','2FGA/100Poss','3FGM/100Poss','3FGA/100Poss','FT/100Poss','FTA/100Poss','TRB/100Poss','AST/100Poss','STL/100Poss','BLK/100Poss','TOV/100Poss','PF/100Poss','PTS/100Poss',
+                '# Dunks','% Shots @ Rim','FG% @ Rim','%Astd @ Rim','% Shots @ Mid','FG% @ Mid','%Astd @ Mid','% Shots @ 3','%Astd @ 3',
+                'AAU Season','AAU Team','AAU League','AAU GP','AAU GS','AAU MIN','AAU PTS','AAU FGM','AAU FGA','AAU FG%','AAU 3PM','AAU 3PA','AAU 3P%','AAU FTM','AAU FTA','AAU FT%','AAU ORB','AAU DRB','AAU TRB','AAU AST','AAU STL','AAU BLK','AAU TOV','AAU PF',
+                'Event Year','Event Name','Event GP','Event MIN','Event PTS','Event FGM','Event FGA','Event FG%','Event 3PM','Event 3PA','Event 3P%','Event FTM','Event FTA','Event FT%','Event TRB','Event AST','Event STL','Event BLK','Event TOV','Event PF','Event Placement'
+                ]]
+
 def get_value_at_column_by_player_name(df, player_name, col_name, is_inverse_percentile=False, to_print_percentile=True):
     print('=========================================')
     try:
@@ -288,7 +303,9 @@ def cast_column_to_float(df, col_name):
     df[col_name].astype(float)
     return df
 
-def draw_conclusions_on_column(df, col_name, num_top=10):
+def draw_conclusions_on_column(df, col_name, num_top=10, position="all", show_bottom=True):
+    if (position != "all"):
+        df = df[df['Position 1'] == position]
     df[col_name].replace('', np.nan, inplace=True)
     df[col_name].astype(float)
     print(f"The top {str(num_top)} highest values of column {col_name} are: ")
@@ -296,11 +313,11 @@ def draw_conclusions_on_column(df, col_name, num_top=10):
         print(f"{row['Name']}: {row[col_name]}")
     
     print('=========================================')
-    print(f"The top {str(num_top)} lowest values of column {col_name} are: ")
-    for _, row in df.nsmallest(num_top, [col_name]).iterrows():
-        print(f"{row['Name']}: {row[col_name]}")
-    
-    print('=========================================')    
+    if (show_bottom):
+        print(f"The top {str(num_top)} lowest values of column {col_name} are: ")
+        for _, row in df.nsmallest(num_top, [col_name]).iterrows():
+            print(f"{row['Name']}: {row[col_name]}")
+        print('=========================================')    
     print(f"The average value of column {col_name} is: {df[col_name].mean()}")
     print(f"The median value of column {col_name} is: {df[col_name].median()}")
 

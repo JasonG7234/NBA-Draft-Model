@@ -153,7 +153,7 @@ def athleticism(df):
     df['Unassisted Shots @ Rim /100Poss'] = df['%Unastd @ Rim'] * df['Shots @ Rim / 100'] / 100
     df = normalize(df, 'Height', True)
     df = normalize(df, 'Stock%')
-    df["Athleticism?"] = (df['Height Normalized']) * (df["Dunks per Minute Played"]+1) * (df["Stock% Normalized"]) * (df['Unassisted Shots @ Rim / 100 Possessions'])*50
+    df["Athleticism?"] = (df['Height Normalized']) * (df["Dunks per Minute Played"]+1) * (df["Stock% Normalized"]) * (df['Unassisted Shots @ Rim /100Poss'])*50
     return df
 
 def touch(df):
@@ -167,7 +167,8 @@ def touch(df):
     df["Touch Indicators"] = 2/(1/df['Midrange Game']+1/df['Rim Game'])
     return df
 
-def add_aux_columns(df):
+def add_aux_columns(df, divide_by_position=True):
+    df['RSCI'].fillna(400)
     df['3FGA/100Poss'].fillna(0)
     df['3PAr'].fillna(0)
     df['3FG%'].fillna(0)
@@ -186,7 +187,7 @@ def add_aux_columns(df):
     df['Box Score Creation'].replace('', np.nan, inplace=True)
     df['Box Score Creation'].astype(float)
     
-    df['Helio Score'] = (df['Box Score Creation'] * (df['Height Normalized']+0.05) * (df['SOS Normalized']+1) * df['Draft Day Age Normalized'])
+    df['Helio Score'] = (df['Box Score Creation'] * (df['Height Normalized']) * (df['SOS Normalized']+1) * df['Draft Day Age Normalized'])
     df.loc[df['G'] <= 15, 'Helio Score'] = df['Helio Score']*(df['G']/15)
     df['Box Score Creation'].astype(float)
     for index, row in df.nlargest(25, ['Helio Score']).iterrows():
@@ -194,47 +195,131 @@ def add_aux_columns(df):
     df.drop(['Height Normalized', 'SOS Normalized', 'Draft Day Age Normalized'], axis=1, inplace=True)
     #draw_conclusions_on_column(df, '"% Dunks Unassisted"', num_top=25)
     #get_value_at_column_by_player_name(df, "Ja Morant", "Helio Score", True)
-    
+    if (divide_by_position):
+        df = divide_by_positions(df)
+    else:
+        df = create_percentile_ranks_by_position_group(df)
+    df = build_draft_ranking_column(df)
     return reorder_aux_columns(df)
+
+def divide_by_positions(df):
+    
+    #Pure points
+    temp = df[(df['Position 1'] == 'PG') & (df['Position 2'] != 'SG')]
+    pg = create_percentile_ranks_by_position_group(temp)
+    #Combos
+    temp = df[((df['Position 1'] == 'PG') & (df['Position 2'] == 'SG')) | ((df['Position 1'] == 'SG') & (df['Position 2'] == 'PG'))]
+    g = create_percentile_ranks_by_position_group(temp)
+    #Pure 2s
+    temp = df[(df['Position 1'] == 'SG') & ((df['Position 2'] != 'PG') & (df['Position 2'] != 'SF'))]
+    sg = create_percentile_ranks_by_position_group(temp)
+    #Wings
+    temp = df[((df['Position 1'] == 'SG') & (df['Position 2'] == 'SF')) | ((df['Position 1'] == 'SF') & (df['Position 2'] == 'SG'))]
+    gf = create_percentile_ranks_by_position_group(temp)
+    #Pure 3s
+    temp = df[(df['Position 1'] == 'SF') & ((df['Position 2'] != 'SG') & (df['Position 2'] != 'PF'))]
+    sf = create_percentile_ranks_by_position_group(temp)
+    #Forwards
+    temp = df[((df['Position 1'] == 'SF') & (df['Position 2'] == 'PF')) | ((df['Position 1'] == 'PF') & (df['Position 2'] == 'SF'))]
+    f = create_percentile_ranks_by_position_group(temp)
+    #Pure 4s
+    temp = df[(df['Position 1'] == 'PF') & ((df['Position 2'] != 'SF') & (df['Position 2'] != 'C'))]
+    pf = create_percentile_ranks_by_position_group(temp)
+    #Bigs
+    temp = df[((df['Position 1'] == 'PF') & (df['Position 2'] == 'C')) | ((df['Position 1'] == 'C') & (df['Position 2'] == 'PF'))]
+    b = create_percentile_ranks_by_position_group(temp)
+    #Pure 5s
+    temp = df[(df['Position 1'] == 'C') & (df['Position 2'] != 'PF')]
+    c = create_percentile_ranks_by_position_group(temp)
+    
+    df_temp = pd.concat([pg, g, sg, gf, sf, f, pf, b, c], axis=0)
+    #draw_conclusions_on_column(df_temp, "Overall Score")
+    return df_temp
+
+def create_percentile_ranks_by_position_group(temp):
+    temp['FTr Rank'] = temp['FTr'].rank(pct=True, ascending=True)
+    temp['STK% Rank'] = temp['Stock%'].rank(pct=True, ascending=True)
+    temp['%A@R Rank'] = temp['%Astd @ Rim'].rank(pct=True, ascending=False)
+    temp['#D Rank'] = temp['# Dunks'].rank(pct=True, ascending=True)
+    temp['PPR Rank'] = temp['Pure Point Rating'].rank(pct=True, ascending=True)
+    temp['AST/40 Rank'] = temp['AST/40'].rank(pct=True, ascending=True)
+    temp['A/V Rank'] = temp['AST/TOV'].rank(pct=True, ascending=True)
+    temp['TRB% Rank'] = temp['TRB%'].rank(pct=True, ascending=True)
+    temp['3PP Rank'] = temp['3 Point Proficiency'].rank(pct=True, ascending=True)
+    temp['FT% Rank'] = temp['FT%'].rank(pct=True, ascending=True)
+    temp['F%@M Rank'] = temp['FG% @ Mid'].rank(pct=True, ascending=True)
+    temp['F%@R Rank'] = temp['FG% @ Rim'].rank(pct=True, ascending=True)
+    temp['%S@R Rank'] = temp['% Shots @ Rim'].rank(pct=True, ascending=True)
+    temp['DR Rank'] = temp['DEF RTG'].rank(pct=True, ascending=False)
+    temp['HOB Rank'] = temp['Hands-On Buckets'].rank(pct=True, ascending=True)
+    temp['%A@M Rank'] = temp['%Astd @ Mid'].rank(pct=True, ascending=False)
+    temp['OL Rank'] = temp['Offensive Load'].rank(pct=True, ascending=True)
+    temp['%A@3 Rank'] = temp['%Astd @ 3'].rank(pct=True, ascending=False)
+    temp['SOS Rank'] = temp['SOS'].rank(pct=True, ascending=True)
+    temp['WS/40 Rank'] = temp['WS/40'].rank(pct=True, ascending=True)
+    temp['BPM Rank'] = temp['BPM'].rank(pct=True, ascending=True)
+    # -----------------------------------------------------------------------
+    temp['Athleticism Score'] = round((temp['FTr Rank']+temp['#D Rank']+temp['STK% Rank']+temp['%A@R Rank'])/4, 3)
+    temp['Passing Score'] = round((temp['PPR Rank']+temp['AST/40 Rank']+temp['A/V Rank'])/3, 3)
+    temp['Rebounding Score'] = temp['TRB% Rank']
+    temp['Shooting Score'] = round((temp['3PP Rank']+temp['F%@M Rank'])+temp['FT% Rank']/3, 3)
+    temp['Finishing Score'] = round((temp['F%@R Rank']+temp['%S@R Rank'])/2, 3)
+    #draw_conclusions_on_column(temp, 'Finishing Score', num_top=20)
+    temp['Defense Score'] = round((temp['STK% Rank']+temp['DR Rank'])/2, 3)
+    temp['Shot Creation Score'] = round((temp['HOB Rank']+temp['%A@M Rank']+temp['OL Rank']+temp['%A@3 Rank'])/4, 3)
+    temp['College Productivity Score'] = round((temp['SOS Rank']+temp['WS/40 Rank']+temp['BPM Rank'])/3, 3)
+    # -----------------------------------------------------------------------
+    temp['Athleticism Score'] = temp['Athleticism Score'].rank(pct=True, ascending=True)
+    temp['Passing Score'] = temp['Passing Score'].rank(pct=True, ascending=True)
+    temp['Shooting Score'] = temp['Shooting Score'].rank(pct=True, ascending=True)
+    temp['Finishing Score'] = temp['Finishing Score'].rank(pct=True, ascending=True)
+    temp['Defense Score'] = temp['Defense Score'].rank(pct=True, ascending=True)
+    temp['Shot Creation Score'] = temp['Shot Creation Score'].rank(pct=True, ascending=True)
+    temp['College Productivity Score'] = temp['College Productivity Score'].rank(pct=True, ascending=True)
+    # -----------------------------------------------------------------------
+    temp['Percentile Score'] = round((temp['Athleticism Score']+temp['Passing Score']+temp['Shooting Score']+temp['Finishing Score']+temp['Defense Score']+temp['Shot Creation Score']+temp['College Productivity Score']+temp['Rebounding Score'])/8, 3)*100
+    # -----------------------------------------------------------------------------
+    temp.drop(['BPM Rank', 'WS/40 Rank', 'SOS Rank', '%A@3 Rank', 'OL Rank', '%A@M Rank', 'HOB Rank', 'DR Rank', '%S@R Rank', 'F%@R Rank', 'F%@M Rank', 
+               '3PP Rank', 'FT% Rank', 'TRB% Rank', 'A/V Rank', 'AST/40 Rank', 'PPR Rank', '#D Rank', '%A@R Rank', 'STK% Rank', 'FTr Rank'], axis=1, inplace=True)
+    return temp
+
+def build_draft_ranking_column(df):
+    df = normalize(df, 'Height')
+    df = normalize(df, 'SOS')
+    df = normalize(df, 'Draft Day Age', True)
+    df = normalize(df, 'RSCI', True)
+    #draw_conclusions_on_column(df, "RSCI Normalized", num_top=15)
+    df = normalize(df, 'Box Score Creation')
+    df = normalize(df, 'Percentile Score')
+    df = normalize(df, 'MP')
+    #draw_conclusions_on_column(df, "SOS Normalized", num_top=15)
+    df['Draft Score'] = 5.5/(
+        (0.25/(df['MP Normalized']+0.01)) +
+        (0.25/(df['RSCI Normalized']+0.01)) +
+        (1/df['Percentile Score Normalized']) +
+        (1/df['Box Score Creation Normalized']) +
+        (1/df['Draft Day Age Normalized']) +
+        (0.5/(df['Height Normalized']+0.01)) +
+        (0.5/df['SOS Normalized']))
+    return df
 
 def reorder_aux_columns(df):
     return df[['RealGM ID','Season','Name',
-                'Position 1','Position 2','Play Style',
+                'Position 1','Position 2','Play Style','Height','Weight',
                 'School','Conference','Wins','Losses','SOS',
                 'Class','Birthday','Draft Day Age',
                 'RSCI','G','GS','MP','PER','TS%','eFG%','3PAr','FTr','PProd','ORB%','DRB%','TRB%','AST%','STL%','BLK%','Stock%','TOV%','Adjusted TOV%','USG%','Offensive Load','OWS','DWS','WS','WS/40','OBPM','DBPM','BPM','AST/TOV','OFF RTG','DEF RTG','Hands-On Buckets','Pure Point Rating',
                 'FG/40','FGA/40','FG%','2FGM/40','2FGA/40','2FG%','3FGM/40','3FGA/40','3FG%',"3 Point Proficiency",'3 Point Confidence','FT/40','FTA/40','FT%','TRB/40','AST/40','STL/40','BLK/40','TOV/40','PF/40','PTS/40',
                 'FGM/100Poss','FGA/100Poss','2FGM/100Poss','2FGA/100Poss','3FGM/100Poss','3FGA/100Poss','FT/100Poss','FTA/100Poss','TRB/100Poss','AST/100Poss','STL/100Poss','BLK/100Poss','TOV/100Poss','PF/100Poss','PTS/100Poss','FGA/100Poss',
-                '# Dunks',"Dunk vs Rim Shot Percentage","% Dunks Unassisted","Dunks per Minute Played",
+                '# Dunks',"Dunk vs Rim Shot Percentage","% Dunks Unassisted","Dunks per Minute Played","Unassisted Shots @ Rim /100Poss",
                 '% Shots @ Rim','FG% @ Rim','%Astd @ Rim','% Shots @ Mid','FG% @ Mid','%Astd @ Mid','% Shots @ 3','%Astd @ 3','% Assisted',
                 'AAU Season','AAU Team','AAU League','AAU GP','AAU GS','AAU MIN','AAU PTS','AAU FGM','AAU FGA','AAU FG%','AAU 3PM','AAU 3PA','AAU 3P%','AAU FTM','AAU FTA','AAU FT%','AAU ORB','AAU DRB','AAU TRB','AAU AST','AAU STL','AAU BLK','AAU TOV','AAU PF',
                 'Event Year','Event Name','Event GP','Event MIN','Event PTS','Event FGM','Event FGA','Event FG%','Event 3PM','Event 3PA','Event 3P%','Event FTM','Event FTA','Event FT%','Event TRB','Event AST','Event STL','Event BLK','Event TOV','Event PF','Event Placement',
-                'Box Score Creation','Rim Shot Creation','Helio Score']]
+                'Finishing Score','Shooting Score','Shot Creation Score','Passing Score','Rebounding Score','Athleticism Score','Defense Score','College Productivity Score','Percentile Score',
+                'Box Score Creation','Rim Shot Creation','Helio Score','Draft Score']]
     
 import sys
 sys.path.append("./src")
 
-
-df = pd.read_csv("data/db_2022.csv")
-df = df[df['MP'] >= 100]
-df = add_aux_columns(df)
-df.to_csv('data/db_2022_special.csv', index=False)
-#get_value_at_column_by_player_name(df, "Ja Morant", "Helio Score")
-#add_aux_columns(df).to_csv("data/jason_db.csv", index=False)
-#for index, row in df.iterrows():
-#draw_conclusions_on_player(df, "Baylor Scheierman")
-
-#print(get_value_at_column_by_player_name(df, "Baylor Scheierman", 'USG%'))
-#draw_conclusions_on_column(df, 'USG%')
-# Scheierman, Terq, Harrison Ingram, Sasser, Tshiebwe, Matthew Cleveland, Strawther, Tyrese Hunter, Taran Armstrong, Kaluma
-'''1. Terq?
-2. Kaluma
-3. Scheierman
-4. Tshiebwe
-5. Taran Armstrong
-6. Strawther
-7. Tyrese Hunter
-8. Marcus Sasser
-9. Harrison Ingram
-10. Cleveland
-'''
+df = pd.read_csv("data/draft_db_2022_special.csv")
+draw_conclusions_on_column(df, 'Draft Score', num_top=25)

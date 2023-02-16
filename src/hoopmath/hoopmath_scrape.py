@@ -49,7 +49,10 @@ HOOP_MATH_SCHOOL_EXCEPTIONS = {
     "StephenF.Austin" : "SFA",
     "St. John's" : "St. John's (NY)",
     "UCSB" : "UCSantaBarbara",
-    "FloridaGulfCoast" : "FGCU"
+    "FloridaGulfCoast" : "FGCU",
+    "Seattle": "SeattleU",
+    "St.Peter's" : "SaintPeter's",
+    "Loyola(MD)" : "LoyolaMaryland"
 }
 
 def add_college_stats_from_hoopmath(df, is_same_team=False):

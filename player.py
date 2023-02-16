@@ -1,13 +1,14 @@
 import sys
 from utils import *
 
-def draw_conclusions_on_player(df, player_name):
+def draw_conclusions_on_player(df, player_name, by_position=True):
     row = df.loc[df['Name'] == player_name].iloc[0]
     pos2 = row['Position 2']
     df = df.append(row, ignore_index = True)
-    df = df[df['Position 1'] == row['Position 1']]
-    if (pos2):
-        df = pd.concat([df, df[df['Position 2'] == pos2]], axis=0)
+    if by_position:
+        df = df[df['Position 1'] == row['Position 1']]
+        if (pos2):
+            df = pd.concat([df, df[df['Position 2'] == pos2]], axis=0)
     print(f"================ {player_name} ==================")
     # Measurables
     get_value_at_column_by_player_name(df, player_name, 'Position 1', to_print_percentile=False)
@@ -52,8 +53,8 @@ def draw_conclusions_on_player(df, player_name):
     get_percentile_rank(df, 'FG% @ Rim', player_name, to_print=False, to_drop_column=False, rank_col_name="FG% @ Rim Rank")
     get_percentile_rank(df, '% Shots @ Rim', player_name, to_print=False, to_drop_column=False, rank_col_name="% Shots @ Rim Rank")
     df['Finishing Score'] = round((df['% Shots @ Rim Rank']+df['FG% @ Rim Rank'])/2, 1)
-    #print(get_value_at_column_by_player_name(df, player_name, "FG% @ Rim"))
-    #print(get_value_at_column_by_player_name(df, player_name, "% Shots @ Rim"))
+    get_value_at_column_by_player_name(df, player_name, "FG% @ Rim")
+    get_value_at_column_by_player_name(df, player_name, "% Shots @ Rim")
     print(f"Finishing Score: " + str(get_percentile_rank(df, 'Finishing Score', player_name, to_print=False)))
     df = df.drop('FG% @ Rim Rank', axis=1)
     df = df.drop('% Shots @ Rim Rank', axis=1)
@@ -61,9 +62,9 @@ def draw_conclusions_on_player(df, player_name):
     get_percentile_rank(df, 'STL%', player_name, to_print=False, to_drop_column=False, rank_col_name="STL% Rank")
     get_percentile_rank(df, 'BLK%', player_name, to_print=False, to_drop_column=False, rank_col_name="BLK% Rank")
     get_percentile_rank(df, 'DEF RTG', player_name, is_inverse_percentile=True, to_print=False, to_drop_column=False, rank_col_name="DEF RTG Rank")
-    #print(get_value_at_column_by_player_name(df, player_name, "STL%"))
-    #print(get_value_at_column_by_player_name(df, player_name, "BLK%"))
-    #print(get_value_at_column_by_player_name(df, player_name, "DEF RTG"))
+    print(get_value_at_column_by_player_name(df, player_name, "STL%"))
+    print(get_value_at_column_by_player_name(df, player_name, "BLK%"))
+    print(get_value_at_column_by_player_name(df, player_name, "DEF RTG"))
     df['Defense Score'] = round((df['STL% Rank']+df['BLK% Rank']+df['DEF RTG Rank'])/3, 1)
     print(f"Defense Score: " + str(get_percentile_rank(df, 'Defense Score', player_name, to_print=False)))
     df = df.drop('STL% Rank', axis=1)
@@ -93,6 +94,6 @@ def draw_conclusions_on_player(df, player_name):
     df = df.drop('BPM Rank', axis=1)
     # AAU Success?
     
-df = read_csv_and_cast_columns('data/draft_db_2022.csv')
+df = read_csv_and_cast_columns('data/db_2022_special.csv')
 name = " ".join(sys.argv[1:])
 draw_conclusions_on_player(df, name)
