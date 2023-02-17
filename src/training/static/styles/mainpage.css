@@ -82,10 +82,12 @@ tr:last-child th:last-child { border-bottom-right-radius: 5px; }
     color: #000;
   }
   .auxiliary {
-    background-color: #ec8176;
+    background-color: #1e458f;
+    color: white;
   }
   .stats {
-    background-color: #ec8176;
+    background-color: #1e458f;
+    color: white;
     padding: 5px;
   }
   .tooltip {
@@ -120,20 +122,22 @@ tr:last-child th:last-child { border-bottom-right-radius: 5px; }
   }
   .circles {
     display: grid;
-    grid-template-columns: repeat(auto-fill,minmax(160px, 1fr));
+    grid-template-columns: repeat(auto-fill,minmax(120px, 1fr));
   }
   .circle {
     display: flex;
     flex-direction: column;
     align-items: center;
+
   }
   .dot {
     height: 50px;
     padding: 5px;
     width: 50px;
-    background-color: #bbb;
     display: flex;
     justify-content: center;
+    font-size: 24px;
+    flex-direction: column;
     align-items: center;
     border-radius: 50%;
   }
