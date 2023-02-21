@@ -21,16 +21,18 @@ class RealGM:
     LOSS_INDEX = 15
     PPR_INDEX = 15
 
-    def __init__(self, soup):
+    def __init__(self, soup, url=""):
         self.reset_relevant_info()
         profile_box = soup.find('div', {"class": "profile-box"})
         if not profile_box:
+            print(url)
             raise ReferenceError("Page not found.")
         self.position = profile_box.find('h2').find('span').text
         for item in profile_box.find_all('p'):
             info_category = item.text.split(" ")
             if info_category[0] in self.RELEVANT_PROFILE_INFO.keys():
                 self.RELEVANT_PROFILE_INFO[info_category[0]] = info_category
+        self.image = profile_box.find('img')['src']
         content = soup.find('div', {"class": "profile-wrap"})
         headers = content.find_all('h2')
         for i, header in enumerate(headers):
@@ -59,6 +61,7 @@ class RealGM:
         return self.RELEVANT_PROFILE_INFO.get('Height:')[1]
     
     def get_weight(self):
+        # Because Height/Weight are in one <p> tag, have to get like this
         return self.RELEVANT_PROFILE_INFO.get('Height:')[4]
     
     def get_class(self):
@@ -152,6 +155,9 @@ class RealGM:
             return float(row.find_all('td')[self.NBA_MIN_INDEX].text)
         except Exception:
             return None
+        
+    def get_image_url(self):
+        return self.image
     
     def reset_relevant_info(self):
         self.RELEVANT_TABLES = {key: None for key in [
@@ -179,7 +185,7 @@ AAU_STATS_TABLE_COLUMNS = ['AAU Season', 'AAU Team', 'AAU League', 'AAU GP', 'AA
 INTERNATIONAL_STATS_TABLE_COLUMNS = ['Event Year', 'Event Name', 'Event GP', 'Event MIN', 'Event PTS', 'Event FGM', 'Event FGA', 'Event FG%', 'Event 3PM', 'Event 3PA', 'Event 3P%', 
         'Event FTM', 'Event FTA', 'Event FT%', 'Event TRB', 'Event AST', 'Event STL', 'Event BLK', 'Event TOV', 'Event PF', 'Event Placement']
 
-def get_realgm_stats(df, find_single_player=False, need_profile_info=False):
+def get_realgm_stats(df, need_profile_info=False, realgm_id=None):
     
     df["RealGM ID"] = ''
     df["Birthday"] = ''
@@ -198,18 +204,11 @@ def get_realgm_stats(df, find_single_player=False, need_profile_info=False):
     for index, row in df.iterrows():
         is_row_data_populated = False
         while not is_row_data_populated:
-            url_name = get_matchable_name(row['Name'])
-            try: 
-                summary_index = df.at[index, 'RealGM ID']
-                if (not summary_index or summary_index in ERROR_VALUES):
-                    realgm_url = "https://basketball.realgm.com/search?q=" + url_name.replace(" ", "+")
-                else:
-                    realgm_url = "https://basketball.realgm.com/player/" + url_name.replace(" ", "-") + "/Summary/" + str(summary_index)
-            except KeyError:
-                realgm_url = "https://basketball.realgm.com/search?q=" + url_name.replace(" ", "+")
+            summary_index = realgm_id if realgm_id is not None else df.at[index, 'RealGM ID']
+            realgm_url = get_url_from_name(row['Name'], summary_index)
             try:
                 site, url = find_site(realgm_url)
-                player_page = RealGM(site)
+                player_page = RealGM(site, url)
                 df.loc[index, 'RealGM ID'] = url.split("/")[-1]
                 populate_stats(df, player_page, index, row)
                 if (need_profile_info):
@@ -264,16 +263,8 @@ def populate_draft_picks(df):
     df["NBA MPG"] = ""
     
     for index, row in df.iterrows():
-        url_name = get_matchable_name(row['Name'])
-        try: 
-            summary_index = df.at[index, 'RealGM ID']
-            if (not summary_index or summary_index in ERROR_VALUES):
-                realgm_url = "https://basketball.realgm.com/search?q=" + url_name.replace(" ", "+")
-            else:
-                realgm_url = "https://basketball.realgm.com/player/" + url_name.replace(" ", "-") + "/Summary/" + str(summary_index)
-        except KeyError:
-            print('KEYERROR')
-            realgm_url = "https://basketball.realgm.com/search?q=" + url_name.replace(" ", "+")
+        summary_index = df.at[index, 'RealGM ID']
+        realgm_url = get_url_from_name(row['Name'], summary_index)
         try:
             site, _ = find_site(realgm_url)
             player_page = RealGM(site)
@@ -284,4 +275,32 @@ def populate_draft_picks(df):
             print(f"{row['Name']} played {pick} minutes per game in the NBA.")
         except Exception as e:
             print(e)
+    return df
+
+def get_url_from_name(name, summary_index):
+    url_name = get_matchable_name(name)
+    try: 
+        if (not summary_index or summary_index in ERROR_VALUES):
+            realgm_url = "https://basketball.realgm.com/search?q=" + url_name.replace(" ", "+")
+        else:
+            realgm_url = "https://basketball.realgm.com/player/" + url_name.replace(" ", "-") + "/Summary/" + str(summary_index)
+    except KeyError:
+        realgm_url = "https://basketball.realgm.com/search?q=" + url_name.replace(" ", "+")
+    return realgm_url
+
+def populate_image_links(df):
+    df["Image Link"] = ""
+    
+    for index, row in df.iterrows():
+        summary_index = df.at[index, 'RealGM ID']
+        realgm_url = get_url_from_name(row['Name'], summary_index)
+        try:
+            site, _ = find_site(realgm_url)
+            player_page = RealGM(site)
+            img_link = "https://basketball.realgm.com" + player_page.get_image_url()
+            print(img_link)
+            df.loc[index, 'Image Link'] = img_link
+        except Exception as e:
+            print(e)
+    
     return df

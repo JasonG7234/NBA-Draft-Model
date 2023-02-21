@@ -1,0 +1,363 @@
+<html>
+    <head>
+        <!-- MAIN CSS -->
+        <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/mainpage.css') }}">
+        <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/colors.css') }}">
+        <!-- ICONS -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+        <!-- FAVICON -->
+        <link rel="shortcut icon" href="../static/favicon.png">
+        <!-- FONT -->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+
+        <title>NBA Draft Pick'Em</title>
+    </head>
+    <body style="font-family: 'Roboto', sans-serif;">
+        <!-- SIDEBAR -->
+        <div class="menu-icon" onclick="toggleSidebar()"><i class="fa fa-bars"></i></div>
+            <div class="sidebar">
+                <div class="leaderboard">
+                    <h2>Leaderboard</h2>
+                    <div class="player">
+                    <img src="https://basketball.realgm.com/images/nba/4.2/profiles/photos/2006/Cunningham_Cade_det22.jpg" alt="Player 1" width="125" height="150">
+                    <div class="info">
+                        <div class="name">Cade Cunningham</div>
+                        <div class="score">93%</div>
+                    </div>
+                    </div>
+                    <div class="player">
+                    <img src="https://basketball.realgm.com/images/nba/4.2/profiles/photos/2006/Williamson_Zion_nop22.jpg" alt="Player 2" width="125" height="150">
+                    <div class="info">
+                        <div class="name">Zion Williamson</div>
+                        <div class="score">92%</div>
+                    </div>
+                    </div>
+                    <div class="player">
+                    <img src="player3.png" alt="Player 3" width="125" height="150">
+                    <div class="info">
+                        <div class="name">Markelle Fultz</div>
+                        <div class="score">80%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <form method="post" action="/">
+            <div class="container">
+                <!-- PLAYER 1 -->
+                <div style="text-align: center;">
+                    <div class="profile-info" style="float: left; padding-left: 10px">
+                        <div style="display:flex;">
+                            <div><img src="https://basketball.realgm.com/images/nba/4.2/profiles/photos/2006/player_photo.jpg"></div>
+                            <div style="display: flex; flex-direction: column; align-items: flex-start; justify-content: space-around; padding-left: 10px">
+                                <h1 class="headings-no-margin">Player 1</h1>
+                                {% if o1['Position 2'] != '-' %}
+                                    <h2 class="headings-no-margin">{{ o1['School'] }} | {{ o1['Class'] }} | {{ o1['Position 1'] }}/{{ o1['Position 2'] }}</h2>
+                                {% else %}
+                                    <h2 class="headings-no-margin">{{ o1['School'] }} | {{ o1['Class'] }} | {{ o1['Position 1'] }}</h2>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div style="float: right">
+                            <input class="player-button" type="submit" value="Player 1" name="action1"/>
+                        </div>
+                    </div>
+                    <h3 class="headings-margin">Auxiliary: </h3>
+                    <table id="infoTable" cellspacing="0" cellpadding="0">
+                        <thead >
+                            <th class="auxiliary"><span>Height</span></th>
+                            <th class="auxiliary"><span>Weight</span></th>
+                            <th class="auxiliary"><span>Draft-Day Age</span></th>
+                            <th class="auxiliary"><span>RSCI Rank</span></th>
+                            <th class="auxiliary"><span>Record</span></th>
+                        </thead>
+                        <tbody>
+                            <tr>
+                            <td><span>{{ o1['Height']//12 }}'{{ o1['Height']%12 }}</span></td>
+                            <td><span>{{ o1['Weight'] }}</span></td>
+                            <td><span>{{ o1['Draft Day Age'] }}</span></td>
+                            <td><span>{{ int(o1['RSCI']) }}</span>
+                                {% if int(o1['RSCI']) == 400 %}
+                            <div class="tooltip" style="margin-left: -4px">+<span class="tooltiptext">For players with ranks greater than 400 or not registered in 247sports.
+                            </div>
+                            {% else %}
+                            {% endif %}</td>
+                            <td><span>{{ int(o1['Wins']) }}-{{ int(o1['Losses']) }}</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="stats-container">
+                        <div style="float: left;">
+                            <h3 class="headings-margin">Stats:</h3>
+                            <table id="infoTable" cellspacing="0" cellpadding="0">
+                                <tbody><tr>
+                                    <th class="stats"><span>TS%</span></th>
+                                    <td><span>{{ round(o1['TS%']*100, 3) }}%</span></td>
+                                </tr><tr>
+                                    <th class="stats"><span>FG% @ Rim</span></th>
+                                    <td><span>{{ round(o1['FG% @ Rim'], 3) }}%</span></td>
+                                </tr><tr>
+                                    <th class="stats"><span>3FG%</span></th>
+                                    <td><span>{{ round(o1['3FG%']*100, 3) }}%</span></td>
+                                </tr><tr>
+                                    <th class="stats"><span>FT%</span></th>
+                                    <td><span>{{ round(o1['FT%']*100, 3) }}%</span></td>
+                                </tr><tr>      
+                                    <th class="stats"><span>TRB%</span></th>
+                                    <td><span>{{ o1['TRB%'] }}%</span></td>
+                                </tr><tr>      
+                                    <th class="stats"><span>AST%</span></th>
+                                    <td><span>{{ o1['AST%'] }}%</span></td>
+                                </tr><tr>    
+                                    <th class="stats"><span>STL%</span></th>
+                                    <td><span>{{ o1['STL%'] }}%</span></td>
+                                </tr><tr>
+                                    <th class="stats"><span>BLK%</span></th>
+                                    <td><span>{{ o1['BLK%'] }}%</span></td>
+                                </tr><tr>  
+                                    <th class="stats"><span>USG%</span></th>
+                                    <td><span>{{ o1['USG%'] }}%</span></td>
+                                </tr><tr>      
+                                    <th class="stats"><span>AST/TOV</span></th>
+                                    <td><span>{{ o1['AST/TOV'] }}</span></td>
+                                </tr><tr>      
+                                    <th class="stats"><span>OFF RTG</span></th>
+                                    <td><span>{{ o1['OFF RTG'] }}</span></td>
+                                </tr><tr>      
+                                    <th class="stats"><span>DEF RTG</span></th>
+                                    <td><span>{{ o1['DEF RTG'] }}</span></td>
+                                </tr><tr>      
+                                    <th class="stats"><span>WS/40</span></th>
+                                    <td><span>{{ o1['WS/40'] }}</span></td>
+                                </tr><tr>      
+                                    <th class="stats"><span>BPM</span></th>
+                                    <td><span>{{ o1['BPM'] }}</span></td>
+                                </tr></tbody>
+                            </table>
+                        </div>
+                        <div style="float: right;">
+                            <h3 class="headings-margin">Summaries: 
+                                <div class="tooltip">&#9432;
+                                    <span class="tooltiptext">These summary scores are percentile values based on how each player compares to other historic draft prospects at their position.
+                                </div>
+                            </h3>
+                            <div class="circles">
+                                <div class="circle">
+                                    <h4 style="margin: 10px;">Shooting Score</h4>
+                                    <div id="color-{{ int(round(o1['Shooting Score'], 2)*100) }}" class="dot">
+                                        {{ int(round(o1['Shooting Score'], 2)*100) }}
+                                    </div>
+                                </div>
+                                <div class="circle">
+                                    <h4 style="margin: 10px;">Rebounding Score</h4>
+                                    <div id="color-{{ int(round(o1['Rebounding Score'], 2)*100) }}" class="dot">
+                                        {{ int(round(o1['Rebounding Score'], 2)*100) }}
+                                    </div>
+                                </div>
+                                <div class="circle">
+                                    <h4 style="margin: 10px;">Passing Score</h4>
+                                    <div id="color-{{ int(round(o1['Passing Score'], 2)*100) }}" class="dot">
+                                        {{ int(round(o1['Passing Score'], 2)*100) }}
+                                    </div>
+                                </div>
+                                <div class="circle">
+                                    <h4 style="margin: 10px;">Athleticism Score</h4>
+                                    <div id="color-{{ int(round(o1['Athleticism Score'], 2)*100) }}" class="dot">
+                                        {{ int(round(o1['Athleticism Score'], 2)*100) }}
+                                    </div>
+                                </div>
+                                <div class="circle">
+                                    <h4 style="margin: 10px;">Shot Creation Score</h4>
+                                    <div id="color-{{ int(round(o1['Shot Creation Score'], 2)*100) }}" class="dot">
+                                        {{ int(round(o1['Shot Creation Score'], 2)*100) }}
+                                    </div>
+                                </div>
+                                <div class="circle">
+                                    <h4 style="margin: 10px;">Finishing Score</h4>
+                                    <div id="color-{{ int(round(o1['Finishing Score'], 2)*100) }}" class="dot">
+                                        {{ int(round(o1['Finishing Score'], 2)*100) }}
+                                    </div>
+                                </div>
+                                <div class="circle">
+                                    <h4 style="margin: 10px;">Defense Score</h4>
+                                    <div id="color-{{ int(round(o1['Defense Score'], 2)*100) }}" class="dot">
+                                        {{ int(round(o1['Defense Score'], 2)*100) }}
+                                    </div>
+                                </div>
+                                <div class="circle">
+                                    <h4 style="margin: 10px;">College Productivity Score</h4>
+                                    <div id="color-{{ int(round(o1['College Productivity Score'], 2)*100) }}" class="dot">
+                                        {{ int(round(o1['College Productivity Score'], 2)*100) }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                
+            </div>
+            <li class="separator" aria-hidden="true" role="presentation"></li>
+            <!-- PLAYER 2 -->
+            <div style="text-align: center;">
+                <div class="profile-info" style="float: right; padding-right: 10px; flex-direction: row-reverse">
+                    <div style="float:right; padding-left: 10px;">
+                        <img src="https://basketball.realgm.com/images/nba/4.2/profiles/photos/2006/player_photo.jpg">
+                    </div>
+                    <div style="text-align:right">
+                        <h1>Player 2</h1>
+                        {% if o2['Position 2'] != '-' %}
+                            <h2 class="green">{{ o2['School'] }} | {{ o2['Class'] }} | {{ o2['Position 1'] }}/{{ o2['Position 2'] }}</h2>
+                        {% else %}
+                            <h2 class="green">{{ o2['School'] }} | {{ o2['Class'] }} | {{ o2['Position 1'] }}</h2>
+                        {% endif %}
+                    </div>
+                    <div style="float: left">
+                    <input class="player-button" type="submit" value="Player 2" name="action2"/>
+                    </div>
+                </div>
+                <h3 class="headings-margin">Auxiliary: </h3>
+                <table id="infoTable" cellspacing="0" cellpadding="0">
+                    <thead>
+                        <th class="auxiliary"><span>Height</span></th>
+                        <th class="auxiliary"><span>Weight</span></th>
+                        <th class="auxiliary"><span>Draft-Day Age</span></th>
+                        <th class="auxiliary"><span>RSCI Rank</span></th>
+                        <th class="auxiliary"><span>Record</span></th>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span>{{ o2['Height']//12 }}'{{ o2['Height']%12 }}</span></td>
+                            <td><span>{{ o2['Weight'] }}</span></td>
+                            <td><span>{{ o2['Draft Day Age'] }}</span></td>
+                            <td><span>{{ int(o2['RSCI']) }}</span>
+                            {% if int(o2['RSCI']) == 400 %}
+                            <div class="tooltip" style="margin-left: -4px">+<span class="tooltiptext">For players with ranks greater than 400 or not registered in 247sports.
+                            </div>
+                            {% else %}
+                            {% endif %}</td>
+                            <td><span>{{ int(o2['Wins']) }}-{{ int(o2['Losses']) }}</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="stats_container">
+                    <div style="float: left; padding: 10px">
+                        <h3 class="headings-margin">Stats:</h3>
+                        <table id="infoTable" cellspacing="0" cellpadding="0">
+                            <tbody><tr>
+                                <th class="stats"><span>TS%</span></th>
+                                <td><span>{{ round(o2['TS%']*100, 3) }}%</span></td>
+                            </tr><tr>
+                                <th class="stats"><span>FG% @ Rim</span></th>
+                                <td><span>{{ round(o2['FG% @ Rim'], 3) }}%</span></td>
+                            </tr><tr>
+                                <th class="stats"><span>3FG%</span></th>
+                                <td><span>{{ round(o2['3FG%']*100, 3) }}%</span></td>
+                            </tr><tr>
+                                <th class="stats"><span>FT%</span></th>
+                                <td><span>{{ round(o2['FT%']*100, 3) }}%</span></td>
+                            </tr><tr>      
+                                <th class="stats"><span>TRB%</span></th>
+                                <td><span>{{ o2['TRB%'] }}%</span></td>
+                            </tr><tr>      
+                                <th class="stats"><span>AST%</span></th>
+                                <td><span>{{ o2['AST%'] }}%</span></td>
+                            </tr><tr>      
+                                <th class="stats"><span>STL%</span></th>
+                                <td><span>{{ o2['STL%'] }}%</span></td>
+                            </tr><tr>      
+                                <th class="stats"><span>BLK%</span></th>
+                                <td><span>{{ o2['BLK%'] }}%</span></td>
+                            </tr><tr>      
+                                <th class="stats"><span>USG%</span></th>
+                                <td><span>{{ o2['USG%'] }}%</span></td>
+                            </tr><tr>      
+                                <th class="stats"><span>AST/TOV</span></th>
+                                <td><span>{{ o2['AST/TOV'] }}</span></td>
+                            </tr><tr>      
+                                <th class="stats"><span>OFF RTG</span></th>
+                                <td><span>{{ o2['OFF RTG'] }}</span></td>
+                            </tr><tr>      
+                                <th class="stats"><span>DEF RTG</span></th>
+                                <td><span>{{ o2['DEF RTG'] }}</span></td>
+                            </tr><tr>      
+                                <th class="stats"><span>WS/40</span></th>
+                                <td><span>{{ o2['WS/40'] }}</span></td>
+                            </tr><tr>      
+                                <th class="stats"><span>BPM</span></th>
+                                <td><span>{{ o2['BPM'] }}</span></td>
+                            </tr></tbody>
+                        </table>
+                    </div>
+                    <div style="float: right;">
+                        <h3 class="headings-margin">Summaries: 
+                            <div class="tooltip">&#9432;
+                                <span class="tooltiptext">Summary scores are percentile values based on how each player compares to other historic draft prospects at their position. They are NOT age or SOS adjusted.
+                            </div>
+                        </h3>
+                        <div class="circles">
+                        <div class="circle">
+                            <h4 style="margin: 10px;">Shooting Score</h4>
+                            <div id="color-{{ int(round(o2['Shooting Score'], 2)*100) }}" class="dot">
+                                {{ int(round(o2['Shooting Score'], 2)*100) }}
+                            </div>
+                        </div>
+                        <div class="circle">
+                            <h4 style="margin: 10px;">Rebounding Score</h4>
+                            <div id="color-{{ int(round(o2['Rebounding Score'], 2)*100) }}" class="dot">
+                                {{ int(round(o2['Rebounding Score'], 2)*100) }}
+                            </div>
+                        </div>
+                        <div class="circle">
+                            <h4 style="margin: 10px;">Passing Score</h4>
+                            <div id="color-{{ int(round(o2['Passing Score'], 2)*100) }}" class="dot">
+                                {{ int(round(o2['Passing Score'], 2)*100) }}
+                            </div>
+                        </div>
+                        <div class="circle">
+                            <h4 style="margin: 10px;">Athleticism Score</h4>
+                            <div id="color-{{ int(round(o2['Athleticism Score'], 2)*100) }}" class="dot">
+                                {{ int(round(o2['Athleticism Score'], 2)*100) }}
+                            </div>
+                        </div>
+                        <div class="circle">
+                            <h4 style="margin: 10px;">Shot Creation Score</h4>
+                            <div id="color-{{ int(round(o2['Shot Creation Score'], 2)*100) }}" class="dot">
+                                {{ int(round(o2['Shot Creation Score'], 2)*100) }}
+                            </div>
+                        </div>
+                        <div class="circle">
+                            <h4 style="margin: 10px;">Finishing Score</h4>
+                            <div id="color-{{ int(round(o2['Finishing Score'], 2)*100) }}" class="dot">
+                                {{ int(round(o2['Finishing Score'], 2)*100) }}
+                            </div>
+                        </div>
+                        <div class="circle">
+                            <h4 style="margin: 10px;">Defense Score</h4>
+                            <div id="color-{{ int(round(o2['Defense Score'], 2)*100) }}" class="dot">
+                                {{ int(round(o2['Defense Score'], 2)*100) }}
+                            </div>
+                        </div>
+                        <div class="circle">
+                            <h4 style="margin: 10px;">College Productivity Score</h4>
+                            <div id="color-{{ int(round(o2['College Productivity Score'], 2)*100) }}" class="dot">
+                                {{ int(round(o2['College Productivity Score'], 2)*100) }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <footer style="background-color: #ccc; width: 100%">
+        <div style="float:left"><a target="_blank" href="https://icons8.com/icon/65492/basketball">Basketball</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a></div>
+        <div style="float:right"><label for="blind">Try Blind?</label><input type="checkbox" name="blind" value="Try Blind" unchecked></div>
+    </footer>
+    </form>
+    <script>
+        function toggleSidebar() {
+          const sidebar = document.querySelector('.sidebar');
+          sidebar.classList.toggle('show');
+        }
+      </script>
+    </body>
+</html>

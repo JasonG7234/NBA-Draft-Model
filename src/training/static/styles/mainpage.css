@@ -1,0 +1,255 @@
+
+
+  br { 
+    display: block; 
+  } 
+  article, aside, details, figcaption, figure, footer, header, hgroup, menu, nav, section { 
+    display: block; 
+  }
+  input, textarea { 
+    -webkit-font-smoothing: antialiased;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    outline: none; 
+  }
+  strong, b { 
+    font-weight: bold; 
+  } 
+  table { 
+    display: table;
+    border-collapse: separate !important;
+    border-spacing: 0;
+  }
+  /* Body */
+  .container {
+    width: 100%; 
+    height: 100%;
+    display: flex;
+    justify-content: space-evenly;
+
+  }
+
+  /* Sidebar */
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: -400px;
+    width: 400px;
+    height: 100%;
+    background-color: #f2f2f2;
+    transition: all 0.3s ease-in-out;
+    z-index: 999;
+  }
+
+  .menu-icon {
+    position: absolute;
+    z-index: 999;
+    cursor: pointer;
+    margin: -5px -5px;
+    padding: 8px;
+    background-color: #f2f2f2;
+    border-bottom: 1px solid black;
+    border-right: 1px solid gray;
+    border-radius: 3px;
+  }
+
+  .sidebar.show {
+    left: 0;
+  }
+
+  .sidebar ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .sidebar li {
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
+  }
+
+  .sidebar li:last-child {
+    border-bottom: none;
+  }
+  .player-button { 
+    width: 5rem;
+    height: 4rem;
+    margin: 0 1rem;
+    font-size: 18px;
+    border-radius: 5px;
+    border: 1px solid black;
+  }
+
+
+  /* Profile Cards */
+  .profile-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+  }
+  img { 
+    border: 0; 
+    max-width: 100%; 
+  }
+  .headings-no-margin {
+    margin-block-start: 0em;
+    margin-block-end: 0em;
+  }
+  .headings-margin {
+    margin-block-start: 0.5em;
+    margin-block-end: 0.5em;
+  }
+
+  /* Stats Tables */
+  #infoTable {
+    margin: 0 auto;
+    font-size: 1em;
+    margin-bottom: 15px;
+  }
+  
+  #infoTable thead {
+    width: 100%;
+    color: black;
+  }
+  #infoTable thead tr th {
+    padding: 12px 8px;
+    padding-left: 20px;
+  }
+thead:first-child th:first-child { border-top-left-radius: 5px; }
+thead:first-child th:last-child { border-top-right-radius: 5px; }
+
+tr:last-child td:first-child { border-bottom-left-radius: 5px; }
+tr:last-child td:last-child { border-bottom-right-radius: 5px; }
+
+/* Stats table borders */
+tr:first-child th:first-child { border-top-left-radius: 5px; }
+tr:first-child th:last-child { border-top-right-radius: 5px; }
+
+tr:last-child th:first-child { border-bottom-left-radius: 5px; }
+tr:last-child th:last-child { border-bottom-right-radius: 5px; }
+
+  #infoTable thead tr th span { 
+    padding-right: 20px;
+  }
+  #infoTable tbody tr td {
+    text-align: center;
+    padding: 8px 10px;
+  }
+  #infoTable tbody tr td.lalign {
+    text-align: left;
+  }
+  tbody tr{
+    background-color: #FAF9F6;
+    color: #000;
+  }
+  .auxiliary {
+    background-color: #1e458f;
+    color: white;
+  }
+  .stats {
+    background-color: #1e458f;
+    color: white;
+    padding: 5px;
+  }
+
+  .separator {
+    background: #ccc;
+    width: 1px;
+    display: block;
+  }
+
+  .tooltip {
+    position: relative;
+    display: inline-block;
+    border-bottom: 1px dotted black; /* If you want dots under the hoverable text */
+  }
+
+  /* Tooltip text */
+  .tooltip .tooltiptext {
+    font-size: 12px;
+    text-decoration: none;
+    visibility: hidden;
+    width: 140px;
+    background-color: #ccc;
+    color: black;
+    text-align: center;
+    padding: 5px;
+    left: 50%;
+    bottom: 100%;
+    margin-left: -70px;
+    border-radius: 6px;
+    opacity: 90%;
+    position: absolute;
+    z-index: 1;
+  }
+  
+  /* Show the tooltip text when you mouse over the tooltip container */
+  .tooltip:hover .tooltiptext {
+    visibility: visible;
+  }
+  .circles {
+    display: grid;
+    grid-template-columns: repeat(4, 120px);
+  }
+  .circle {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 5px;
+  }
+  .dot {
+    height: 50px;
+    padding: 5px;
+    width: 50px;
+    display: flex;
+    justify-content: center;
+    font-size: 24px;
+    flex-direction: column;
+    align-items: center;
+    border-radius: 50%;
+  }
+  .leaderboard {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    width: 400px;
+  }
+  
+  .player {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    width: 100%;
+  }
+  
+  .player img {
+    padding-left: 10px
+  }
+  
+  .info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    flex: 1;
+  }
+  
+  .name {
+    font-weight: bold;
+    text-align: center;
+  }
+  
+  .score {    
+    font-weight: bold;
+    text-align: right;
+  }
+  /* Footer */
+  footer {
+    position: fixed;
+    bottom: 0;
+  }

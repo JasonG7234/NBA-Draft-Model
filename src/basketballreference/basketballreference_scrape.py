@@ -112,14 +112,14 @@ BASKETBALL_REFERENCE_INDEX_EXCEPTIONS = {
     "andre-jackson" : 8,
     "brandon-johnson" : 56,
     "david-jones" : 10,
-    "terrell-brown" : 55
+    "terrell-brown" : 55,
+    "marcus-hammond" : 4
 }
 
 BASKETBALL_REFERENCE_SCHOOL_NAME_EXCEPTIONS = {
     "Central Florida" : "UCF",
     "Illinois-Chicago" : "UIC",
     "Louisiana Lafayette" : "Louisiana",
-    "UAB" : "Alabama-Birmingham",
     "Southern Miss." : "Southern Miss",
     "Tennessee-Martin" : "UT-Martin",
     "Texas A&M Corpus Christi" : "Texas A&M-Corpus Christi",
@@ -148,7 +148,7 @@ def add_college_stats_from_basketball_reference(df):
             df.drop(index, inplace=True)
             continue
         college_stats.append(player_stats)
-
+    print(player_stats)
     df = pd.concat([df, pd.DataFrame(college_stats,index=df.index,columns=COLUMN_NAMES)], axis=1)
     return df
 
