@@ -136,6 +136,7 @@ def find_site(url, max_retry_count=3):
                    'referer': "ttps://www.sports-reference.com/cbb/schools/pepperdine/2022.html",
                    'accept-language': "en-US,en;q=0.6",
                    'accept-encoding': "gzip, deflate, br"}
+    response = None
     while count < max_retry_count:
         try:
             response = requests.get(url, headers=req_headers, timeout=30)
@@ -150,7 +151,7 @@ def find_site(url, max_retry_count=3):
             time.sleep(10)
             count += 1
     if not response:
-        print('no response')
+        print('NO RESPONSE')
         return None, None
     try:
         html = response.content.decode("utf-8")

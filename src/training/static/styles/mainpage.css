@@ -6,22 +6,12 @@
   article, aside, details, figcaption, figure, footer, header, hgroup, menu, nav, section { 
     display: block; 
   }
-  ol, ul { 
-    list-style: none; 
-  }
   input, textarea { 
     -webkit-font-smoothing: antialiased;
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
     box-sizing: border-box;
     outline: none; 
-  }
-  blockquote, q { 
-    quotes: none; 
-  }
-  blockquote:before, blockquote:after, q:before, q:after { 
-    content: ''; 
-    content: none; 
   }
   strong, b { 
     font-weight: bold; 
@@ -31,15 +21,88 @@
     border-collapse: separate !important;
     border-spacing: 0;
   }
+  /* Body */
+  .container {
+    width: 100%; 
+    height: 100%;
+    display: flex;
+    justify-content: space-evenly;
+
+  }
+
+  /* Sidebar */
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: -400px;
+    width: 400px;
+    height: 100%;
+    background-color: #f2f2f2;
+    transition: all 0.3s ease-in-out;
+    z-index: 999;
+  }
+
+  .menu-icon {
+    position: absolute;
+    z-index: 999;
+    cursor: pointer;
+    margin: -5px -5px;
+    padding: 8px;
+    background-color: #f2f2f2;
+    border-bottom: 1px solid black;
+    border-right: 1px solid gray;
+    border-radius: 3px;
+  }
+
+  .sidebar.show {
+    left: 0;
+  }
+
+  .sidebar ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .sidebar li {
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
+  }
+
+  .sidebar li:last-child {
+    border-bottom: none;
+  }
+  .player-button { 
+    width: 5rem;
+    height: 4rem;
+    margin: 0 1rem;
+    font-size: 18px;
+    border-radius: 5px;
+    border: 1px solid black;
+  }
+
+
+  /* Profile Cards */
   .profile-info {
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    justify-content: center;
+    width: 100%;
   }
   img { 
     border: 0; 
     max-width: 100%; 
   }
+  .headings-no-margin {
+    margin-block-start: 0em;
+    margin-block-end: 0em;
+  }
+  .headings-margin {
+    margin-block-start: 0.5em;
+    margin-block-end: 0.5em;
+  }
+
+  /* Stats Tables */
   #infoTable {
     margin: 0 auto;
     font-size: 1em;
@@ -90,6 +153,13 @@ tr:last-child th:last-child { border-bottom-right-radius: 5px; }
     color: white;
     padding: 5px;
   }
+
+  .separator {
+    background: #ccc;
+    width: 1px;
+    display: block;
+  }
+
   .tooltip {
     position: relative;
     display: inline-block;
@@ -102,16 +172,15 @@ tr:last-child th:last-child { border-bottom-right-radius: 5px; }
     text-decoration: none;
     visibility: hidden;
     width: 140px;
-    background-color: black;
-    color: #fff;
+    background-color: #ccc;
+    color: black;
     text-align: center;
-    padding: 5px 0;
+    padding: 5px;
     left: 50%;
     bottom: 100%;
     margin-left: -70px;
     border-radius: 6px;
-   
-    /* Position the tooltip text - see examples below! */
+    opacity: 90%;
     position: absolute;
     z-index: 1;
   }
@@ -122,13 +191,14 @@ tr:last-child th:last-child { border-bottom-right-radius: 5px; }
   }
   .circles {
     display: grid;
-    grid-template-columns: repeat(auto-fill,minmax(120px, 1fr));
+    grid-template-columns: repeat(4, 120px);
   }
   .circle {
     display: flex;
     flex-direction: column;
     align-items: center;
-
+    justify-content: space-between;
+    padding: 5px;
   }
   .dot {
     height: 50px;
@@ -140,11 +210,6 @@ tr:last-child th:last-child { border-bottom-right-radius: 5px; }
     flex-direction: column;
     align-items: center;
     border-radius: 50%;
-  }
-  
-  footer {
-    position: fixed;
-    bottom: 0;
   }
   .leaderboard {
     display: flex;
@@ -183,39 +248,8 @@ tr:last-child th:last-child { border-bottom-right-radius: 5px; }
     font-weight: bold;
     text-align: right;
   }
-  .menu-icon {
-    position: absolute;
-    margin: 5px auto;
-    z-index: 999;
-  }
-
-  /* Sidebar */
-  .sidebar {
+  /* Footer */
+  footer {
     position: fixed;
-    top: 0;
-    left: -400px;
-    width: 400px;
-    height: 100%;
-    background-color: #f2f2f2;
-    transition: all 0.3s ease-in-out;
-    z-index: 999;
-  }
-
-  .sidebar.show {
-    left: 0;
-  }
-
-  .sidebar ul {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-  }
-
-  .sidebar li {
-    padding: 10px;
-    border-bottom: 1px solid #ccc;
-  }
-
-  .sidebar li:last-child {
-    border-bottom: none;
+    bottom: 0;
   }

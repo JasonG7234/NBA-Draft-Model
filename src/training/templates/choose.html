@@ -44,23 +44,26 @@
             </div>
         </div>
         <form method="post" action="/">
-            <div style="width: 100%; height: 100%;">
+            <div class="container">
                 <!-- PLAYER 1 -->
-                <div style="width: 49.9%; float: left; height: 95%; text-align: center; border-right: 0.5px solid #ccc">
-                    <div class="profile-info">
-                        <div style="float:right; padding-right: 10px;">
-                            <img src="{{ o1['Image Link']}}">
+                <div style="text-align: center;">
+                    <div class="profile-info" style="float: left; padding-left: 10px">
+                        <div style="display:flex;">
+                            <div><img src="https://basketball.realgm.com/images/nba/4.2/profiles/photos/2006/player_photo.jpg"></div>
+                            <div style="display: flex; flex-direction: column; align-items: flex-start; justify-content: space-around; padding-left: 10px">
+                                <h1 class="headings-no-margin">Player 1</h1>
+                                {% if o1['Position 2'] != '-' %}
+                                    <h2 class="headings-no-margin">{{ o1['School'] }} | {{ o1['Class'] }} | {{ o1['Position 1'] }}/{{ o1['Position 2'] }}</h2>
+                                {% else %}
+                                    <h2 class="headings-no-margin">{{ o1['School'] }} | {{ o1['Class'] }} | {{ o1['Position 1'] }}</h2>
+                                {% endif %}
+                            </div>
                         </div>
-                        <div style="text-align:left">
-                            <h1>{{ o1['Name']}}</h1>
-                            {% if o1['Position 2'] != '-' %}
-                                <h2 class="green">{{ o1['School'] }} | {{ o1['Class'] }} | {{ o1['Position 1'] }}/{{ o1['Position 2'] }}</h2>
-                            {% else %}
-                                <h2 class="green">{{ o1['School'] }} | {{ o1['Class'] }} | {{ o1['Position 1'] }}</h2>
-                            {% endif %}
+                        <div style="float: right">
+                            <input class="player-button" type="submit" value="Player 1" name="action1"/>
                         </div>
                     </div>
-                    <h3>Auxiliary: </h3>
+                    <h3 class="headings-margin">Auxiliary: </h3>
                     <table id="infoTable" cellspacing="0" cellpadding="0">
                         <thead >
                             <th class="auxiliary"><span>Height</span></th>
@@ -84,9 +87,9 @@
                             </tr>
                         </tbody>
                     </table>
-                    <div style="width: 100%; height: 100%;">
-                        <div style="width: 50%; float: left;">
-                            <h3>Stats:</h3>
+                    <div class="stats-container">
+                        <div style="float: left;">
+                            <h3 class="headings-margin">Stats:</h3>
                             <table id="infoTable" cellspacing="0" cellpadding="0">
                                 <tbody><tr>
                                     <th class="stats"><span>TS%</span></th>
@@ -106,13 +109,13 @@
                                 </tr><tr>      
                                     <th class="stats"><span>AST%</span></th>
                                     <td><span>{{ o1['AST%'] }}%</span></td>
-                                </tr><tr>      
-                                    <th class="stats"><span>TRB%</span></th>
-                                    <td><span>{{ o1['TRB%'] }}%</span></td>
-                                </tr><tr>      
-                                    <th class="stats"><span>BLK%</span></th>
+                                </tr><tr>    
+                                    <th class="stats"><span>STL%</span></th>
                                     <td><span>{{ o1['STL%'] }}%</span></td>
-                                </tr><tr>      
+                                </tr><tr>
+                                    <th class="stats"><span>BLK%</span></th>
+                                    <td><span>{{ o1['BLK%'] }}%</span></td>
+                                </tr><tr>  
                                     <th class="stats"><span>USG%</span></th>
                                     <td><span>{{ o1['USG%'] }}%</span></td>
                                 </tr><tr>      
@@ -133,8 +136,8 @@
                                 </tr></tbody>
                             </table>
                         </div>
-                        <div style="width: 50%; float: right;">
-                            <h3>Summaries: 
+                        <div style="float: right;">
+                            <h3 class="headings-margin">Summaries: 
                                 <div class="tooltip">&#9432;
                                     <span class="tooltiptext">These summary scores are percentile values based on how each player compares to other historic draft prospects at their position.
                                 </div>
@@ -191,24 +194,28 @@
                             </div>
                         </div>
                     </div>
-                <input type="submit" value="Player 1" name="action1"/>
+                
             </div>
+            <li class="separator" aria-hidden="true" role="presentation"></li>
             <!-- PLAYER 2 -->
-            <div style="width: 49.9%; float: right; height: 95%; text-align: center;">
-                <div class="profile-info">
-                    <div style="float:right; padding-right: 10px;">
-                        <img src="{{ o2['Image Link']}}">
+            <div style="text-align: center;">
+                <div class="profile-info" style="float: right; padding-right: 10px; flex-direction: row-reverse">
+                    <div style="float:right; padding-left: 10px;">
+                        <img src="https://basketball.realgm.com/images/nba/4.2/profiles/photos/2006/player_photo.jpg">
                     </div>
-                    <div style="text-align:left">
-                        <h1>{{ o2['Name']}}</h1>
+                    <div style="text-align:right">
+                        <h1>Player 2</h1>
                         {% if o2['Position 2'] != '-' %}
                             <h2 class="green">{{ o2['School'] }} | {{ o2['Class'] }} | {{ o2['Position 1'] }}/{{ o2['Position 2'] }}</h2>
                         {% else %}
                             <h2 class="green">{{ o2['School'] }} | {{ o2['Class'] }} | {{ o2['Position 1'] }}</h2>
                         {% endif %}
                     </div>
+                    <div style="float: left">
+                    <input class="player-button" type="submit" value="Player 2" name="action2"/>
+                    </div>
                 </div>
-                <h3>Auxiliary: </h3>
+                <h3 class="headings-margin">Auxiliary: </h3>
                 <table id="infoTable" cellspacing="0" cellpadding="0">
                     <thead>
                         <th class="auxiliary"><span>Height</span></th>
@@ -232,9 +239,9 @@
                         </tr>
                     </tbody>
                 </table>
-                <div style="width: 100%; height: 100%;">
-                    <div style="width: 50%; float: left;">
-                        <h3>Stats:</h3>
+                <div class="stats_container">
+                    <div style="float: left; padding: 10px">
+                        <h3 class="headings-margin">Stats:</h3>
                         <table id="infoTable" cellspacing="0" cellpadding="0">
                             <tbody><tr>
                                 <th class="stats"><span>TS%</span></th>
@@ -255,11 +262,11 @@
                                 <th class="stats"><span>AST%</span></th>
                                 <td><span>{{ o2['AST%'] }}%</span></td>
                             </tr><tr>      
-                                <th class="stats"><span>TRB%</span></th>
+                                <th class="stats"><span>STL%</span></th>
                                 <td><span>{{ o2['STL%'] }}%</span></td>
                             </tr><tr>      
                                 <th class="stats"><span>BLK%</span></th>
-                                <td><span>{{ o2['STL%'] }}%</span></td>
+                                <td><span>{{ o2['BLK%'] }}%</span></td>
                             </tr><tr>      
                                 <th class="stats"><span>USG%</span></th>
                                 <td><span>{{ o2['USG%'] }}%</span></td>
@@ -281,10 +288,10 @@
                             </tr></tbody>
                         </table>
                     </div>
-                    <div style="width: 50%; float: right;">
-                        <h3>Summaries: 
+                    <div style="float: right;">
+                        <h3 class="headings-margin">Summaries: 
                             <div class="tooltip">&#9432;
-                                <span class="tooltiptext">These summary scores are percentile values based on how each player compares to other historic draft prospects at their position.
+                                <span class="tooltiptext">Summary scores are percentile values based on how each player compares to other historic draft prospects at their position. They are NOT age or SOS adjusted.
                             </div>
                         </h3>
                         <div class="circles">
@@ -338,12 +345,10 @@
                         </div>
                     </div>
                 </div>
-                <input type="submit" value="Player 2" name="action2"/>
             </div>
-            <input type="submit" value="End" name="End"/>
         </div>
     </div>
-    <footer style="background-color: #ccc; width: 100%; opacity: 60%">
+    <footer style="background-color: #ccc; width: 100%">
         <div style="float:left"><a target="_blank" href="https://icons8.com/icon/65492/basketball">Basketball</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a></div>
         <div style="float:right"><label for="blind">Try Blind?</label><input type="checkbox" name="blind" value="Try Blind" unchecked></div>
     </footer>

@@ -11,6 +11,7 @@ from utils import *
 app = Flask(__name__, static_folder='static')
 
 df = convert_number_to_class(pd.read_csv("../../data/draft_db_2023_special.csv"))
+df = df[(df['Season'] != '2008-09') & (df['Season'] != '2009-10') & (df['Season'] != '2010-11')]
 df['Position 2'] = df['Position 2'].replace(np.nan, '-')
 df = df.fillna(0)
 
