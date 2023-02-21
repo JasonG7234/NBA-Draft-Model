@@ -185,7 +185,7 @@ AAU_STATS_TABLE_COLUMNS = ['AAU Season', 'AAU Team', 'AAU League', 'AAU GP', 'AA
 INTERNATIONAL_STATS_TABLE_COLUMNS = ['Event Year', 'Event Name', 'Event GP', 'Event MIN', 'Event PTS', 'Event FGM', 'Event FGA', 'Event FG%', 'Event 3PM', 'Event 3PA', 'Event 3P%', 
         'Event FTM', 'Event FTA', 'Event FT%', 'Event TRB', 'Event AST', 'Event STL', 'Event BLK', 'Event TOV', 'Event PF', 'Event Placement']
 
-def get_realgm_stats(df, need_profile_info=False):
+def get_realgm_stats(df, need_profile_info=False, realgm_id=None):
     
     df["RealGM ID"] = ''
     df["Birthday"] = ''
@@ -204,7 +204,7 @@ def get_realgm_stats(df, need_profile_info=False):
     for index, row in df.iterrows():
         is_row_data_populated = False
         while not is_row_data_populated:
-            summary_index = df.at[index, 'RealGM ID']
+            summary_index = realgm_id if realgm_id is not None else df.at[index, 'RealGM ID']
             realgm_url = get_url_from_name(row['Name'], summary_index)
             try:
                 site, url = find_site(realgm_url)
