@@ -1,6 +1,6 @@
 # NBA Draft Model
 
-This is a Python college basketball data scraper + draft model.
+This is a Python NCAA basketball data scraper + draft model.
 
 ## Installation
 
