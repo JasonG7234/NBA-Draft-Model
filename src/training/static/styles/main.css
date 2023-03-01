@@ -1,4 +1,11 @@
-
+  html {
+    height: 100%;
+  }
+  
+  body {
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+  }
 
   br { 
     display: block; 
@@ -22,10 +29,19 @@
     border-spacing: 0;
   }
   /* Body */
-  .container {
+  form { 
+    height: 100%;
     width: 100%;
+  }
+  .content-container {
+    width: 100%;
+    height: 98%;
     display: flex;
     justify-content: space-evenly;
+    align-items: center;
+  }
+  #player-container {
+    text-align: center;
   }
 
   /* Sidebar */
@@ -70,24 +86,57 @@
   .sidebar li:last-child {
     border-bottom: none;
   }
-  .player-button { 
-    width: 5rem;
-    height: 4rem;
-    margin: 0 1rem;
+  #player-button  {
+    min-width: 130px;
     font-size: 18px;
+    height: 60px;
+    color: #fff;
+    padding: 5px 10px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    display: inline-block;
+    outline: none;
     border-radius: 5px;
-    border: 1px solid black;
-  }
+    border: 2px solid #495057;
+    background: #495057;
+}
+#player-button:hover {
+    background: #fff;
+    color: #495057
+}
 
 
   /* Profile Cards */
-  .profile-info {
+  #profile-info {
     display: flex;
     justify-content: space-between;
     align-items: center;
     min-height: 8rem;
     width: 100%;
   }
+  #profile-info-content {
+    display:flex;
+  }
+  #profile-info-content.second {
+    text-align: right;
+  }
+
+  #profile-info-content-text {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+  }
+  #profile-info-content-text.first {
+    align-items: flex-start;
+    padding-left: 10px;
+  }
+  #profile-info-content-text.second {
+    align-items: flex-end;
+    padding-right: 10px;
+  }
+
   img { 
     border: 0; 
     max-width: 100%; 
@@ -99,6 +148,10 @@
   .headings-margin {
     margin-block-start: 0.5em;
     margin-block-end: 0.5em;
+  }
+
+  .stats-table {
+    float: left;
   }
 
   /* Stats Tables */
@@ -153,10 +206,15 @@ tr:last-child th:last-child { border-bottom-right-radius: 5px; }
     padding: 5px;
   }
 
+  .stats-summaries {
+    float: right;
+  }
+
   .separator {
     background: #ccc;
     width: 1px;
     display: block;
+    height: 100%;
   }
 
   .tooltip {
@@ -218,7 +276,7 @@ tr:last-child th:last-child { border-bottom-right-radius: 5px; }
     width: 400px;
   }
   
-  .player {
+  #player {
     display: flex;
     align-items: center;
     padding: 15px;
@@ -227,7 +285,7 @@ tr:last-child th:last-child { border-bottom-right-radius: 5px; }
     width: 100%;
   }
   
-  .player img {
+  #player img {
     padding-left: 10px
   }
   
@@ -249,9 +307,11 @@ tr:last-child th:last-child { border-bottom-right-radius: 5px; }
   }
   /* Footer */
   footer {
+    width: 100%;
     position: fixed;
     bottom: 0;
     font-size: 16px;
+    background-color: #ccc;
   }
   
 .contact-social > ul {
@@ -282,8 +342,54 @@ footer img {
   list-style: none;
 }
 
+/* MOBILE */
 @media screen and (max-width: 1142px) {
-  .container {
+  .content-container {
     flex-direction: column;
+    justify-content: space-between;
+  }
+
+  #player-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.5rem;
+  }
+
+  #player-container:first-child {
+    flex-direction: column-reverse;
+  }
+
+  #profile-info {
+    justify-content: space-around;
+    align-items: center;
+    width: 90%;
+  }
+  #profile-info.second {
+    flex-direction: row-reverse;
+  }
+  #profile-info-content.second {
+    text-align: left;
+    flex-direction: row-reverse;
+  }
+  #profile-info-content-text.second {
+    align-items: flex-start;
+    padding-left: 10px;
+  }
+
+  .stats-container {
+    width: 100%;
+    display: flex;
+    justify-content: space-evenly;
+  }
+
+  .circles {
+    grid-template-columns: repeat(2, 13rem);
+  }
+  .separator {
+    width: 100%;
+    height: 1px;
   }
 }
