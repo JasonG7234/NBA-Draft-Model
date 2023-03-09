@@ -31,6 +31,8 @@ BART_TORVIK_NAME_EXCEPTIONS = {
     "Kay Felder" : "Kahlil Felder",
     "Ray Spalding" : "Raymond Spalding",
     "Herbert Jones" : "Herb Jones",
+    "Tyrn Flowers" : "Ty Flowers",
+    "JaKarr Sampson" : "Jakarr Sampson"
     }
 
 BART_TORVIK_VALUE_EXCEPTIONS = {
@@ -38,7 +40,8 @@ BART_TORVIK_VALUE_EXCEPTIONS = {
     "Tyler Harris2015-16" : "6",
     "Donovan Mitchell2016-17" : "9",
     "Jordan Bell2016-17" : "50",
-    "Donovan Williams2021-22" : "9"
+    "Donovan Williams2021-22" : "9",
+    "Jae'Sean Tate2017-18" : "17"
 }
 
 def fetch_bart_torvik_data(year):
