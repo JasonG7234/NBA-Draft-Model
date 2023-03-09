@@ -41,6 +41,7 @@ HOOP_MATH_SCHOOL_EXCEPTIONS = {
 	"CentralFlorida" : "UCF",
 	"WesternMichigan" : "WesternMich.",
 	"Illinois-Chicago" : "UIC",
+    "Purdue-FortWayne" : "PurdueFortWayne",
 	"TexasArlington" : "UTArlington",
 	"EasternWashington" : "EasternWash.",
 	"LouisianaLafayette" : "Louisiana",
@@ -90,8 +91,12 @@ def fetch_hoop_math_page_url(row):
     season_in_url = '20' + row['Season'].split('-')[-1]
     if (int(season_in_url) < 2018 and team_name_in_url == "NCState"):
         team_name_in_url = "NorthCarolinaSt."
-    if (int(season_in_url) < 2018 and team_name_in_url == "SaintMary's(CA)"):
+    elif (int(season_in_url) < 2018 and team_name_in_url == "SaintMary's(CA)"):
         team_name_in_url = "St.Mary's(CA)"
+    elif (int(season_in_url) < 2015 and team_name_in_url == "Louisiana"):
+        team_name_in_url = "La.-Lafayette"
+    elif (int(season_in_url) < 2019 and team_name_in_url == "UIC"):
+        team_name_in_url = "Ill.-Chicago"
     url = 'https://hoop-math.com/' + team_name_in_url + season_in_url + '.php'
     return find_site(url)[0]
 
