@@ -195,6 +195,7 @@ def get_realgm_stats(df, need_profile_info=False, realgm_id=None):
     df["Wins"] = ''
     df["Losses"] = ''
     df["Pure Point Rating"] = ''
+    df["Image Link"] = ""
     
     for col in AAU_STATS_TABLE_COLUMNS:
         df[col] = ''
@@ -257,6 +258,7 @@ def populate_profile_info(df, player_page, index):
     df.loc[index, "Height"] = player_page.get_height()
     df.loc[index, "Weight"] = player_page.get_weight()
     df.loc[index, "Class"] = player_page.get_class()
+    df.loc[index, "Image Link"] = player_page.get_image_url()
 
 def populate_draft_picks(df):
     df["Draft Pick"] = ""

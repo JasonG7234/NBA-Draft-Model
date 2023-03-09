@@ -35,7 +35,7 @@ df = realgm_scrape.get_realgm_stats(df, True, realgm_id=lines[3])
 df = convert_class_to_number(df)
 df = convert_height_to_inches(df)
 df = basketballreference_scrape.add_college_stats_from_basketball_reference(df)
-#df = rsci_scrape.add_rsci_rank_as_column(df, True)
+df = rsci_scrape.add_rsci_rank_as_column(df, True)
 df['RSCI'] = 400
 df = torvik_fetch.get_torvik_dunks(df)
 df = hoopmath_scrape.add_college_stats_from_hoopmath(df)
