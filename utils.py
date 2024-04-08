@@ -109,6 +109,9 @@ NBA_SCHOOL_NAME_EXCEPTIONS = {
     "St. Johns" : "St. John's"
 }
 
+HIGH_MAJOR_CONFERENCES = ['Big Ten', 'SEC', 'ACC', 'Big East', 'Big 12', 'Pac-12']
+MID_MAJOR_CONFERENCES = ['A-10', 'AAC', 'WCC', 'MWC']
+
 PER_40_COLUMN_IDS = ['fg_per_min', 'fga_per_min', 'fg_pct', 'fg2_per_min', 'fg2a_per_min', 'fg2_pct', 'fg3_per_min', 'fg3a_per_min', 'fg3_pct',
     'ft_per_min','fta_per_min','ft_pct', 'trb_per_min', 'ast_per_min', 'stl_per_min', 'blk_per_min', 'tov_per_min', 'pf_per_min', 'pts_per_min']
 
@@ -247,18 +250,24 @@ def normalize(df, col_name, is_inverse_normalization=False):
     return df
 
 def reorder_final_draft_db_columns(df):
+    
+    df = df.reindex(columns = df.columns.tolist() + 
+        ['Play Style', 'Stock%', 'Adjusted TOV%', 'Offensive Load', '3 Point Proficiency', '3 Point Confidence', 'Dunk vs Rim Shot Percentage', '% Dunks Unassisted', 'Dunks per Minute Played', 'Unassisted Shots @ Rim /100Poss', '% Assisted', 'Finishing Score', 'Shooting Score', 'Shot Creation Score', 'Passing Score', 'Rebounding Score', 'Athleticism Score', 'Defense Score', 'College Productivity Score', 'Percentile Score', 'Box Score Creation', 'Rim Shot Creation', 'Helio Score', 'Draft Score']
+    )
+    
     return df[['RealGM ID','Season','Name',
-                'Position 1','Position 2',
+                'Position 1','Position 2','Play Style','Height','Weight',
                 'School','Conference','Wins','Losses','SOS',
                 'Class','Birthday','Draft Day Age',
-                'Height','Weight','Height w/o Shoes','Height w/ Shoes','Wingspan','Standing Reach','Body Fat %','Hand Length','Hand Width',
-                'RSCI','G','GS','MP','PER','TS%','eFG%','3PAr','FTr','PProd','ORB%','DRB%','TRB%','AST%','STL%','BLK%','TOV%','USG%','OWS','DWS','WS','WS/40','OBPM','DBPM','BPM','AST/TOV','OFF RTG','DEF RTG','Hands-On Buckets','Pure Point Rating',
-                'FG/40','FGA/40','FG%','2FGM/40','2FGA/40','2FG%','3FGM/40','3FGA/40','3FG%','FT/40','FTA/40','FT%','TRB/40','AST/40','STL/40','BLK/40','TOV/40','PF/40','PTS/40',
+                'RSCI','G','GS','MP','PER','TS%','eFG%','3PAr','FTr','PProd','ORB%','DRB%','TRB%','AST%','STL%','BLK%','Stock%','TOV%','Adjusted TOV%','USG%','Offensive Load','OWS','DWS','WS','WS/40','OBPM','DBPM','BPM','AST/TOV','OFF RTG','DEF RTG','Hands-On Buckets','Pure Point Rating',
+                'FG/40','FGA/40','FG%','2FGM/40','2FGA/40','2FG%','3FGM/40','3FGA/40','3FG%',"3 Point Proficiency",'3 Point Confidence','FT/40','FTA/40','FT%','TRB/40','AST/40','STL/40','BLK/40','TOV/40','PF/40','PTS/40',
                 'FGM/100Poss','FGA/100Poss','2FGM/100Poss','2FGA/100Poss','3FGM/100Poss','3FGA/100Poss','FT/100Poss','FTA/100Poss','TRB/100Poss','AST/100Poss','STL/100Poss','BLK/100Poss','TOV/100Poss','PF/100Poss','PTS/100Poss',
-                '# Dunks','% Shots @ Rim','FG% @ Rim','%Astd @ Rim','% Shots @ Mid','FG% @ Mid','%Astd @ Mid','% Shots @ 3','%Astd @ 3',
+                '# Dunks',"Dunk vs Rim Shot Percentage","% Dunks Unassisted","Dunks per Minute Played","Unassisted Shots @ Rim /100Poss",
+                '% Shots @ Rim','FG% @ Rim','%Astd @ Rim','% Shots @ Mid','FG% @ Mid','%Astd @ Mid','% Shots @ 3','%Astd @ 3','% Assisted',
                 'AAU Season','AAU Team','AAU League','AAU GP','AAU GS','AAU MIN','AAU PTS','AAU FGM','AAU FGA','AAU FG%','AAU 3PM','AAU 3PA','AAU 3P%','AAU FTM','AAU FTA','AAU FT%','AAU ORB','AAU DRB','AAU TRB','AAU AST','AAU STL','AAU BLK','AAU TOV','AAU PF',
-                'Event Year','Event Name','Event GP','Event MIN','Event PTS','Event FGM','Event FGA','Event FG%','Event 3PM','Event 3PA','Event 3P%','Event FTM','Event FTA','Event FT%','Event TRB','Event AST','Event STL','Event BLK','Event TOV','Event PF','Event Placement'
-                ]]
+                'Event Year','Event Name','Event GP','Event MIN','Event PTS','Event FGM','Event FGA','Event FG%','Event 3PM','Event 3PA','Event 3P%','Event FTM','Event FTA','Event FT%','Event TRB','Event AST','Event STL','Event BLK','Event TOV','Event PF','Event Placement',
+                'Finishing Score','Shooting Score','Shot Creation Score','Passing Score','Rebounding Score','Athleticism Score','Defense Score','College Productivity Score','Percentile Score',
+                'Box Score Creation','Rim Shot Creation','Helio Score','Draft Score', 'Image Link']]
     
 def reorder_final_season_db_columns(df):
     return df[['RealGM ID','Season','Name',
@@ -271,10 +280,11 @@ def reorder_final_season_db_columns(df):
                 'FGM/100Poss','FGA/100Poss','2FGM/100Poss','2FGA/100Poss','3FGM/100Poss','3FGA/100Poss','FT/100Poss','FTA/100Poss','TRB/100Poss','AST/100Poss','STL/100Poss','BLK/100Poss','TOV/100Poss','PF/100Poss','PTS/100Poss',
                 '# Dunks','% Shots @ Rim','FG% @ Rim','%Astd @ Rim','% Shots @ Mid','FG% @ Mid','%Astd @ Mid','% Shots @ 3','%Astd @ 3',
                 'AAU Season','AAU Team','AAU League','AAU GP','AAU GS','AAU MIN','AAU PTS','AAU FGM','AAU FGA','AAU FG%','AAU 3PM','AAU 3PA','AAU 3P%','AAU FTM','AAU FTA','AAU FT%','AAU ORB','AAU DRB','AAU TRB','AAU AST','AAU STL','AAU BLK','AAU TOV','AAU PF',
-                'Event Year','Event Name','Event GP','Event MIN','Event PTS','Event FGM','Event FGA','Event FG%','Event 3PM','Event 3PA','Event 3P%','Event FTM','Event FTA','Event FT%','Event TRB','Event AST','Event STL','Event BLK','Event TOV','Event PF','Event Placement'
+                'Event Year','Event Name','Event GP','Event MIN','Event PTS','Event FGM','Event FGA','Event FG%','Event 3PM','Event 3PA','Event 3P%','Event FTM','Event FTA','Event FT%','Event TRB','Event AST','Event STL','Event BLK','Event TOV','Event PF','Event Placement', 
+                'Image Link'
                 ]]
 
-def get_value_at_column_by_player_name(df, player_name, col_name, is_inverse_percentile=False, to_print_percentile=True):
+def get_value_at_column_by_player_name(df, player_name, col_name, is_inverse_percentile=False, to_print_percentile=True, to_find_similar=False):
     print('=========================================')
     try:
         val = df.loc[df['Name'] == player_name].iloc[0][col_name]
@@ -282,6 +292,17 @@ def get_value_at_column_by_player_name(df, player_name, col_name, is_inverse_per
         print(f"ERROR: The name {player_name} has no exact match.")
         return
     print(f"{player_name}'s value for column '{col_name}' is: {val}")
+    if to_find_similar:
+        # Calculate the absolute difference between each row and the target value
+        df['difference'] = df[col_name].apply(lambda x: abs(x - val))
+
+        # Sort the dataframe by the 'difference' column to find the closest rows
+        df_sorted = df.sort_values(by='difference')
+
+        # Get the rows with the smallest difference (closest to the target value)
+        closest_rows = df_sorted.head(10)  # You can specify the number of rows you want
+
+        print(closest_rows[['Name', col_name]])
     if to_print_percentile:
         get_percentile_rank(df, col_name, player_name, is_inverse_percentile)
 

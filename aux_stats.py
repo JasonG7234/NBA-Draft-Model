@@ -30,6 +30,7 @@ def self_created_dunks(df):
     return df
 
 def bentaylor_stats(df):
+    df["Harmonic STK%"] = (2*df['STL%']*df['BLK%'])/(df['STL%']+df['BLK%'])
     df["3 Point Proficiency"] = ""
     df['Box Score Creation'] = ""
     df['Offensive Load'] = ""
@@ -55,46 +56,7 @@ def bentaylor_stats(df):
         df.loc[index, 'Adjusted TOV%'] = round(_cTOV, 3)
     #df[].fillna(df['Box Score Creation'].mean())
     df['Box Score Creation'] = pd.to_numeric(df['Box Score Creation'], downcast="float")
-    print(df['Box Score Creation'].dtype)
     return df
-
-def add_conference(df):
-    ACC = ['Boston College', 'Clemson', 'Duke', 'UNC', 'North Carolina', 'NC State', 'Wake Forest', 'Florida State', 'Georgia Tech', 'Louisville', 'Miami', 'Notre Dame', 'Pitt', 'Syracuse', 'Virginia Tech', 'Virginia']
-    BIG_EAST = ['Butler', 'Creighton', 'DePaul', 'Georgetown', 'Marquette', 'Providence', 'Seton Hall', "St. John's (NY)", 'UConn', 'Villanova', 'Xavier']
-    SEC = ['Alabama', 'Arkansas', 'Auburn', 'Florida', 'Georgia', 'Kentucky', 'LSU', 'Ole Miss', 'Mississippi State', 'Missouri', 'South Carolina', 'Tennessee', 'Texas A&M', 'Vanderbilt']
-    BIG_TEN = ['Illinois', 'Indiana', 'Iowa', 'Maryland', 'Michigan State', 'Michigan', 'Minnesota', 'Nebraska', 'Northwestern', 'Ohio State', 'Penn State', 'Purdue', 'Rutgers', 'Wisconsin']
-    WCC = ['Gonzaga', 'Pepperdine', 'Santa Clara', 'BYU', "Saint Mary's", 'San Francisco']
-    BIG_12 = ['Baylor', 'Iowa State', 'Kansas', 'Kansas State', 'Oklahoma', 'Oklahoma State', 'Texas', 'TCU', 'Texas Tech', 'West Virginia']
-    PAC_12 = ['Oregon', 'USC', 'UCLA', 'Arizona State', 'Arizona', 'California', 'Colorado', 'Utah', 'Oregon State', 'Stanford', 'Washington', 'Washington State']
-    MWC = ['Air Force', 'Boise State', 'Colorado State', 'Fresno State', 'Nevada', 'New Mexico', 'San Diego State', 'San Jose State', 'UNLV', 'Utah State', 'Wyoming']
-    AAC = ['Cincinnati', 'East Carolina', 'Houston', 'Memphis', 'SMU', 'South Florida', 'Temple', 'Tulane', 'Tulsa', 'Wichita State', 'Central Florida']
-    A10 = ['Davidson', 'Dayton', 'Duquesne', 'Fordham', 'George Mason', 'George Washington', 'La Salle', 'Rhode Island', 'Richmond', "St. Joseph's", 'Saint Louis', 'St. Bonaventure', 'UMass', 'VCU']
-    
-    df['Conference'] = 'Other'
-    for index, row in df.iterrows():
-        school = row['School']
-        if school in ACC:
-            df.loc[index, 'Conference'] = 'ACC'
-        if school in BIG_EAST:
-            df.loc[index, 'Conference'] = 'Big East'
-        if school in SEC:
-            df.loc[index, 'Conference'] = 'SEC'
-        if school in BIG_TEN:
-            df.loc[index, 'Conference'] = 'Big Ten'
-        if school in WCC:
-            df.loc[index, 'Conference'] = 'WCC'
-        if school in BIG_12:
-            df.loc[index, 'Conference'] = 'Big 12'
-        if school in PAC_12:
-            df.loc[index, 'Conference'] = 'Pac-12'
-        if school in MWC:
-            df.loc[index, 'Conference'] = 'MWC'
-        if school in AAC:
-            df.loc[index, 'Conference'] = 'AAC'
-        if school in A10:
-            df.loc[index, 'Conference'] = 'AAC'
-    return df
-
 
     
 def play_styles(df):
@@ -313,7 +275,7 @@ def reorder_aux_columns(df):
                 'Position 1','Position 2','Play Style','Height','Weight',
                 'School','Conference','Wins','Losses','SOS',
                 'Class','Birthday','Draft Day Age',
-                'RSCI','G','GS','MP','PER','TS%','eFG%','3PAr','FTr','PProd','ORB%','DRB%','TRB%','AST%','STL%','BLK%','Stock%','TOV%','Adjusted TOV%','USG%','Offensive Load','OWS','DWS','WS','WS/40','OBPM','DBPM','BPM','AST/TOV','OFF RTG','DEF RTG','Hands-On Buckets','Pure Point Rating',
+                'RSCI','G','GS','MP','PER','TS%','eFG%','3PAr','FTr','PProd','ORB%','DRB%','TRB%','AST%','STL%','BLK%','Stock%','Harmonic STK%','TOV%','Adjusted TOV%','USG%','Offensive Load','OWS','DWS','WS','WS/40','OBPM','DBPM','BPM','AST/TOV','OFF RTG','DEF RTG','Hands-On Buckets','Pure Point Rating',
                 'FG/40','FGA/40','FG%','2FGM/40','2FGA/40','2FG%','3FGM/40','3FGA/40','3FG%',"3 Point Proficiency",'3 Point Confidence','FT/40','FTA/40','FT%','TRB/40','AST/40','STL/40','BLK/40','TOV/40','PF/40','PTS/40',
                 'FGM/100Poss','FGA/100Poss','2FGM/100Poss','2FGA/100Poss','3FGM/100Poss','3FGA/100Poss','FT/100Poss','FTA/100Poss','TRB/100Poss','AST/100Poss','STL/100Poss','BLK/100Poss','TOV/100Poss','PF/100Poss','PTS/100Poss',
                 '# Dunks',"Dunk vs Rim Shot Percentage","% Dunks Unassisted","Dunks per Minute Played","Unassisted Shots @ Rim /100Poss",

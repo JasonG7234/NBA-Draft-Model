@@ -33,46 +33,46 @@
                 <div class="leaderboard">
                     <h2>Leaderboard</h2>
                     <div id="player">
-                    <img src="https://basketball.realgm.com/images/nba/4.2/profiles/photos/2006/Cunningham_Cade_det22.jpg" alt="Player 1" width="125" height="150">
+                    <img src="https://basketball.realgm.com/images/nba/4.2/profiles/photos/2006/Cunningham_Cade_det22.jpg" alt="Player 1" width="125" Height="150">
                     <div class="info">
-                        <div class="name">Cade Cunningham</div>
+                        <div class="Name">Cade Cunningham</div>
                         <div class="score">93%</div>
                     </div>
                     </div>
                     <div id="player">
-                    <img src="https://basketball.realgm.com/images/nba/4.2/profiles/photos/2006/Williamson_Zion_nop22.jpg" alt="Player 2" width="125" height="150">
+                    <img src="https://basketball.realgm.com/images/nba/4.2/profiles/photos/2006/Williamson_Zion_nop22.jpg" alt="Player 2" width="125" Height="150">
                     <div class="info">
-                        <div class="name">Zion Williamson</div>
+                        <div class="Name">Zion Williamson</div>
                         <div class="score">92%</div>
                     </div>
                     </div>
                     <div id="player">
-                    <img src="player3.png" alt="Player 3" width="125" height="150">
+                    <img src="player3.png" alt="Player 3" width="125" Height="150">
                     <div class="info">
-                        <div class="name">Markelle Fultz</div>
+                        <div class="Name">Markelle Fultz</div>
                         <div class="score">80%</div>
                     </div>
                 </div>
             </div>
         </div> -->
-        <form method="post" action="{{ url_for('handle_data') }}">
+        <form method="post" action="/">
             <div class="content-container">
                 <!-- PLAYER 1 -->
                 <div id="player-container">
                     <div id="profile-info">
                         <div id="profile-info-content">
-                            <div><img alt="Player 1 image" src="{{ o1['image_link'] }}"></div>
+                            <div><img alt="Player 1 image" src="{{ o1['Image Link'] }}"></div>
                             <div id="profile-info-content-text" class="first">
-                                <h1 class="headings-no-margin">{{ o1['name']}}</h1>
-                                {% if o1['position_2'] != None %}
-                                    <h2 class="headings-no-margin">{{ o1['school'] }} | {{ o1['class_year'] }} | {{ o1['position_1'] }}/{{ o1['position_2'] }}</h2>
+                                <h1 class="headings-no-margin">{{ o1['Name']}}</h1>
+                                {% if o1['Position 2'] != '-' %}
+                                    <h2 class="headings-no-margin">{{ o1['School'] }} | {{ o1['Class'] }} | {{ o1['Position 1'] }}/{{ o1['Position 2'] }}</h2>
                                 {% else %}
-                                    <h2 class="headings-no-margin">{{ o1['school'] }} | {{ o1['class_year'] }} | {{ o1['position_1'] }}</h2>
+                                    <h2 class="headings-no-margin">{{ o1['School'] }} | {{ o1['Class'] }} | {{ o1['Position 1'] }}</h2>
                                 {% endif %}
                             </div>
                         </div>
                         <div style="float: right">
-                            <input id="player-button" type="submit" value="Player 1" name="action1"/>
+                            <input id="player-button" type="submit" value="Player 1" Name="action1"/>
                         </div>
                     </div>
                     <h3 class="headings-margin">Auxiliary: </h3>
@@ -86,16 +86,16 @@
                         </thead>
                         <tbody>
                             <tr>
-                            <td><span>{{ o1['height']//12 }}'{{ o1['height']%12 }}</span></td>
-                            <td><span>{{ o1['weight'] }}</span></td>
+                            <td><span>{{ o1['Height']//12 }}'{{ o1['Height']%12 }}</span></td>
+                            <td><span>{{ o1['Weight'] }}</span></td>
                             <td><span>{{ o1['draft_day_age'] }}</span></td>
-                            <td><span>{{ int(o1['rsci']) }}</span>
-                                {% if int(o1['rsci']) == 400 %}
+                            <td><span>{{ int(o1['RSCI']) }}</span>
+                                {% if int(o1['RSCI']) == 400 %}
                             <div class="tooltip" style="margin-left: -4px">+<span class="tooltiptext">For players with ranks greater than 400 or not registered in 247sports.
                             </div>
                             {% else %}
                             {% endif %}</td>
-                            <td><span>{{ int(o1['wins']) }}-{{ int(o1['losses']) }}</span></td>
+                            <td><span>{{ int(o1['Wins']) }}-{{ int(o1['Losses']) }}</span></td>
                             </tr>
                         </tbody>
                     </table>
@@ -105,50 +105,50 @@
                             <table id="infoTable" cellspacing="0" cellpadding="0">
                                 <tbody><tr>
                                     <th class="stats"><span>TS%</span></th>
-                                    <td><span>{{ round(o1['ts_pct'], 3) }}%</span></td>
+                                    <td><span>{{ round(o1['TS%'], 3) }}%</span></td>
                                 </tr><tr>
                                     <th class="stats"><span>FG% @ Rim</span></th>
-                                    <td><span>{{ round(o1['fg_pct_at_rim'], 3) }}%</span></td>
+                                    <td><span>{{ round(o1['FG% @ Rim'], 3) }}%</span></td>
                                 </tr><tr>
                                     <th class="stats"><span>3FG%</span></th>
-                                    {% if o1['three_fg_pct'] %}
-                                    <td><span>{{ round(o1['three_fg_pct'], 3) }}%</span></td>
+                                    {% if o1['3FG%'] %}
+                                    <td><span>{{ round(o1['3FG%'], 3) }}%</span></td>
                                     {% else %}
                                     <td><span>-</span></td>
                                     {% endif %}
                                 </tr><tr>
                                     <th class="stats"><span>FT%</span></th>
-                                    <td><span>{{ round(o1['ft_pct'], 3) }}%</span></td>
+                                    <td><span>{{ round(o1['FT%'], 3) }}%</span></td>
                                 </tr><tr>      
                                     <th class="stats"><span>TRB%</span></th>
-                                    <td><span>{{ o1['trb_pct'] }}%</span></td>
+                                    <td><span>{{ o1['TRB%'] }}%</span></td>
                                 </tr><tr>      
                                     <th class="stats"><span>AST%</span></th>
-                                    <td><span>{{ o1['ast_pct'] }}%</span></td>
+                                    <td><span>{{ o1['AST%'] }}%</span></td>
                                 </tr><tr>    
                                     <th class="stats"><span>STL%</span></th>
-                                    <td><span>{{ o1['stl_pct'] }}%</span></td>
+                                    <td><span>{{ o1['STL%'] }}%</span></td>
                                 </tr><tr>
                                     <th class="stats"><span>BLK%</span></th>
-                                    <td><span>{{ o1['blk_pct'] }}%</span></td>
+                                    <td><span>{{ o1['BLK%'] }}%</span></td>
                                 </tr><tr>  
                                     <th class="stats"><span>USG%</span></th>
-                                    <td><span>{{ o1['usg_pct'] }}%</span></td>
+                                    <td><span>{{ o1['USG%'] }}%</span></td>
                                 </tr><tr>      
                                     <th class="stats"><span>AST/TOV</span></th>
-                                    <td><span>{{ o1['ast_tov'] }}</span></td>
+                                    <td><span>{{ o1['AST/TOV'] }}</span></td>
                                 </tr><tr>      
                                     <th class="stats"><span>OFF RTG</span></th>
-                                    <td><span>{{ o1['off_rtg'] }}</span></td>
+                                    <td><span>{{ o1['OFF RTG'] }}</span></td>
                                 </tr><tr>      
                                     <th class="stats"><span>DEF RTG</span></th>
-                                    <td><span>{{ o1['def_rtg'] }}</span></td>
+                                    <td><span>{{ o1['DEF RTG'] }}</span></td>
                                 </tr><tr>      
                                     <th class="stats"><span>WS/40</span></th>
-                                    <td><span>{{ o1['ws_per40'] }}</span></td>
+                                    <td><span>{{ o1['WS/40'] }}</span></td>
                                 </tr><tr>      
                                     <th class="stats"><span>BPM</span></th>
-                                    <td><span>{{ o1['bpm'] }}</span></td>
+                                    <td><span>{{ o1['BPM'] }}</span></td>
                                 </tr></tbody>
                             </table>
                         </div>
@@ -161,50 +161,50 @@
                             <div class="circles">
                                 <div class="circle">
                                     <h4 style="margin: 10px;">Shooting Score</h4>
-                                    <div id="color-{{ int(round(o1['shooting_score'], 2)) }}" class="dot">
-                                        {{ int(round(o1['shooting_score'], 2)) }}
+                                    <div id="color-{{ int(round(o1['Shooting Score'], 2)) }}" class="dot">
+                                        {{ int(round(o1['Shooting Score'], 2)) }}
                                     </div>
                                 </div>
                                 <div class="circle">
                                     <h4 style="margin: 10px;">Rebounding Score</h4>
-                                    <div id="color-{{ int(round(o1['rebounding_score'], 2)) }}" class="dot">
-                                        {{ int(round(o1['rebounding_score'], 2)) }}
+                                    <div id="color-{{ int(round(o1['Rebounding Score'], 2)) }}" class="dot">
+                                        {{ int(round(o1['Rebounding Score'], 2)) }}
                                     </div>
                                 </div>
                                 <div class="circle">
                                     <h4 style="margin: 10px;">Passing Score</h4>
-                                    <div id="color-{{ int(round(o1['passing_score'], 2)) }}" class="dot">
-                                        {{ int(round(o1['passing_score'], 2)) }}
+                                    <div id="color-{{ int(round(o1['Passing Score'], 2)) }}" class="dot">
+                                        {{ int(round(o1['Passing Score'], 2)) }}
                                     </div>
                                 </div>
                                 <div class="circle">
                                     <h4 style="margin: 10px;">Athleticism Score</h4>
-                                    <div id="color-{{ int(round(o1['athleticism_score'], 2)) }}" class="dot">
-                                        {{ int(round(o1['athleticism_score'], 2)) }}
+                                    <div id="color-{{ int(round(o1['Athleticism Score'], 2)) }}" class="dot">
+                                        {{ int(round(o1['Athleticism Score'], 2)) }}
                                     </div>
                                 </div>
                                 <div class="circle">
                                     <h4 style="margin: 10px;">Shot Creation Score</h4>
-                                    <div id="color-{{ int(round(o1['shot_creation_score'], 2)) }}" class="dot">
-                                        {{ int(round(o1['shot_creation_score'], 2)) }}
+                                    <div id="color-{{ int(round(o1['Shot Creation Score'], 2)) }}" class="dot">
+                                        {{ int(round(o1['Shot Creation Score'], 2)) }}
                                     </div>
                                 </div>
                                 <div class="circle">
                                     <h4 style="margin: 10px;">Finishing Score</h4>
-                                    <div id="color-{{ int(round(o1['finishing_score'], 2)) }}" class="dot">
-                                        {{ int(round(o1['finishing_score'], 2)) }}
+                                    <div id="color-{{ int(round(o1['Finishing Score'], 2)) }}" class="dot">
+                                        {{ int(round(o1['Finishing Score'], 2)) }}
                                     </div>
                                 </div>
                                 <div class="circle">
                                     <h4 style="margin: 10px;">Defense Score</h4>
-                                    <div id="color-{{ int(round(o1['defense_score'], 2)) }}" class="dot">
-                                        {{ int(round(o1['defense_score'], 2)) }}
+                                    <div id="color-{{ int(round(o1['Defense Score'], 2)) }}" class="dot">
+                                        {{ int(round(o1['Defense Score'], 2)) }}
                                     </div>
                                 </div>
                                 <div class="circle">
                                     <h4 style="margin: 10px;">College Productivity Score</h4>
-                                    <div id="color-{{ int(round(o1['college_productivity_score'], 2)) }}" class="dot">
-                                        {{ int(round(o1['college_productivity_score'], 2)) }}
+                                    <div id="color-{{ int(round(o1['College Productivity Score'], 2)) }}" class="dot">
+                                        {{ int(round(o1['College Productivity Score'], 2)) }}
                                     </div>
                                 </div>
                             </div>
@@ -217,18 +217,18 @@
             <div id="player-container">
                 <div id="profile-info" class="second">
                     <div style="float: left">
-                        <input id="player-button" type="submit" value="Player 2" name="action2"/>
+                        <input id="player-button" type="submit" value="Player 2" Name="action2"/>
                     </div>
                     <div id="profile-info-content" class="second">
                         <div id="profile-info-content-text" class="second">
-                            <h1 class="headings-no-margin">{{ o2['name']}}</h1>
-                            {% if o2['position_2'] != None %}
-                                <h2 class="headings-no-margin">{{ o2['school'] }} | {{ o2['class_year'] }} | {{ o2['position_1'] }}/{{ o2['position_2'] }}</h2>
+                            <h1 class="headings-no-margin">{{ o2['Name']}}</h1>
+                            {% if o2['Position 2'] != '-' %}
+                                <h2 class="headings-no-margin">{{ o2['School'] }} | {{ o2['Class'] }} | {{ o2['Position 1'] }}/{{ o2['Position 2'] }}</h2>
                             {% else %}
-                                <h2 class="headings-no-margin">{{ o2['school'] }} | {{ o2['class_year'] }} | {{ o2['position_1'] }}</h2>
+                                <h2 class="headings-no-margin">{{ o2['School'] }} | {{ o2['Class'] }} | {{ o2['Position 1'] }}</h2>
                             {% endif %}
                         </div>
-                        <div><img alt="Player 2 image" src="{{ o2['image_link'] }}"></div>
+                        <div><img alt="Player 2 image" src="{{ o2['Image Link'] }}"></div>
                     </div>
                 </div>
                 <h3 class="headings-margin">Auxiliary: </h3>
@@ -242,16 +242,16 @@
                     </thead>
                     <tbody>
                         <tr>
-                            <td><span>{{ o2['height']//12 }}'{{ o2['height']%12 }}</span></td>
-                            <td><span>{{ o2['weight'] }}</span></td>
+                            <td><span>{{ o2['Height']//12 }}'{{ o2['Height']%12 }}</span></td>
+                            <td><span>{{ o2['Weight'] }}</span></td>
                             <td><span>{{ o2['draft_day_age'] }}</span></td>
-                            <td><span>{{ int(o2['rsci']) }}</span>
-                            {% if int(o2['rsci']) == 400 %}
+                            <td><span>{{ int(o2['RSCI']) }}</span>
+                            {% if int(o2['RSCI']) == 400 %}
                             <div class="tooltip" style="margin-left: -4px">+<span class="tooltiptext">For players with ranks greater than 400 or not registered in 247sports.
                             </div>
                             {% else %}
                             {% endif %}</td>
-                            <td><span>{{ int(o2['wins']) }}-{{ int(o2['losses']) }}</span></td>
+                            <td><span>{{ int(o2['Wins']) }}-{{ int(o2['Losses']) }}</span></td>
                         </tr>
                     </tbody>
                 </table>
@@ -261,50 +261,50 @@
                         <table id="infoTable" cellspacing="0" cellpadding="0">
                             <tbody><tr>
                                 <th class="stats"><span>TS%</span></th>
-                                <td><span>{{ round(o2['ts_pct'], 3) }}%</span></td>
+                                <td><span>{{ round(o2['TS%'], 3) }}%</span></td>
                             </tr><tr>
                                 <th class="stats"><span>FG% @ Rim</span></th>
-                                <td><span>{{ round(o2['fg_pct_at_rim'], 3) }}%</span></td>
+                                <td><span>{{ round(o2['FG% @ Rim'], 3) }}%</span></td>
                             </tr><tr>
                                 <th class="stats"><span>3FG%</span></th>
-                                {% if o2['three_fg_pct'] %}
-                                <td><span>{{ round(o2['three_fg_pct'], 3) }}%</span></td>
+                                {% if o2['3FG%'] %}
+                                <td><span>{{ round(o2['3FG%'], 3) }}%</span></td>
                                 {% else %}
                                 <td><span>-</span></td>
                                 {% endif %}
                             </tr><tr>
                                 <th class="stats"><span>FT%</span></th>
-                                <td><span>{{ round(o2['ft_pct'], 3) }}%</span></td>
+                                <td><span>{{ round(o2['FT%'], 3) }}%</span></td>
                             </tr><tr>      
                                 <th class="stats"><span>TRB%</span></th>
-                                <td><span>{{ o2['trb_pct'] }}%</span></td>
+                                <td><span>{{ o2['TRB%'] }}%</span></td>
                             </tr><tr>      
                                 <th class="stats"><span>AST%</span></th>
-                                <td><span>{{ o2['ast_pct'] }}%</span></td>
+                                <td><span>{{ o2['AST%'] }}%</span></td>
                             </tr><tr>      
                                 <th class="stats"><span>STL%</span></th>
-                                <td><span>{{ o2['stl_pct'] }}%</span></td>
+                                <td><span>{{ o2['STL%'] }}%</span></td>
                             </tr><tr>      
                                 <th class="stats"><span>BLK%</span></th>
-                                <td><span>{{ o2['blk_pct'] }}%</span></td>
+                                <td><span>{{ o2['BLK%'] }}%</span></td>
                             </tr><tr>      
                                 <th class="stats"><span>USG%</span></th>
-                                <td><span>{{ o2['usg_pct'] }}%</span></td>
+                                <td><span>{{ o2['USG%'] }}%</span></td>
                             </tr><tr>      
                                 <th class="stats"><span>AST/TOV</span></th>
-                                <td><span>{{ o2['ast_tov'] }}</span></td>
+                                <td><span>{{ o2['AST/TOV'] }}</span></td>
                             </tr><tr>      
                                 <th class="stats"><span>OFF RTG</span></th>
-                                <td><span>{{ o2['off_rtg'] }}</span></td>
+                                <td><span>{{ o2['OFF RTG'] }}</span></td>
                             </tr><tr>      
                                 <th class="stats"><span>DEF RTG</span></th>
-                                <td><span>{{ o2['def_rtg'] }}</span></td>
+                                <td><span>{{ o2['DEF RTG'] }}</span></td>
                             </tr><tr>      
                                 <th class="stats"><span>WS/40</span></th>
-                                <td><span>{{ o2['ws_per40'] }}</span></td>
+                                <td><span>{{ o2['WS/40'] }}</span></td>
                             </tr><tr>      
                                 <th class="stats"><span>BPM</span></th>
-                                <td><span>{{ o2['bpm'] }}</span></td>
+                                <td><span>{{ o2['BPM'] }}</span></td>
                             </tr></tbody>
                         </table>
                     </div>
@@ -317,50 +317,50 @@
                         <div class="circles">
                         <div class="circle">
                             <h4 style="margin: 10px;">Shooting Score</h4>
-                            <div id="color-{{ int(round(o2['shooting_score'], 2)) }}" class="dot">
-                                {{ int(round(o2['shooting_score'], 2)) }}
+                            <div id="color-{{ int(round(o2['Shooting Score'], 2)) }}" class="dot">
+                                {{ int(round(o2['Shooting Score'], 2)) }}
                             </div>
                         </div>
                         <div class="circle">
                             <h4 style="margin: 10px;">Rebounding Score</h4>
-                            <div id="color-{{ int(round(o2['rebounding_score'], 2)) }}" class="dot">
-                                {{ int(round(o2['rebounding_score'], 2)) }}
+                            <div id="color-{{ int(round(o2['Rebounding Score'], 2)) }}" class="dot">
+                                {{ int(round(o2['Rebounding Score'], 2)) }}
                             </div>
                         </div>
                         <div class="circle">
                             <h4 style="margin: 10px;">Passing Score</h4>
-                            <div id="color-{{ int(round(o2['passing_score'], 2)) }}" class="dot">
-                                {{ int(round(o2['passing_score'], 2)) }}
+                            <div id="color-{{ int(round(o2['Passing Score'], 2)) }}" class="dot">
+                                {{ int(round(o2['Passing Score'], 2)) }}
                             </div>
                         </div>
                         <div class="circle">
                             <h4 style="margin: 10px;">Athleticism Score</h4>
-                            <div id="color-{{ int(round(o2['athleticism_score'], 2)) }}" class="dot">
-                                {{ int(round(o2['athleticism_score'], 2)) }}
+                            <div id="color-{{ int(round(o2['Athleticism Score'], 2)) }}" class="dot">
+                                {{ int(round(o2['Athleticism Score'], 2)) }}
                             </div>
                         </div>
                         <div class="circle">
                             <h4 style="margin: 10px;">Shot Creation Score</h4>
-                            <div id="color-{{ int(round(o2['shot_creation_score'], 2)) }}" class="dot">
-                                {{ int(round(o2['shot_creation_score'], 2)) }}
+                            <div id="color-{{ int(round(o2['Shot Creation Score'], 2)) }}" class="dot">
+                                {{ int(round(o2['Shot Creation Score'], 2)) }}
                             </div>
                         </div>
                         <div class="circle">
                             <h4 style="margin: 10px;">Finishing Score</h4>
-                            <div id="color-{{ int(round(o2['finishing_score'], 2)) }}" class="dot">
-                                {{ int(round(o2['finishing_score'], 2)) }}
+                            <div id="color-{{ int(round(o2['Finishing Score'], 2)) }}" class="dot">
+                                {{ int(round(o2['Finishing Score'], 2)) }}
                             </div>
                         </div>
                         <div class="circle">
                             <h4 style="margin: 10px;">Defense Score</h4>
-                            <div id="color-{{ int(round(o2['defense_score'], 2)) }}" class="dot">
-                                {{ int(round(o2['defense_score'], 2)) }}
+                            <div id="color-{{ int(round(o2['Defense Score'], 2)) }}" class="dot">
+                                {{ int(round(o2['Defense Score'], 2)) }}
                             </div>
                         </div>
                         <div class="circle">
                             <h4 style="margin: 10px;">College Productivity Score</h4>
-                            <div id="color-{{ int(round(o2['college_productivity_score'], 2)) }}" class="dot">
-                                {{ int(round(o2['college_productivity_score'], 2)) }}
+                            <div id="color-{{ int(round(o2['College Productivity Score'], 2)) }}" class="dot">
+                                {{ int(round(o2['College Productivity Score'], 2)) }}
                             </div>
                         </div>
                     </div>
@@ -376,7 +376,7 @@
                 <li><a class="hover-target" href=""><i class="fa fa-github"></i></a></li>
             </ul>
         </div> -->
-        <div style="float:right; padding: 10px; font-size: 18px;"><input type="checkbox" name="blind" {{'checked="checked"' if blind else ""}}><label for="blind">Blind Mode</label></div>
+        <div style="float:right; padding: 10px; font-size: 18px;"><input type="checkbox" Name="blind" {{'checked="checked"' if blind else ""}}><label for="blind">Blind Mode</label></div>
     </footer>
     </form>
     <script>

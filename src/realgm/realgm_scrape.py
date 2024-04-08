@@ -157,7 +157,7 @@ class RealGM:
             return 0
         
     def get_image_url(self):
-        return self.image
+        return "https://basketball.realgm.com" + self.image
     
     def reset_relevant_info(self):
         self.RELEVANT_TABLES = {key: None for key in [
@@ -298,7 +298,7 @@ def populate_image_links(df):
         try:
             site, _ = find_site(realgm_url)
             player_page = RealGM(site)
-            img_link = "https://basketball.realgm.com" + player_page.get_image_url()
+            img_link = player_page.get_image_url()
             print(img_link)
             df.loc[index, 'Image Link'] = img_link
         except Exception as e:
