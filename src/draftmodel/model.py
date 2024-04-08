@@ -1,3 +1,8 @@
+import sys
+sys.path.append("../")
+
+from realgm import realgm_scrape
+
 import numpy as np
 import pandas as pd
 import tensorflow.compat.v1 as tf
@@ -9,17 +14,16 @@ from tensorflow import keras
 from tensorflow.keras import layers
 from tensorflow.python.keras.backend import set_session
 
-from utils import *
 
 MACHINE_LEARNING_COLUMNS = ['Height','Draft Day Age','RSCI','SOS','BLK%','STL%','TRB%','FTr','3PAr','AST%','USG%','WS/40','BPM','AST/TOV', 'OFF RTG','DEF RTG','Hands-On Buckets','Pure Point Rating', '# Dunks', 'TS%']
-CURRENT_YEAR = "2021-22"
+CURRENT_YEAR = "2022-23"
 
 TENSORFLOW_EPOCHS = 25
 NODE_COUNT = 64
 LOGREG_ITER = 500
 
 def main():
-    master = pd.read_csv("main.csv")
+    master = pd.read_csv("../../data/model_db.csv")
     
     sum_list = [0.0] * len(master.loc[master['Season'] == CURRENT_YEAR])
     for _ in range(10):
@@ -31,10 +35,33 @@ def main():
             sum_list[i] = round(sum_list[i]+tf[i][0]+gbm[i]+lr[i], 3)
     prospects['Result'] = sum_list
     prospects.sort_values(by=['Result'], ascending=False)
-    prospects.to_csv('modelv1.0.csv', index=False)
+    prospects.to_csv('modelv2.0.csv', index=False)
+
+def clean_up_data(df):
+    df = df.replace('', np.nan)
+    
+    pg = df[df['Position 1'] == 'PG']
+    df.loc[(df['Position 1'] == 'PG') & (df['# Dunks'].isnull()), '# Dunks'] = pg['# Dunks'].mean()
+    df.loc[(df['Position 1'] == 'PG') & (df['STL%'].isnull()), 'STL%'] = pg['STL%'].mean()
+    sg = df[df['Position 1'] == 'SG']
+    df.loc[(df['Position 1'] == 'SG') & (df['# Dunks'].isnull()), '# Dunks'] = sg['# Dunks'].mean()
+    df.loc[(df['Position 1'] == 'SG') & (df['STL%'].isnull()), 'STL%'] = sg['STL%'].mean()
+    sf = df[df['Position 1'] == 'SF']
+    df.loc[(df['Position 1'] == 'SF') & (df['# Dunks'].isnull()), '# Dunks'] = sf['# Dunks'].mean()
+    df.loc[(df['Position 1'] == 'SF') & (df['STL%'].isnull()), 'STL%'] = sf['STL%'].mean()
+    pf = df[df['Position 1'] == 'PF']
+    df.loc[(df['Position 1'] == 'PF') & (df['# Dunks'].isnull()), '# Dunks'] = pf['# Dunks'].mean()
+    df.loc[(df['Position 1'] == 'PF') & (df['STL%'].isnull()), 'STL%'] = pf['STL%'].mean()
+    c = df[df['Position 1'] == 'C']
+    df.loc[(df['Position 1'] == 'C') & (df['# Dunks'].isnull()), '# Dunks'] = c['# Dunks'].mean()
+    df.loc[(df['Position 1'] == 'C') & (df['STL%'].isnull()), 'STL%'] = c['STL%'].mean()
+    
+    df.fillna(df.mean(), inplace = True)
+    return df
 
 def get_train_test_split(master):
-    master['NBA Draft Pick'] = master['NBA Draft Pick'].fillna(value=0)
+    #df = realgm_scrape.populate_draft_picks(master)
+    #df.to_csv("../../data/model_db.csv", index=False)
     master = clean_up_data(master)
     Y = pd.DataFrame(index=np.arange(len(master)), columns=['Result'])
     
@@ -44,9 +71,10 @@ def get_train_test_split(master):
             master = master.drop(index)
             Y = Y.drop(index)
             continue
-        Y.loc[index, 'Result'] = 1 if (row['NBA Draft Pick'] > 0) else 0
+        Y.loc[index, 'Result'] = 1 if (row['NBA MPG'] > 20) else 0
     
     print("# prospects: " + str(len(prospects)))
+    
     X = master[MACHINE_LEARNING_COLUMNS]
     
     Y=Y.astype('int')

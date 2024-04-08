@@ -47,7 +47,7 @@ def get_NBA_Combine_measurements(df):
         for _, combine_player in combine_data.iterrows():
             for i, df_player in df[df['Season'] == season].iterrows():
                 if (is_fuzzy_name_match(combine_player['PLAYER_NAME'], df_player['Name'], NBA_DRAFT_COMBINE_NAME_EXCEPTIONS)):
-                    print(f"Found match for {df_player['Name']}")
+                    print(f"Found NBA Combine match for {df_player['Name']}")
                     populate_NBA_combine_measurements(df, i, combine_player)
                     break
     return df

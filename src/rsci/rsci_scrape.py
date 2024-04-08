@@ -111,7 +111,7 @@ def add_rsci_rank_as_column(df, find_single_player=False, starting_year=FIRST_YE
                             if (college != row['School']):
                                 continue
                         rank = player.find('div', {'class':'primary'}).getText().split()[0]
-                        print("Found a match for " + row['Name'] + ": " + rank)
+                        print("RSCI rank for " + row['Name'] + ": " + rank)
                         df.at[index, 'RSCI'] = rank
                         if find_single_player:
                             return df

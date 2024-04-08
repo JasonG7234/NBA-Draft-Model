@@ -2,6 +2,7 @@ import sys
 sys.path.append("./src")
 
 from utils import *
+from aux_stats import *
 
 from nbadraftcombine import measurements_fetch
 from nbadraftnet import nbadraftnet_scrape
@@ -42,7 +43,7 @@ df = hoopmath_scrape.add_college_stats_from_hoopmath(df)
 df = update_position_columns(df)
 if (len(lines) == 5 and lines[4] == 'Draft'):
     df = measurements_fetch.get_NBA_Combine_measurements(df)
-    df = reorder_final_draft_db_columns(df)
+    df = add_aux_columns(df)
 else:
     df = reorder_final_season_db_columns(df)
 df.to_csv('temp.csv', index=False)

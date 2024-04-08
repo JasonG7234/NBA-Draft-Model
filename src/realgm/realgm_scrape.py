@@ -73,7 +73,7 @@ class RealGM:
     def get_draft_pick(self):
         pick = self.RELEVANT_PROFILE_INFO.get('Drafted:')
         if (not pick) or (pick[1] == "Undrafted"):
-            return None
+            return 100
         draft_round = int(pick[2].replace(',', ''))
         draft_pick = int(pick[4].replace(',', ''))
         return int((draft_round-1)*30+draft_pick)
@@ -149,12 +149,12 @@ class RealGM:
     def get_nba_stats(self, row_to_get=-1):
         table = self.RELEVANT_TABLES.get("NBA Regular Season Stats - Per Game")
         if not table:
-            return None
+            return 0
         row = table.find('tfoot').find_all('tr')[row_to_get]
         try:
             return float(row.find_all('td')[self.NBA_MIN_INDEX].text)
         except Exception:
-            return None
+            return 0
         
     def get_image_url(self):
         return self.image
@@ -270,11 +270,10 @@ def populate_draft_picks(df):
         try:
             site, _ = find_site(realgm_url)
             player_page = RealGM(site)
-            pick = player_page.get_draft_pick()
             df.loc[index, 'NBA Draft Pick'] = player_page.get_draft_pick()
             nba_mpg = player_page.get_nba_stats()
             df.loc[index, 'NBA MPG'] = nba_mpg
-            print(f"{row['Name']} played {pick} minutes per game in the NBA.")
+            print(f"{row['Name']} played {nba_mpg} minutes per game in the NBA.")
         except Exception as e:
             print(e)
     return df

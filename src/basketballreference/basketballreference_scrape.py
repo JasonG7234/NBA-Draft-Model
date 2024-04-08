@@ -70,7 +70,11 @@ BASKETBALL_REFERENCE_PLAYER_NAME_EXCEPTIONS = {
     "kenneth-lofton" : "kenneth-loftonjr",
     "joe-harris" : "joe-harris-",
     "garrison-mathews" : "garrison-matthews",
-    "kc-ndefo" : "kenechukwu-ndefo"
+    "kc-ndefo" : "kenechukwu-ndefo",
+    "hunter-tyson" : "tyson-hunter",
+    "gg-jackson" : "gregory-jackson-ii",
+    "ricky-council-iv" : "ricky-counciliv",
+    "craig-porter-jr" : "craig-porterjr",
 }
 
 BASKETBALL_REFERENCE_INDEX_EXCEPTIONS = {
@@ -113,11 +117,11 @@ BASKETBALL_REFERENCE_INDEX_EXCEPTIONS = {
     "brandon-johnson" : 56,
     "david-jones" : 10,
     "terrell-brown" : 55,
-    "marcus-hammond" : 4
+    "marcus-hammond" : 4,
+    "reed-sheppard" : 2
 }
 
 BASKETBALL_REFERENCE_SCHOOL_NAME_EXCEPTIONS = {
-    "Central Florida" : "UCF",
     "Illinois-Chicago" : "UIC",
     "Louisiana Lafayette" : "Louisiana",
     "Southern Miss." : "Southern Miss",
@@ -148,7 +152,6 @@ def add_college_stats_from_basketball_reference(df):
             df.drop(index, inplace=True)
             continue
         college_stats.append(player_stats)
-    print(player_stats)
     df = pd.concat([df, pd.DataFrame(college_stats,index=df.index,columns=COLUMN_NAMES)], axis=1)
     return df
 
@@ -162,6 +165,7 @@ def get_players_basketball_reference_page(row):
     if (index_value_in_url == 1):
         while index_value_in_url in range(1, MAX_PROFILES_TO_SEARCH_BY_NAME): 
             url = "https://www.sports-reference.com/cbb/players/" + player_name_in_url + "-" + str(index_value_in_url) + ".html"
+            print(url)
             soup_html, _ = find_site(url)
             if ((not soup_html) and (player_name_in_url[-3:] == '-jr')):
                 player_name_in_url = player_name_in_url[:-3] + 'jr'
@@ -202,12 +206,12 @@ def get_advanced_stats(soup_html):
     """
     player_advanced_stats = [] 
     last_season_stats = get_last_season_stat_row(soup_html, 'players_advanced')
-    stats = last_season_stats.findChildren('td')[2:] # Slicing
+    stats = last_season_stats.findChildren('td')[3:] # Slicing
     stats_index = 0 # Index of which stat we are on in the player's Advanced table
     all_index = 0 # Index of which stat we SHOULD be on, according to all possible stats in the Advanced table
     while all_index in range(0, len(ADVANCED_COLUMN_IDS)):
         try:
-            stat_at_index = stats[stats_index] 
+            stat_at_index = stats[stats_index]
             if (stat_at_index.getText()):
                 if (is_expected_advanced_stat_in_table(stat_at_index, all_index)):
                     player_advanced_stats.append(stat_at_index.getText()) 

@@ -23,11 +23,13 @@ HOOP_MATH_NAME_EXCEPTIONS = {
 	"Edward Daniel" : "Ed Daniel",
 	"Moe Harkless" : "Maurice Harkless",
 	"KEVIN JONES" : "Kevin Jones",
-    "Kam Jones" : "Kameron Jones"
+    "Kam Jones" : "Kameron Jones",
+    "\"GG\"JACKSONII,GREGORY" : "GG Jackson"
 }
 
 HOOP_MATH_SCHOOL_EXCEPTIONS = {
 	"UNC" : "NorthCarolina",
+    "Connecticut" : "UConn",
 	"SaintMary's" : "SaintMary's(CA)",
 	"Pitt" : "Pittsburgh",
 	"Wisconsin-Milwaukee" : "Milwaukee",
@@ -40,6 +42,7 @@ HOOP_MATH_SCHOOL_EXCEPTIONS = {
 	"Miami" : "Miami(FL)",
 	"CentralFlorida" : "UCF",
 	"WesternMichigan" : "WesternMich.",
+    "EasternMichigan" : "EasternMich.",
 	"Illinois-Chicago" : "UIC",
     "Purdue-FortWayne" : "PurdueFortWayne",
 	"TexasArlington" : "UTArlington",

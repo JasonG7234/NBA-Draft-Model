@@ -4,12 +4,11 @@ import math
 from utils import *
 
 def jason_3pt_confidence(df):
-    cast_column_to_float(df, '3FG%')
-    cast_column_to_float(df, '3PAr')
     df['3 Point Confidence'] = 2/(1/df['3FG%']+1/df['3PAr'])
     return df
 
 def percent_assisted_overall(df):
+    cast_column_to_float(df, '%Astd @ 3')
     df['% Assisted'] = (
         (df['%Astd @ Rim']/100*df['% Shots @ Rim']) +
         (df['% Shots @ Mid']/100*df['%Astd @ Mid']) +
@@ -21,7 +20,7 @@ def percent_assisted_overall(df):
 def self_created_dunks(df):
     df["Dunks per Minute"] = df['# Dunks'] / df['MP']
     df["Rim Shots per Minute"] = (df['% Shots @ Rim'] * df['FGA/40']) / 4000
-    df["Dunk vs Rim Shot Percentage"] = round(df["Dunks per Minute"] / df["Rim Shots per Minute"]*100, 2)
+    df["Dunk vs Rim Shot Percentage"] = round((df["Dunks per Minute"] / df["Rim Shots per Minute"])*100, 2)
     df["% Dunks Unassisted"] = (100-df['%Astd @ Rim'])*(df['Dunk vs Rim Shot Percentage']*df['% Shots @ Rim']/100)/100
     df["Rim Shot Creation"] = ""
     for index, row in df.iterrows():
@@ -168,10 +167,16 @@ def touch(df):
     return df
 
 def add_aux_columns(df, divide_by_position=True):
-    df['RSCI'].fillna(400)
+    for col in df.columns:
+        if "RealGM" in str(col):
+            df[col] = df[col].astype(int)
+            df[col] = df[col].astype(str)
+        elif pd.to_numeric(df[col], errors='coerce').notna().all():
+            df[col] = pd.to_numeric(df[col], errors='coerce').astype(float)
+    
+    
+
     df['3FGA/100Poss'].fillna(0)
-    df['3PAr'].fillna(0)
-    df['3FG%'].fillna(0)
     df['Draft Day Age'].fillna(df['Draft Day Age'].mean())
     df = jason_3pt_confidence(df)
     df = bentaylor_stats(df)
@@ -310,16 +315,20 @@ def reorder_aux_columns(df):
                 'Class','Birthday','Draft Day Age',
                 'RSCI','G','GS','MP','PER','TS%','eFG%','3PAr','FTr','PProd','ORB%','DRB%','TRB%','AST%','STL%','BLK%','Stock%','TOV%','Adjusted TOV%','USG%','Offensive Load','OWS','DWS','WS','WS/40','OBPM','DBPM','BPM','AST/TOV','OFF RTG','DEF RTG','Hands-On Buckets','Pure Point Rating',
                 'FG/40','FGA/40','FG%','2FGM/40','2FGA/40','2FG%','3FGM/40','3FGA/40','3FG%',"3 Point Proficiency",'3 Point Confidence','FT/40','FTA/40','FT%','TRB/40','AST/40','STL/40','BLK/40','TOV/40','PF/40','PTS/40',
-                'FGM/100Poss','FGA/100Poss','2FGM/100Poss','2FGA/100Poss','3FGM/100Poss','3FGA/100Poss','FT/100Poss','FTA/100Poss','TRB/100Poss','AST/100Poss','STL/100Poss','BLK/100Poss','TOV/100Poss','PF/100Poss','PTS/100Poss','FGA/100Poss',
+                'FGM/100Poss','FGA/100Poss','2FGM/100Poss','2FGA/100Poss','3FGM/100Poss','3FGA/100Poss','FT/100Poss','FTA/100Poss','TRB/100Poss','AST/100Poss','STL/100Poss','BLK/100Poss','TOV/100Poss','PF/100Poss','PTS/100Poss',
                 '# Dunks',"Dunk vs Rim Shot Percentage","% Dunks Unassisted","Dunks per Minute Played","Unassisted Shots @ Rim /100Poss",
                 '% Shots @ Rim','FG% @ Rim','%Astd @ Rim','% Shots @ Mid','FG% @ Mid','%Astd @ Mid','% Shots @ 3','%Astd @ 3','% Assisted',
                 'AAU Season','AAU Team','AAU League','AAU GP','AAU GS','AAU MIN','AAU PTS','AAU FGM','AAU FGA','AAU FG%','AAU 3PM','AAU 3PA','AAU 3P%','AAU FTM','AAU FTA','AAU FT%','AAU ORB','AAU DRB','AAU TRB','AAU AST','AAU STL','AAU BLK','AAU TOV','AAU PF',
                 'Event Year','Event Name','Event GP','Event MIN','Event PTS','Event FGM','Event FGA','Event FG%','Event 3PM','Event 3PA','Event 3P%','Event FTM','Event FTA','Event FT%','Event TRB','Event AST','Event STL','Event BLK','Event TOV','Event PF','Event Placement',
                 'Finishing Score','Shooting Score','Shot Creation Score','Passing Score','Rebounding Score','Athleticism Score','Defense Score','College Productivity Score','Percentile Score',
-                'Box Score Creation','Rim Shot Creation','Helio Score','Draft Score']]
+                'Box Score Creation','Rim Shot Creation','Helio Score','Draft Score','Image Link']]
     
 import sys
 sys.path.append("./src")
 
-df = pd.read_csv("data/draft_db_2022_special.csv")
-draw_conclusions_on_column(df, 'Draft Score', num_top=25)
+def main():
+    df = pd.read_csv("data/draft_db.csv")
+    df = add_aux_columns(df)
+    df.to_csv("data/draft_db.csv", index=False)
+    
+main()

@@ -331,25 +331,3 @@ def print_dataframe(df):
 def populate_dataframe_with_average_values(df):
     df = df.replace('', np.nan)
     return df.fillna(df.mean())
-
-def clean_up_data(df):
-    df = df.replace('', np.nan)
-    
-    pg = df[df['Position 1'] == 'PG']
-    df.loc[(df['Position 1'] == 'PG') & (df['# Dunks'].isnull()), '# Dunks'] = pg['# Dunks'].mean()
-    df.loc[(df['Position 1'] == 'PG') & (df['STL%'].isnull()), 'STL%'] = pg['STL%'].mean()
-    sg = df[df['Position 1'] == 'SG']
-    df.loc[(df['Position 1'] == 'SG') & (df['# Dunks'].isnull()), '# Dunks'] = sg['# Dunks'].mean()
-    df.loc[(df['Position 1'] == 'SG') & (df['STL%'].isnull()), 'STL%'] = sg['STL%'].mean()
-    sf = df[df['Position 1'] == 'SF']
-    df.loc[(df['Position 1'] == 'SF') & (df['# Dunks'].isnull()), '# Dunks'] = sf['# Dunks'].mean()
-    df.loc[(df['Position 1'] == 'SF') & (df['STL%'].isnull()), 'STL%'] = sf['STL%'].mean()
-    pf = df[df['Position 1'] == 'PF']
-    df.loc[(df['Position 1'] == 'PF') & (df['# Dunks'].isnull()), '# Dunks'] = pf['# Dunks'].mean()
-    df.loc[(df['Position 1'] == 'PF') & (df['STL%'].isnull()), 'STL%'] = pf['STL%'].mean()
-    c = df[df['Position 1'] == 'C']
-    df.loc[(df['Position 1'] == 'C') & (df['# Dunks'].isnull()), '# Dunks'] = c['# Dunks'].mean()
-    df.loc[(df['Position 1'] == 'C') & (df['STL%'].isnull()), 'STL%'] = c['STL%'].mean()
-    
-    df.fillna(df.mean(), inplace = True)
-    return df
