@@ -284,7 +284,7 @@ def reorder_final_season_db_columns(df):
                 'Image Link'
                 ]]
 
-def get_value_at_column_by_player_name(df, player_name, col_name, is_inverse_percentile=False, to_print_percentile=True, to_find_similar=False):
+def get_value_at_column_by_player_name(df, player_name, col_name, is_inverse_percentile=False, to_print_percentile=True, to_find_similar=False, num_find_similar=0):
     print('=========================================')
     try:
         val = df.loc[df['Name'] == player_name].iloc[0][col_name]
@@ -300,14 +300,22 @@ def get_value_at_column_by_player_name(df, player_name, col_name, is_inverse_per
         df_sorted = df.sort_values(by='difference')
 
         # Get the rows with the smallest difference (closest to the target value)
-        closest_rows = df_sorted.head(10)  # You can specify the number of rows you want
+        closest_rows = df_sorted.head(num_find_similar)  # You can specify the number of rows you want
 
         print(closest_rows[['Name', col_name]])
     if to_print_percentile:
         get_percentile_rank(df, col_name, player_name, is_inverse_percentile)
 
+def get_top_values(df, col_name, num_values=10):
+    # Sort the dataframe by 'column_name' in descending order (highest to lowest)
+    df_sorted = df.sort_values(by=col_name, ascending=False)
+
+    # Print the top 10 rows
+    print(df_sorted[['Name', col_name]].head(num_values))   
+
 def get_percentile_rank(df, col_name, player_name, is_inverse_percentile=False, to_print=True, rank_col_name="Rank", to_drop_column=True):
     df[rank_col_name] = df[col_name].rank(pct=True, ascending=(not is_inverse_percentile))
+    print()
     try:
         percentile = round(df.loc[df['Name'] == player_name].iloc[0][rank_col_name]*100)
         percentile = 100-percentile if is_inverse_percentile else percentile
@@ -343,6 +351,30 @@ def draw_conclusions_on_column(df, col_name, num_top=10, position="all", show_bo
     print(f"The average value of column {col_name} is: {df[col_name].mean()}")
     print(f"The median value of column {col_name} is: {df[col_name].median()}")
 
+def get_overall_player_comparisons(df: pd.DataFrame, player_name: str, num_to_compare: int = 4):
+    SUMMARY_SCORE_LABELS = ['Finishing Score','Shooting Score','Shot Creation Score','Passing Score','Rebounding Score','Athleticism Score','Defense Score','College Productivity Score']
+
+    leaderboard = {}
+    target_player = df.loc[df['Name'] == player_name].iloc[0]
+
+    # Filter out to same primary or secondary position
+    df = df[(df['Position 1'] == target_player['Position 1']) | (df['Position 2'] == target_player['Position 2'])]
+    for _, row in df.iterrows():
+        player_summary_score_diff = 0
+        summary_score_count = 0
+        for summary_label in SUMMARY_SCORE_LABELS:
+            summary_value = row[summary_label]
+            if (summary_value not in ERROR_VALUES):
+                player_summary_score_diff += abs(target_player[summary_label] - summary_value)
+                summary_score_count += 1
+        leaderboard[row['Name']] = (player_summary_score_diff/summary_score_count)
+        
+    top_leaderboard = []
+    for key, value in leaderboard.items():
+        if (value < 0.2):
+            top_leaderboard.append([key, value])
+            
+    return sorted(top_leaderboard.items(), key=lambda x: x[1], reverse=True)[:num_to_compare]
 
 def print_dataframe(df):
     
@@ -352,3 +384,6 @@ def print_dataframe(df):
 def populate_dataframe_with_average_values(df):
     df = df.replace('', np.nan)
     return df.fillna(df.mean())
+
+df = pd.read_csv("data/draft_db.csv")
+#get_value_at_column_by_player_name(df, 'Reed Sheppard', '')

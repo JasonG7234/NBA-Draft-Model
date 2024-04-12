@@ -118,7 +118,10 @@ BASKETBALL_REFERENCE_INDEX_EXCEPTIONS = {
     "david-jones" : 10,
     "terrell-brown" : 55,
     "marcus-hammond" : 4,
-    "reed-sheppard" : 2
+    "reed-sheppard" : 2,
+    "justin-edwards": 4,
+    "yves-missi": 2,
+    "jakobe-walter": 2
 }
 
 BASKETBALL_REFERENCE_SCHOOL_NAME_EXCEPTIONS = {
