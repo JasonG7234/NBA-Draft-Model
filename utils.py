@@ -182,6 +182,9 @@ def check_value_in_dictionary_of_exceptions(name, exceptions_dict, default):
     """Performs a dictionary lookup to try to map the player's name/school to the correct Basketball-Reference page."""
     return exceptions_dict.get(name, default)
 
+def get_row_from_player_name(df: pd.DataFrame, player_name: str, idx: int = 0):
+    return df.loc[df['Name'] == player_name].iloc[idx]
+
 def get_basketball_reference_player_info(soup):
     player_info =  soup.find('div', {'id': 'meta'})
     if (not player_info): return None
@@ -371,10 +374,10 @@ def get_overall_player_comparisons(df: pd.DataFrame, player_name: str, num_to_co
         
     top_leaderboard = []
     for key, value in leaderboard.items():
-        if (value < 0.2):
+        if (value < 0.5):
             top_leaderboard.append([key, value])
             
-    return sorted(top_leaderboard.items(), key=lambda x: x[1], reverse=True)[:num_to_compare]
+    return sorted(top_leaderboard, key=lambda x: x[1])[1:num_to_compare+1]
 
 def print_dataframe(df):
     
@@ -384,6 +387,3 @@ def print_dataframe(df):
 def populate_dataframe_with_average_values(df):
     df = df.replace('', np.nan)
     return df.fillna(df.mean())
-
-df = pd.read_csv("data/draft_db.csv")
-#get_value_at_column_by_player_name(df, 'Reed Sheppard', '')

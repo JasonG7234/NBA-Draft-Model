@@ -26,5 +26,4 @@ main()
 # TODO:
 # Add Dalton Knecht and make a thread on him / other players
 # Add hoop-explorer support
-# Auto-create graphics
 
