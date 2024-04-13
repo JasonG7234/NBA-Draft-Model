@@ -1,0 +1,196 @@
+<html>
+    <head>
+        <!-- GOOGLE ANALYTICS -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-CV4EWH6NE7"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){
+                dataLayer.push(arguments);
+            }
+            gtag('js', new Date());
+            gtag('config', 'G-CV4EWH6NE7');
+        </script>
+        <!-- MAIN CSS -->
+        <!-- link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/main.css') }}" -->
+        <!-- FAVICON -->
+        <!-- FONT -->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap">
+        <style>
+            html {
+                height: 800px;
+                width: 800px;
+            }
+            body {
+                font-family: Roboto, sans-serif;
+                margin: 0;
+                padding: 5px;
+            }
+            .header {
+                text-align: center;
+                display: flex;
+                justify-content: space-evenly;
+                align-items: center;
+                text-align: left;
+                padding-top: 10px;
+                padding-bottom: 10px;
+                color: white;
+                background-color: {{ colors[0] }};
+            }
+            .header img {
+                max-width: 100%;
+                margin-right: 25px;
+            }
+            .header_player {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+            .grid {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                grid-auto-rows: minmax(300px, auto); /* Automatically fill remaining height */
+                margin-top: 0px;
+            }
+            .grid-item {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+                border: 1px solid black;
+                background-color: #ccc;
+            }
+            .grid-item img {
+                max-width: 100%;
+            }
+            .grid-item h2 {
+                font-size: 32px;
+                margin-bottom: -5px;
+            }
+            .grid-item h4 {
+                font-size: 22px;
+                margin-top: 8px;
+                margin-bottom: -16px;
+            }
+            .grid-item p {
+                font-size: 20px;
+            }
+            .comp_pic {
+                height: 123px;
+                width: 92px;
+            }
+            .comp_chart {
+                margin-top: 14px;
+            }
+            .right-content {
+
+            }
+            .left-content {
+            }
+            .content-wrapper {
+                    padding-top: 5px;
+                    padding-bottom: 5px;
+                    display: flex;
+                    justify-content: space-evenly;
+                    align-items: center;
+                    text-align: left;
+                    width: 100%;
+                    background-color: #ffffff;
+            }
+            .content-wrapper img {
+                    max-width: 100%;
+            }
+            h1 {
+                font-size: 52px;
+            }
+            .footer {
+                font-size: 11px;
+                padding: 2px;
+                background-color: {{ colors[1] }}
+            }
+            .labels_in_footer {
+                text-align: center;
+                font-weight: bold;
+            }
+        </style>
+        <title>NBA Draft Pick'Em</title>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <div class="header_player">
+                    <img src="{{ target['Image Link'] }}" alt="Header Image">
+                    <div>
+                        <div style="margin-top: -20px"><h1>{{ target['Name'] }}</h1></div>
+                        <div style="margin-top: -40px"><h2>{{ int(target['Height']//12) }}'{{ int(target['Height']%12) }}&nbsp;{{ target['Position 1'] }}&nbsp;|&nbsp;{{ target['School'] }}</h2></div>
+                        <div style="margin-top: -15px"><h3>Closest Comparisons:</h3></div>
+                    </div>
+                </div>
+                <div class="header_chart">
+                    <img src="{{ url_for('static', filename='gt.png') }}" alt="Chart 1" height="125" width="250">
+                </div>
+            </div>
+        </div>
+            <div class="grid">
+                <div class="grid-item">
+                    <div class="content-wrapper">
+                        <div class="left-content">
+                            <img class="comp_pic" src="{{ comparisons[0]['Image Link'] }}" alt="Player 1 Pic">
+                        </div>
+                        <div class="right-content">
+                            <h2>{{ comparisons[0]['Name'] }}</h2>
+                            <h4>{{ int(comparisons[0]['Height']//12) }}'{{ int(comparisons[0]['Height']%12) }}&nbsp;{{ comparisons[0]['Position 1'] }}&nbsp;|&nbsp;{{ comparisons[0]['School'] }}</h4>
+                            <p>Comparison Score: <strong>{{ scores[0]}}</strong></p>
+                        </div>
+                    </div>
+                    <img class="comp_chart" src="{{ url_for('static', filename='g0.png') }}" alt="Chart 1" height="125" width="250">
+                </div>
+                <div class="grid-item">
+                    <div class="content-wrapper">
+                        <div class="left-content">
+                            <img class="comp_pic" src="{{ comparisons[1]['Image Link'] }}" alt="Player 2 Pic">
+                        </div>
+                        <div class="right-content">
+                            <h2>{{ comparisons[1]['Name'] }}</h2>
+                            <h4>{{ int(comparisons[1]['Height']//12) }}'{{ int(comparisons[1]['Height']%12) }}&nbsp;{{ comparisons[1]['Position 1'] }}&nbsp;|&nbsp;{{ comparisons[1]['School'] }}</h4>
+                            <p>Comparison Score: <strong>{{ scores[1] }}</strong></p>
+                        </div>
+                    </div>
+                    <img class="comp_chart" src="{{ url_for('static', filename='g1.png') }}" alt="Chart 2" height="125" width="250">
+                </div>
+                <div class="grid-item">
+                    <div class="content-wrapper">
+                        <div class="left-content">
+                            <img class="comp_pic" src="{{ comparisons[2]['Image Link'] }}" alt="Player 3 Pic">
+                        </div>
+                        <div class="right-content">
+                            <h2>{{ comparisons[2]['Name'] }}</h2>
+                            <h4>{{ int(comparisons[2]['Height']//12) }}'{{ int(comparisons[2]['Height']%12) }}&nbsp;{{ comparisons[2]['Position 1'] }}&nbsp;|&nbsp;{{ comparisons[2]['School'] }}</h4>
+                            <p>Comparison Score: <strong>{{ scores[2] }}</strong></p>
+                        </div>
+                    </div>
+                    <img class="comp_chart" src="{{ url_for('static', filename='g2.png') }}" alt="Chart 3" height="125" width="250">
+                </div>
+                <div class="grid-item">
+                    <div class="content-wrapper">
+                        <div class="left-content">
+                            <img class="comp_pic" src="{{ comparisons[3]['Image Link'] }}" alt="Player 4 Pic">
+                        </div>
+                            <div class="right-content">
+                            <h2>{{ comparisons[3]['Name'] }}</h2>
+                            <h4>{{ int(comparisons[3]['Height']//12) }}'{{ int(comparisons[3]['Height']%12) }}&nbsp;{{ comparisons[3]['Position 1'] }}&nbsp;|&nbsp;{{ comparisons[3]['School'] }}</h4>
+                            <p>Comparison Score: <strong>{{ scores[3] }}</strong></p>
+                        </div>
+                    </div>                    
+                        <img class="comp_chart" src="{{ url_for('static', filename='g3.png') }}" alt="Chart 4" height="125" width="250">
+                </div>
+            </div>
+        </div>
+        <div class="footer">
+        The charts are ordered by<br />
+        <div class="labels_in_footer">Finishing | Shooting | Shot Creation | Passing | Rebounding | Athleticism | Defense | Intangibles</div>
+        and are scored as a percentile rank against other draft prospects at similar positions.
+        </div>
+    </body>
+</html>
