@@ -118,10 +118,7 @@ BASKETBALL_REFERENCE_INDEX_EXCEPTIONS = {
     "david-jones" : 10,
     "terrell-brown" : 55,
     "marcus-hammond" : 4,
-    "reed-sheppard" : 2,
     "justin-edwards": 4,
-    "yves-missi": 2,
-    "jakobe-walter": 2
 }
 
 BASKETBALL_REFERENCE_SCHOOL_NAME_EXCEPTIONS = {
@@ -189,12 +186,17 @@ def get_players_basketball_reference_page(row):
                     else:
                         index_value_in_url = index_value_in_url + 1
             else:
-                print("Sorry, we couldn't find the correct player page for : " +row['Name'])
                 if (player_name_in_url[-3:] == '-jr'):
                     player_name_in_url = player_name_in_url[:-3] + 'jr'
                     url = "https://www.sports-reference.com/cbb/players/" + player_name_in_url + "-" + str(index_value_in_url) + ".html"
                     soup_html, _ = find_site(url)
                     return soup_html
+                if (index_value_in_url == 1):
+                    index_value_in_url = 2
+                    url = "https://www.sports-reference.com/cbb/players/" + player_name_in_url + "-" + str(index_value_in_url) + ".html"
+                    soup_html, _ = find_site(url)
+                    return soup_html
+                print("Sorry, we couldn't find the correct player page for : " +row['Name'])
                 return None
     else:
         url = "https://www.sports-reference.com/cbb/players/" + player_name_in_url + "-" + str(index_value_in_url) + ".html"
