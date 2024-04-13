@@ -136,7 +136,7 @@ def find_site(url, max_retry_count=3):
     It's very important to decode + sub out all comments! (Basketball-Reference's HTML comments throw everything out of wack)"""
     count = 0
     req_headers = { 'User-Agent': "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36",
-                   'referer': "ttps://www.sports-reference.com/cbb/schools/pepperdine/2022.html",
+                   'referer': "https://www.sports-reference.com/cbb/schools/pepperdine/2022.html",
                    'accept-language': "en-US,en;q=0.6",
                    'accept-encoding': "gzip, deflate, br"}
     response = None
