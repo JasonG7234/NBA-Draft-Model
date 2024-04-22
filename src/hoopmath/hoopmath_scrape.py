@@ -108,7 +108,6 @@ def get_hoop_math_formatted_school(name):
     return check_value_in_dictionary_of_exceptions(url_name, HOOP_MATH_SCHOOL_EXCEPTIONS, url_name)
 
 def get_hoop_math_data(soup_html, row):
-    
     pbp_table = soup_html.find('table', {'id': 'OffTable1'})
     if (pbp_table):
         player_stats = []
@@ -116,7 +115,7 @@ def get_hoop_math_data(soup_html, row):
         items = pbp_table.find_all('td')
         for i in range(int(len(items) / HOOP_MATH_TABLE_COLUMN_COUNT)):
             hoop_math_row = items[i*HOOP_MATH_TABLE_COLUMN_COUNT:(i+1)*HOOP_MATH_TABLE_COLUMN_COUNT]
-            hoop_math_name = ' '.join(reversed(hoop_math_row[0].getText().strip().split(', ')))
+            hoop_math_name = reverse_name(hoop_math_row[0].getText())
             if(is_fuzzy_name_match(hoop_math_name, row['Name'], HOOP_MATH_NAME_EXCEPTIONS)):
                 for i in HOOP_MATH_COLUMN_INDEXES:
                     val = hoop_math_row[i].getText() 
