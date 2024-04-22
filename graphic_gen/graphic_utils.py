@@ -4,6 +4,7 @@ import os
 import csv
 from typing import List, Optional
 
+
 SUMMARY_SCORE_LABELS = ['Finishing Score','Shooting Score','Shot Creation Score','Passing Score','Rebounding Score','Athleticism Score','Defense Score','College Productivity Score']
 PATH_TO_COLORS = 'data/colors.csv'
 
@@ -22,6 +23,18 @@ def get_colors_from_school(school_name: str) -> List[str]:
                 break  # Stop searching once the team is found
 
     return colors
+
+def get_a11y_text_color_from_hex(hex_colors) -> str:
+    text_colors = []
+    for hex in hex_colors:
+        rgb = []
+        for i in (1, 3, 5):
+            unit = hex[i:i+2]
+            unit_int = int(unit, 16)
+            rgb.append(unit_int)
+        intensity = (rgb[0] * 0.299) + (rgb[1] * 0.587) + (rgb[2] * 0.114)
+        text_colors.append("black" if intensity > 186 else "white")
+    return text_colors
 
 def create_summary_graph(
     y: List[float],  # List of values for the Summary Scores
@@ -132,20 +145,6 @@ def __calculate_text_yval(y: int, is_negative: bool) -> int:
         else: return -0.7
     else:
         return 15
-
-
-def __get_a11y_text_color_from_hex(hex) -> str:
-    print(hex)
-    rgb = []
-    for i in (0, 2, 4):
-        v = hex[i:i+2], 16
-        print(v)
-        it = int(v)
-        print(it)
-        rgb.append(tuple(it))
-    intensity = (rgb[0] * 0.299) + (rgb[1] * 0.587) + (rgb[2] * 0.114)
-    print(intensity)
-    return "black" if intensity > 186 else "white"
 
 def __remove_file_if_exists(file_path: str):
     if os.path.isfile(file_path):

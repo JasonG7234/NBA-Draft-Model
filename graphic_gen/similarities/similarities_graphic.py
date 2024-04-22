@@ -9,7 +9,7 @@ from utils import *
 sys.path.insert(0, './graphic_gen/')
 from graphic_utils import *
 
-TARGET_PLAYER_NAME= "Reed Sheppard"
+TARGET_PLAYER_NAME= "Jaylon Tyson"
 SUMMARY_SCORE_LABELS = ['Finishing Score','Shooting Score','Shot Creation Score','Passing Score','Rebounding Score','Athleticism Score','Defense Score','College Productivity Score']
 NUM_TO_COMPARE = 4
 
@@ -17,6 +17,7 @@ def create_target_graph(target_row):
     # Populate summary score values for target player
     y = []
     for label in SUMMARY_SCORE_LABELS:
+        print(label, str(100*target_row[label]))
         val = round(100*target_row[label], 0)
         y.append(val)
     
@@ -36,7 +37,7 @@ def create_target_graph(target_row):
             
     return create_summary_graph(y, bar_colors, False, to_print=False, file_path = f"./graphic_gen/similarities/static/gt.png")
 
-def get_comparison_graph(target_row, comp_row, count: int):
+def create_comparison_graph(target_row, comp_row, count: int):
     
     # Populate summary score differences
     y = []
@@ -65,14 +66,15 @@ def get_comparison_graph(target_row, comp_row, count: int):
 app = Flask(__name__, static_folder='static')
 
 @app.route('/')
-def home():
-    
+def home(create_graphs: bool = False):
     df = pd.read_csv("data/draft_db.csv")
     # Get player
     target_row = get_row_from_player_name(df, TARGET_PLAYER_NAME)
+    if (create_graphs):
+        create_target_graph(target_row)
     
     # Get comparisons
-    top_comparisons = get_overall_player_comparisons(df, TARGET_PLAYER_NAME, num_to_compare=NUM_TO_COMPARE)
+    top_comparisons = get_player_comparisons(df, TARGET_PLAYER_NAME, num_to_compare=NUM_TO_COMPARE)
     
     comparisons = []
     comparisons_scores = []
@@ -82,20 +84,23 @@ def home():
         comp_row = get_row_from_player_name(df, comp[0])
         comparisons.append(comp_row)
         comparisons_scores.append(round(100*(1-comp[1]), 2))
-        get_comparison_graph(target_row, comp_row, i)
+        if (create_graphs):
+            create_comparison_graph(target_row, comp_row, i)
         
     # Generate HTML for image
-    return render_template('index.html', 
-            target=target_row, 
-            comparisons=comparisons, 
-            scores=comparisons_scores, 
-            colors=get_colors_from_school(target_row['School']),
-            int=int
-    )
+    if (not create_graphs):
+        school_colors = get_colors_from_school(target_row['School'])
+        return render_template('index.html', 
+                target=target_row, 
+                comparisons=comparisons, 
+                scores=comparisons_scores, 
+                colors=school_colors,
+                text_colors =[c for c in get_a11y_text_color_from_hex(school_colors)],
+                int=int
+        )
 
 if __name__ == '__main__':
-    df = pd.read_csv("data/draft_db.csv")
-    # Get player
-    target_row = get_row_from_player_name(df, TARGET_PLAYER_NAME)
-    create_target_graph(target_row)
-    app.run(host="localhost", port=8000)
+    if '-g' in sys.argv:
+        home(True)
+    else:
+        app.run(host="localhost", port=8000)
