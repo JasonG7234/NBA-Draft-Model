@@ -75,6 +75,8 @@ BASKETBALL_REFERENCE_PLAYER_NAME_EXCEPTIONS = {
     "gg-jackson" : "gregory-jackson-ii",
     "ricky-council-iv" : "ricky-counciliv",
     "craig-porter-jr" : "craig-porterjr",
+    "daron-holmes" : "daron-holmesii",
+    "tristan-da-silva": "tristan-dasilva"
 }
 
 BASKETBALL_REFERENCE_INDEX_EXCEPTIONS = {

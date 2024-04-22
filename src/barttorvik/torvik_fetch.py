@@ -2,7 +2,6 @@ import sys
 sys.path.insert(0, '../../')
 from utils import *
 
-import time
 import json
 import requests
 
@@ -32,7 +31,8 @@ BART_TORVIK_NAME_EXCEPTIONS = {
     "Ray Spalding" : "Raymond Spalding",
     "Herbert Jones" : "Herb Jones",
     "Tyrn Flowers" : "Ty Flowers",
-    "JaKarr Sampson" : "Jakarr Sampson"
+    "JaKarr Sampson" : "Jakarr Sampson",
+    "Tristan Da Silva" : "Tristan da Silva",
     }
 
 BART_TORVIK_VALUE_EXCEPTIONS = {
@@ -79,7 +79,7 @@ def get_torvik_dunks(df):
                 df.loc[index, '# Dunks'] = manual_dunks
             else:
                 for player in torvik_json:
-                    if (is_fuzzy_name_match(player[0], df_player['Name'], BART_TORVIK_NAME_EXCEPTIONS, 95)):
+                    if (is_fuzzy_name_match(player[0], df_player['Name'], BART_TORVIK_NAME_EXCEPTIONS, 93)):
                         dunk_count = player[42]
                         print(f"Found # Dunks for {df_player['Name']}: {dunk_count}")
                         df.loc[index, '# Dunks'] = dunk_count
