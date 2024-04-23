@@ -13,55 +13,25 @@ TARGET_PLAYER_NAME= "Jaylon Tyson"
 SUMMARY_SCORE_LABELS = ['Finishing Score','Shooting Score','Shot Creation Score','Passing Score','Rebounding Score','Athleticism Score','Defense Score','College Productivity Score']
 NUM_TO_COMPARE = 4
 
-def create_target_graph(target_row):
+def create_target_summary_graph(target_row):
     # Populate summary score values for target player
     y = []
     for label in SUMMARY_SCORE_LABELS:
         print(label, str(100*target_row[label]))
         val = round(100*target_row[label], 0)
         y.append(val)
-    
-    # Create two colormaps
-    cmap_neg = mcolors.LinearSegmentedColormap.from_list('red_gray', ['red', 'gray'], N=100)
-    cmap_pos = mcolors.LinearSegmentedColormap.from_list('gray_green', ['gray', 'green'], N=100)
-
-    # Normalize the y-values to the range [0, 1] for colormap scaling
-    norm_neg = mcolors.Normalize(vmin=0, vmax=50)
-    norm_pos = mcolors.Normalize(vmin=50, vmax=100)
-
-    # Assign colors based on the value of each bar
-    bar_colors = [cmap_neg(norm_neg(val)) if val < 50 else cmap_pos(norm_pos(val)) for val in y]
-    
-    #        plt.text(bar.get_x() + bar.get_width()/2, 15, int(yval), 
-    #                va='top', ha='center', color='black', fontsize=12)
             
-    return create_summary_graph(y, bar_colors, False, to_print=False, file_path = f"./graphic_gen/similarities/static/gt.png")
+    return create_summary_graph(y, get_colors_from_ranks(y), False, to_print=False, file_path = f"./graphic_gen/similarities/static/gt.png")
 
-def create_comparison_graph(target_row, comp_row, count: int):
+def create_comparison_summary_graph(target_row, comp_row, count: int):
     
     # Populate summary score differences
     y = []
     for label in SUMMARY_SCORE_LABELS:
         val = round(100*(comp_row[label] - target_row[label]), 0)
         y.append(val)
-    
-    # Create two colormaps: one for negative values and one for positive values
-    cmap_neg = mcolors.LinearSegmentedColormap.from_list('red_gray', ['red', 'gray'], N=100)
-    cmap_pos = mcolors.LinearSegmentedColormap.from_list('gray_green', ['gray', 'green'], N=100)
 
-    # Normalize the y-values to the range [0, 1] for colormap scaling
-    # We find the maximum absolute value to scale negative and positive values proportionally
-    max_abs_value = max(abs(min(y)), abs(max(y)))
-    norm_neg = mcolors.Normalize(vmin=-max_abs_value, vmax=0)
-    norm_pos = mcolors.Normalize(vmin=0, vmax=max_abs_value)
-
-    # Assign colors based on the value of each bar
-    bar_colors = [cmap_neg(norm_neg(val)) if val < 0 else cmap_pos(norm_pos(val)) for val in y]
-
-    #        plt.text(bar.get_x() + bar.get_width()/2, calculate_text_yval(yval), int(yval), 
-    #                va='top' if (yval > 0) else 'bottom', ha='center', color='black', fontsize=12)
-
-    return create_summary_graph(y, bar_colors, True, to_print=False, file_path = f"./graphic_gen/similarities/static/g{str(count)}.png")
+    return create_summary_graph(y, get_colors_from_ranks(y, True), True, to_print=False, file_path = f"./graphic_gen/similarities/static/g{str(count)}.png")
     
 app = Flask(__name__, static_folder='static')
 
@@ -71,7 +41,7 @@ def home(create_graphs: bool = False):
     # Get player
     target_row = get_row_from_player_name(df, TARGET_PLAYER_NAME)
     if (create_graphs):
-        create_target_graph(target_row)
+        create_target_summary_graph(target_row)
     
     # Get comparisons
     top_comparisons = get_player_comparisons(df, TARGET_PLAYER_NAME, num_to_compare=NUM_TO_COMPARE)
@@ -85,7 +55,7 @@ def home(create_graphs: bool = False):
         comparisons.append(comp_row)
         comparisons_scores.append(round(100*(1-comp[1]), 2))
         if (create_graphs):
-            create_comparison_graph(target_row, comp_row, i)
+            create_comparison_summary_graph(target_row, comp_row, i)
         
     # Generate HTML for image
     if (not create_graphs):

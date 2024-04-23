@@ -4,9 +4,34 @@ import os
 import csv
 from typing import List, Optional
 
+import matplotlib.colors as mcolors
+import matplotlib.font_manager
+
+# Set the font globally
+prop = matplotlib.font_manager.FontProperties(fname="C:/Users/Owner/Documents/Projects/NBA-Draft-Model/fonts/Roboto-Regular.ttf")
+matplotlib.rcParams['font.family'] = prop.get_name()
+
 
 SUMMARY_SCORE_LABELS = ['Finishing Score','Shooting Score','Shot Creation Score','Passing Score','Rebounding Score','Athleticism Score','Defense Score','College Productivity Score']
 PATH_TO_COLORS = 'data/colors.csv'
+
+def get_colors_from_ranks(vals, is_negative_vals_accepted=False):
+    
+    # Create two colormaps
+    cmap_neg = mcolors.LinearSegmentedColormap.from_list('red_gray', ['red', 'gray'], N=100)
+    cmap_pos = mcolors.LinearSegmentedColormap.from_list('gray_green', ['gray', 'green'], N=100)
+
+    # Normalize the y-values to the range [0, 1] for colormap scaling
+    if (is_negative_vals_accepted):
+        max_abs_value = max(abs(min(vals)), abs(max(vals)))
+        norm_neg = mcolors.Normalize(vmin=-max_abs_value, vmax=0)
+        norm_pos = mcolors.Normalize(vmin=0, vmax=max_abs_value)
+    else: 
+        norm_neg = mcolors.Normalize(vmin=0, vmax=50)
+        norm_pos = mcolors.Normalize(vmin=50, vmax=100)
+
+    # Assign colors based on the value of each bar
+    return [cmap_neg(norm_neg(val)) if val < (0 if is_negative_vals_accepted else 50) else cmap_pos(norm_pos(val)) for val in vals]
 
 def get_colors_from_school(school_name: str) -> List[str]:
     colors = []  # List to store the colors corresponding to the team
