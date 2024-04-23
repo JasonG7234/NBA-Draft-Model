@@ -368,7 +368,7 @@ def get_player_comparisons(df: pd.DataFrame, player_name: str, num_to_compare: i
     
     
     # Filter out to same primary or secondary position
-    df = df[(df['Position 1'] == target_player['Position 1']) | (df['Position 1'] == target_player['Position 2'])]
+    df = filter_by_position(df, target_player)
     for _, row in df.iterrows():
         player_summary_score_diff = 0
         summary_score_count = 0
@@ -385,6 +385,9 @@ def get_player_comparisons(df: pd.DataFrame, player_name: str, num_to_compare: i
         if (value < 100):
             top_leaderboard.append([key, value])
     return sorted(top_leaderboard, key=lambda x: x[1])[1:num_to_compare+1]
+
+def filter_by_position(df, target_row):
+    return df[(df['Position 1'] == target_row['Position 1']) | (df['Position 2'] == target_row['Position 1'])]
 
 def print_dataframe(df):
     

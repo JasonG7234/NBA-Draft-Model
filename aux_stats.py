@@ -264,6 +264,8 @@ def build_draft_ranking_column(df):
     return df
 
 def reorder_aux_columns(df):
+    df['3FG%'] = df['3FG%']*100
+    df['3PAr'] = df['3PAr']*100
     return df[['RealGM ID','Season','Name',
                 'Position 1','Position 2','Play Style','Height','Weight',
                 'School','Conference','Wins','Losses','SOS',

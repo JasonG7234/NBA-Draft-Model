@@ -98,6 +98,8 @@ FG% @ Mid
 % Shots @ 3
 %Astd @ 3
 % Assisted
+Adj OFF +/-,
+Adj DEF +/-,
 AAU Season
 AAU Team
 AAU League

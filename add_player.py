@@ -38,7 +38,8 @@ df = convert_class_to_number(df)
 df = convert_height_to_inches(df)
 df = basketballreference_scrape.add_college_stats_from_basketball_reference(df)
 df = rsci_scrape.add_rsci_rank_as_column(df, True)
-df['RSCI'] = 400
+if (not df["RSCI"].all()):
+    df['RSCI'] = 400
 df = torvik_fetch.get_torvik_dunks(df)
 df = hoop_explorer_fetch.get_hoop_explorer_plus_minus_single_player(df)
 df = hoopmath_scrape.add_college_stats_from_hoopmath(df)
