@@ -48,7 +48,7 @@ def get_hoop_explorer_plus_minus_single_player(df):
                 o = he_player['off_adj_rapm']['value']
                 d = he_player['def_adj_rapm']['value']
                 # pos = player['posFreqs'] While this is probably the best single source of positional data, it still differs from what I'd consider correct NBA positional predictions
-                print(f"Found match for {he_player_name}")
+                print(f"Found +/- match for {he_player_name}")
                 df.loc[index, 'Adj OFF +/-'] = o
                 df.loc[index, 'Adj DEF +/-'] = -d
                 break
@@ -94,7 +94,7 @@ def get_hoop_explorer_plus_minus_dataframe():
                     o = he_player['off_adj_rapm']['value']
                     d = he_player['def_adj_rapm']['value']
                     # pos = player['posFreqs'] While this is probably the best single source of positional data, it still differs from what I'd consider correct NBA positional predictions
-                    print(f"Found match for {he_player_name}")
+                    print(f"Found +/- match for {he_player_name}")
                     df.loc[index, 'Adj OFF +/-'] = o
                     df.loc[index, 'Adj DEF +/-'] = -d
                     break
