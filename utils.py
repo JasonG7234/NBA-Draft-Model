@@ -256,6 +256,8 @@ def normalize(df, col_name, is_inverse_normalization=False):
         df[f'{col_name} Normalized'] = 1 - (df[col_name] - min_value) / (max_value - min_value)
     else:
         df[f'{col_name} Normalized'] = (df[col_name] - min_value) / (max_value - min_value)
+    df[f'{col_name} Normalized'] = df[f'{col_name} Normalized'].astype(float, errors='ignore')
+    df[f'{col_name} Normalized'] = df[f'{col_name} Normalized'].fillna(f'{col_name} Normalized')
     return df
 
 def reorder_final_draft_db_columns(df):
@@ -323,6 +325,7 @@ def get_top_values(df, col_name, num_values=10):
     print(df_sorted[['Name', col_name]].head(num_values))   
 
 def get_percentile_rank(df, col_name, player_name, is_inverse_percentile=False, to_print=True, rank_col_name="Rank", to_drop_column=True):
+    df[col_name] = df[col_name].fillna(df[col_name].mean())
     df[rank_col_name] = df[col_name].rank(pct=True, ascending=(not is_inverse_percentile))
     try:
         percentile = round(df.loc[df['Name'] == player_name].iloc[0][rank_col_name]*100)
@@ -359,10 +362,10 @@ def draw_conclusions_on_column(df, col_name, num_top=10, position="all", show_bo
     print(f"The average value of column {col_name} is: {df[col_name].mean()}")
     print(f"The median value of column {col_name} is: {df[col_name].median()}")
 
-def get_player_comparisons(df: pd.DataFrame, player_name: str, num_to_compare: int = 4, categories = None):
+def get_player_comparisons(df: pd.DataFrame, player_name: str, num_to_compare: int = 4, categories = None, include_draft_score=False):
     if (categories is None):
         categories = ['Finishing Score','Shooting Score','Shot Creation Score','Passing Score','Rebounding Score','Athleticism Score','Defense Score','College Productivity Score']
-
+        
     leaderboard = {}
     target_player = df.loc[df['Name'] == player_name].iloc[0]
     
@@ -376,9 +379,15 @@ def get_player_comparisons(df: pd.DataFrame, player_name: str, num_to_compare: i
             summary_value = row[summary_label]
             if (summary_value not in ERROR_VALUES):
                 #if (summary_value < 1): summary_value *= 100
+                    
                 player_summary_score_diff += abs(target_player[summary_label] - summary_value)
                 summary_score_count += 1
-        leaderboard[row['Name']] = (player_summary_score_diff/summary_score_count)
+        if (include_draft_score):
+            draft_score_value = row['Draft Score']
+            player_summary_score_diff += (abs(target_player['Draft Score'] - draft_score_value)*3) # Magnitude of 3. We want the Draft Score comp to be about 33% of the comparison
+            leaderboard[row['Name']] = (player_summary_score_diff/(summary_score_count*3))
+        else:
+            leaderboard[row['Name']] = (player_summary_score_diff/summary_score_count)
         
     top_leaderboard = []
     for key, value in leaderboard.items():

@@ -8,8 +8,8 @@ import matplotlib.colors as mcolors
 import matplotlib.font_manager
 
 # Set the font globally
-prop = matplotlib.font_manager.FontProperties(fname="C:/Users/Owner/Documents/Projects/NBA-Draft-Model/fonts/Roboto-Regular.ttf")
-matplotlib.rcParams['font.family'] = prop.get_name()
+#prop = matplotlib.font_manager.FontProperties(fname="C:/Users/Owner/Documents/Projects/NBA-Draft-Model/fonts/Roboto-Regular.ttf")
+#matplotlib.rcParams['font.family'] = prop.get_name()
 
 
 SUMMARY_SCORE_LABELS = ['Finishing Score','Shooting Score','Shot Creation Score','Passing Score','Rebounding Score','Athleticism Score','Defense Score','College Productivity Score']
