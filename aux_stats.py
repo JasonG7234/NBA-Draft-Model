@@ -4,6 +4,7 @@ import math
 from utils import *
 
 def jason_3pt_confidence(df):
+
     df['3 Point Confidence'] = 2/(1/df['3FG%']+1/df['3PAr'])
     return df
 
@@ -135,12 +136,9 @@ def touch(df):
 def add_aux_columns(df, divide_by_position=True):
     for col in df.columns:
         if "RealGM" in str(col):
-            df[col] = df[col].astype(int)
             df[col] = df[col].astype(str)
         elif pd.to_numeric(df[col], errors='coerce').notna().all():
             df[col] = pd.to_numeric(df[col], errors='coerce').astype(float)
-    
-    
 
     df['3FGA/100Poss'].fillna(0)
     df['Draft Day Age'].fillna(df['Draft Day Age'].mean())
@@ -161,8 +159,6 @@ def add_aux_columns(df, divide_by_position=True):
     df['Helio Score'] = (df['Box Score Creation'] * (df['Height Normalized']) * (df['SOS Normalized']+1) * df['Draft Day Age Normalized'])
     df.loc[df['G'] <= 15, 'Helio Score'] = df['Helio Score']*(df['G']/15)
     df['Box Score Creation'].astype(float)
-    for index, row in df.nlargest(25, ['Helio Score']).iterrows():
-        df.loc[index, 'Play Style'] = 'Primary'
     df.drop(['Height Normalized', 'SOS Normalized', 'Draft Day Age Normalized'], axis=1, inplace=True)
     #draw_conclusions_on_column(df, '"% Dunks Unassisted"', num_top=25)
     #get_value_at_column_by_player_name(df, "Ja Morant", "Helio Score", True)
@@ -247,6 +243,7 @@ def build_draft_ranking_column(df):
     df = normalize(df, 'Height')
     df = normalize(df, 'SOS')
     df = normalize(df, 'Draft Day Age', True)
+    df['RSCI'] = pd.to_numeric(df['RSCI'], errors='raise').astype(int)
     df = normalize(df, 'RSCI', True)
     #draw_conclusions_on_column(df, "RSCI Normalized", num_top=15)
     df = normalize(df, 'Box Score Creation')
@@ -255,7 +252,7 @@ def build_draft_ranking_column(df):
     #draw_conclusions_on_column(df, "SOS Normalized", num_top=15)
     df['Draft Score'] = 5.5/(
         (0.25/(df['MP Normalized']+0.01)) +
-        (0.25/(df['RSCI Normalized']+0.01)) +
+        (0.5/(df['RSCI Normalized']+0.01)) +
         (1/df['Percentile Score Normalized']) +
         (1/df['Box Score Creation Normalized']) +
         (1/df['Draft Day Age Normalized']) +
@@ -264,8 +261,17 @@ def build_draft_ranking_column(df):
     return df
 
 def reorder_aux_columns(df):
-    df['3FG%'] = df['3FG%']*100
-    df['3PAr'] = df['3PAr']*100
+    for index, row in df.iterrows():
+        v1 = row['3FG%']
+        if not np.isnan(v1):
+            while (v1 < 1 and v1 != 0):
+                v1*=100
+            df.loc[index, '3FG%'] = v1
+        v2 = row['3PAr']
+        if not np.isnan(v2):
+            while (v2 < 1 and v2 != 0):
+                v2*=100
+            df.loc[index, '3PAr'] = v2
     return df[['RealGM ID','Season','Name',
                 'Position 1','Position 2','Play Style','Height','Weight',
                 'School','Conference','Wins','Losses','SOS',
