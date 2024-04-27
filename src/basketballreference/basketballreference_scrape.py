@@ -76,7 +76,8 @@ BASKETBALL_REFERENCE_PLAYER_NAME_EXCEPTIONS = {
     "ricky-council-iv" : "ricky-counciliv",
     "craig-porter-jr" : "craig-porterjr",
     "daron-holmes" : "daron-holmesii",
-    "tristan-da-silva": "tristan-dasilva"
+    "tristan-da-silva": "tristan-dasilva",
+    "terrence-shannon-jr": "terrence-shannonjr"
 }
 
 BASKETBALL_REFERENCE_INDEX_EXCEPTIONS = {
@@ -167,7 +168,6 @@ def get_players_basketball_reference_page(row):
     if (index_value_in_url == 1):
         while index_value_in_url in range(1, MAX_PROFILES_TO_SEARCH_BY_NAME): 
             url = "https://www.sports-reference.com/cbb/players/" + player_name_in_url + "-" + str(index_value_in_url) + ".html"
-            print(url)
             soup_html, _ = find_site(url)
             if ((not soup_html) and (player_name_in_url[-3:] == '-jr')):
                 player_name_in_url = player_name_in_url[:-3] + 'jr'
