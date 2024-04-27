@@ -141,7 +141,7 @@
             .grid {
                 display: grid;
                 grid-template-columns: repeat(3, 1fr);
-                grid-auto-rows: minmax(276px, auto); /* Automatically fill remaining height */
+                grid-auto-rows: minmax(200px, auto); /* Automatically fill remaining height */
                 margin-top: 0px;
             }
             .grid-item {
@@ -150,7 +150,7 @@
                 align-items: center;
                 text-align: center;
                 border: 1px solid black;
-                background-color: #ccc;
+                background-color: #fff;
             }
             .grid-item img {
                 max-width: 100%;
@@ -182,23 +182,23 @@
                     align-items: center;
                     text-align: left;
                     width: 100%;
-                    background-color: #ffffff;
+                    background-color: #ccc;
             }
             .content-wrapper img {
                     max-width: 100%;
             }
+            .x_axis {
+                display: flex;
+                justify-content: space-evenly;
+            }
             h1 {
-                font-size: 52px;
+                font-size: 44px;
             }
             .footer {
-                font-size: 11px;
-                padding: 2px;
+                font-size: 18px;
+                padding: 5px;
                 color: {{ text_colors[1]}};
                 background-color: {{ colors[1] }};
-            }
-            .labels_in_footer {
-                text-align: center;
-                font-weight: bold;
             }
         </style>
         <title>NBA Draft Pick'Em</title>
@@ -210,12 +210,12 @@
                     <img src="{{ row['Image Link'] }}" alt="Header Image">
                     <div>
                         <div style="margin-top: -30px"><h1>{{ row['Name'] }}</h1></div>
-                        <div style="margin-top: -40px"><h2>{{ int(row['Height']//12) }}'{{ int(row['Height']%12) }}&nbsp;{{ row['Position 1'] }}&nbsp;|&nbsp;{{ row['School'] }}</h2></div>
+                        <div style="margin-top: -30px"><h2>{{ int(row['Height']//12) }}'{{ int(row['Height']%12) }}&nbsp;{{ pos }}&nbsp;|&nbsp;{{ row['School'] }}</h2></div>
                     </div>
                 </div>
                 <div class="header_projection">
                     <span>Draft Projection:</span></br>
-                    <strong>Lottery</strong>
+                    <strong>{{ ovr_proj }}</strong>
                 </div>
             </div>
             <div class="aux_table" style="width: 100%; display: flex; justify-content: center">
@@ -250,7 +250,6 @@
                         <strong>Shooting</strong>
                     </div>
                     <div><img class="comp_chart" src="{{ url_for('static', filename='gshoot.png') }}" alt="Chart 1" height="125" width="400"></div>
-                    <div>3FG%&nbsp;|&nbsp;3PAr&nbsp;|&nbsp;FG%@Mid&nbsp;</div>
                 </div>
                 <div class="grid-item">
                     <div class="content-wrapper">
@@ -283,6 +282,11 @@
                     <div><img class="comp_chart" src="{{ url_for('static', filename='gprod.png') }}" alt="Chart 1" height="125" width="400"></div>
                 </div>
             </div>
+        </div>
+        <div class="footer">
+            <strong>Offensive Role:</strong>&nbsp;{{ off_role}} {{ row['Play Style']}} {{ pos }} | <strong>{% if off_proj > 0 %}+{% else %}{% endif %}{{ off_proj }}</strong></br>
+            <strong>Defensive Role:</strong>&nbsp;{{ def_role }} {{ pos }} Defender | <strong>{% if def_proj > 0 %}+{% else %}{% endif %}{{ def_proj }}</strong></br>
+            <strong>Comparisons:</strong>&nbsp;{{ comps[0][0]}}, {{ comps[1][0] }}</br>
         </div>
     </body>
 </html>
