@@ -15,6 +15,8 @@ def __get_url_from_season_and_tier(year, tier):
 def fetch(season, tier='High'):
     time.sleep(2)
     count = 0
+    if (int(season) <= 2018):
+        return None
     while count < 3:
         try:
             url = __get_url_from_season_and_tier(season, tier)
@@ -31,7 +33,7 @@ def fetch(season, tier='High'):
             count += 1
     if not response:
         print('NO RESPONSE')
-        return None, None
+        return None
     return None
 
 def get_hoop_explorer_plus_minus_single_player(df):
@@ -40,11 +42,13 @@ def get_hoop_explorer_plus_minus_single_player(df):
     df['Adj DEF +/-'] = ""
     
     for index, row in df.iterrows():
-        year = row['Season'][:4]
+        year = row['Season'][:4]        
+        if int(year) < 2018: # Prior to first year of hoop-explorer data
+            continue
         hoop_explorer_player_data = fetch(year, 'High') + fetch(year, 'Medium') + fetch(year, 'Low')
         for he_player in hoop_explorer_player_data:
             he_player_name = reverse_name(he_player['key'])
-            if is_fuzzy_name_match(he_player_name, row['Name'], HOOP_EXPLORER_NAME_EXCEPTIONS, name_match_percentage=95):
+            if is_fuzzy_name_match(he_player_name, row['Name'], HOOP_EXPLORER_NAME_EXCEPTIONS, name_match_percentage=91):
                 o = he_player['off_adj_rapm']['value']
                 d = he_player['def_adj_rapm']['value']
                 # pos = player['posFreqs'] While this is probably the best single source of positional data, it still differs from what I'd consider correct NBA positional predictions
@@ -90,7 +94,7 @@ def get_hoop_explorer_plus_minus_dataframe():
                 
             for he_player in hoop_explorer_player_data:
                 he_player_name = reverse_name(he_player['key'])
-                if is_fuzzy_name_match(he_player_name, row['Name'], HOOP_EXPLORER_NAME_EXCEPTIONS, name_match_percentage=95):
+                if is_fuzzy_name_match(he_player_name, row['Name'], HOOP_EXPLORER_NAME_EXCEPTIONS, name_match_percentage=91):
                     o = he_player['off_adj_rapm']['value']
                     d = he_player['def_adj_rapm']['value']
                     # pos = player['posFreqs'] While this is probably the best single source of positional data, it still differs from what I'd consider correct NBA positional predictions

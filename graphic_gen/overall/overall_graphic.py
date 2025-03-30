@@ -9,7 +9,7 @@ from utils import *
 sys.path.insert(0, './graphic_gen/')
 from graphic_utils import *
 
-TARGET_PLAYER_NAME = 'Jalen Brunson'
+TARGET_PLAYER_NAME = 'Danny Wolf'
 
 SHEET_LABELS = [
     ['3FG%', '3PAr', 'FG% @ Mid'], # Shooting
@@ -43,7 +43,7 @@ def __calculate_text_position(bar, bars):
         return bar.get_height()/1.3
     else:
         max_height = max(b.get_height() for b in bars)
-        return bar.get_height()*(1/20*max_height)
+        return bar.get_height()*(1/10*max_height)
     
 def __get_defensive_projection_score(df):
     new_row = get_row_from_player_name(df, TARGET_PLAYER_NAME)
@@ -206,12 +206,16 @@ def create_prospect_graphs(df):
         # For each label in the master spreadsheet list
         for label in SHEET_LABELS[label_i]:
             if (new_row[label] in ERROR_VALUES or pd.isna(new_row[label])):
-                GRAPH_LABELS[label_i].remove(label.replace(" ", "")[3:])
+                try:
+                    GRAPH_LABELS[label_i].remove(label.replace(" ", "")[3:])
+                except ValueError:
+                    GRAPH_LABELS[label_i].remove(label)
                 continue
             y.append(round(new_row[label], 1))
             ranks.append(100*new_row[label + ' Rank'])
         
         # Create a bar chart with the desired labels on the graph, not the spreadsheet
+
         bars = plt.bar(GRAPH_LABELS[label_i], ranks, color=get_colors_from_ranks(ranks))
     
         # Add the values on the bars

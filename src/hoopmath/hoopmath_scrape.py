@@ -81,7 +81,7 @@ def add_college_stats_from_hoopmath(df, is_same_team=False):
     return df
 
 def fetch_hoop_math_page_url(row):
-    """Fetches the 247 recruiting rankings for a given dataframe row.
+    """Fetches the hoop-math page for a given dataframe row.
 
     Args:
         row (int): The DataFrame row, as long as that row has a 'School' and 'Season' column.

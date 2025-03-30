@@ -3,8 +3,11 @@ import numpy as np
 import math
 from utils import *
 
-def jason_3pt_confidence(df):
+import traceback
 
+def jason_3pt_confidence(df):
+    df['3FG%'] = pd.to_numeric(df['3FG%'], errors='coerce')
+    df['3FG%'].fillna(0, inplace=True)
     df['3 Point Confidence'] = 2/(1/df['3FG%']+1/df['3PAr'])
     return df
 
@@ -109,7 +112,7 @@ def play_styles(df):
             pf.loc[index, 'Play Style'] = 'Connector'
     pf.drop(['Stretch','Energy','Playmaker','Scorer'], axis=1, inplace=True)
     new_df = pd.concat([pg, wing, pf, c], axis=0)
-    return new_df.sort_values(by=['BPM'], ascending=False)
+    return new_df
 
 def athleticism(df):
     df["Dunks per Minute Played"] = df['# Dunks'] / df['MP']
@@ -139,7 +142,6 @@ def add_aux_columns(df, divide_by_position=True):
             df[col] = df[col].astype(str)
         elif pd.to_numeric(df[col], errors='coerce').notna().all():
             df[col] = pd.to_numeric(df[col], errors='coerce').astype(float)
-
     df['3FGA/100Poss'].fillna(0)
     df['Draft Day Age'].fillna(df['Draft Day Age'].mean())
     df = jason_3pt_confidence(df)
@@ -148,6 +150,7 @@ def add_aux_columns(df, divide_by_position=True):
     df = percent_assisted_overall(df)
     df = self_created_dunks(df)
     df = play_styles(df)
+
     df['Stock%'] = 2/(1/df['STL%'] + 1/df['BLK%'])
     df = normalize(df, 'Height')
     df = normalize(df, 'SOS')
@@ -162,7 +165,8 @@ def add_aux_columns(df, divide_by_position=True):
     df.drop(['Height Normalized', 'SOS Normalized', 'Draft Day Age Normalized'], axis=1, inplace=True)
     #draw_conclusions_on_column(df, '"% Dunks Unassisted"', num_top=25)
     #get_value_at_column_by_player_name(df, "Ja Morant", "Helio Score", True)
-    if (divide_by_position):
+    print('ADD AUX COLUMNS')
+    if (divide_by_position and len(df) != 1):
         df = divide_by_positions(df)
     else:
         df = create_percentile_ranks_by_position_group(df)
@@ -179,11 +183,21 @@ def divide_by_positions(df):
     # Guards
     temp = df[(df['Position 1'] == 'PG') | (df['Position 2'] == 'PG')]
     g = create_percentile_ranks_by_position_group(temp)
+    print(len(g))
     #Wings - most complex (SG, SG/SF, SF/SG, SF)
-    temp = df[((df['Position 1'] == 'SG') & (df['Position 2'] == 'SF')) | ((df['Position 1'] == 'SF') & (df['Position 2'] == 'SG')) | ((df['Position 1'] == 'SF') & (df['Position 2'] != 'SG') & df['Position 2'] != 'PF') | ((df['Position 1'] == 'SG') & (df['Position 2'] != 'SF') & df['Position 2'] != 'PG')]
+    temp = df[
+        ((df['Position 1'] == 'SG') & (df['Position 2'] == 'SF')) | 
+        ((df['Position 1'] == 'SF') & (df['Position 2'] == 'SG')) | 
+        ((df['Position 1'] == 'SF') & (df['Position 2'] != 'SG') & (df['Position 2'] != 'PF')) | 
+        ((df['Position 1'] == 'SG') & (df['Position 2'] != 'SF') & (df['Position 2'] != 'PG'))
+    ]
     w = create_percentile_ranks_by_position_group(temp)
     #Forwards
-    temp = df[(df['Position 1'] == 'PF') | (df['Position 2'] == 'PF')]
+    temp = df[
+        ((df['Position 1'] == 'PF') & (df['Position 2'] == 'SF')) | 
+        ((df['Position 1'] == 'PF') & (df['Position 2'] == '')) | 
+        ((df['Position 1'] == 'PF') & (df['Position 2'] != 'SF') & (df['Position 2'] != 'C')) | 
+        ((df['Position 1'] == 'SF') & (df['Position 2'] != 'PF') & (df['Position 2'] != 'C'))]
     f = create_percentile_ranks_by_position_group(temp)
     # Bigs
     temp = df[(df['Position 2'] == 'C') | (df['Position 1'] == 'C')]
@@ -196,7 +210,7 @@ def divide_by_positions(df):
 def create_percentile_ranks_by_position_group(temp):
     temp = normalize(temp, 'FTr')
     temp = normalize(temp,'Stock%')
-    temp = normalize(temp, '%Astd @ Rim')
+    temp = normalize(temp, '%Astd @ Rim', is_inverse_normalization=True)
     temp = normalize(temp, '# Dunks')
     temp = normalize(temp,'Pure Point Rating')
     temp = normalize(temp, 'AST/40')
@@ -208,9 +222,9 @@ def create_percentile_ranks_by_position_group(temp):
     temp = normalize(temp, 'FG% @ Rim')
     temp = normalize(temp, '% Shots @ Rim')
     temp = normalize(temp, 'Hands-On Buckets')
-    temp = normalize(temp, '%Astd @ Mid')
+    temp = normalize(temp, '%Astd @ Mid', is_inverse_normalization=True)
     temp = normalize(temp, 'Offensive Load')
-    temp = normalize(temp, '%Astd @ 3')
+    temp = normalize(temp, '%Astd @ 3', is_inverse_normalization=True)
     temp = normalize(temp, 'SOS')
     temp = normalize(temp, 'WS/40')
     temp = normalize(temp, 'Adj OFF +/-')
@@ -235,6 +249,8 @@ def create_percentile_ranks_by_position_group(temp):
     # -----------------------------------------------------------------------
     temp.loc[:, 'Percentile Score'] = round((temp.loc[:, 'Athleticism Score']+temp.loc[:, 'Passing Score']+temp.loc[:, 'Shooting Score']+temp.loc[:, 'Finishing Score']+temp.loc[:, 'Defense Score']+temp.loc[:, 'Shot Creation Score']+temp.loc[:, 'College Productivity Score']+temp.loc[:, 'Rebounding Score'])/8, 3)*100
     # -----------------------------------------------------------------------------
+    get_value_at_column_by_player_name(temp, 'Danny Wolf', 'Finishing Score')
+    get_value_at_column_by_player_name(temp, 'Danny Wolf', 'Shooting Score')
     temp.drop(['WS/40 Normalized', 'SOS Normalized', '%Astd @ 3 Normalized', 'Offensive Load Normalized', '%Astd @ Mid Normalized', 'Hands-On Buckets Normalized', '% Shots @ Rim Normalized', 'FG% @ Rim Normalized', 'FG% @ Mid Normalized', 
                '3 Point Proficiency Normalized', 'FT% Normalized', 'TRB% Normalized', 'AST/TOV Normalized', 'AST/40 Normalized', 'Pure Point Rating Normalized', '# Dunks Normalized', '%Astd @ Rim Normalized', 'Stock% Normalized', 'FTr Normalized'], axis=1, inplace=True)
     return temp
@@ -244,20 +260,26 @@ def build_draft_ranking_column(df):
     df = normalize(df, 'SOS')
     df = normalize(df, 'Draft Day Age', True)
     df['RSCI'] = pd.to_numeric(df['RSCI'], errors='raise').astype(int)
-    df = normalize(df, 'RSCI', True)
+    df = normalize(df, 'RSCI', True, lower_bound=0.05) # Just because guys are unranked doesn't mean they should get a zero
     #draw_conclusions_on_column(df, "RSCI Normalized", num_top=15)
     df = normalize(df, 'Box Score Creation')
     df = normalize(df, 'Percentile Score')
     df = normalize(df, 'MP')
-    #draw_conclusions_on_column(df, "SOS Normalized", num_top=15)
-    df['Draft Score'] = 5.5/(
-        (0.25/(df['MP Normalized']+0.01)) +
-        (0.5/(df['RSCI Normalized']+0.01)) +
-        (1/df['Percentile Score Normalized']) +
-        (1/df['Box Score Creation Normalized']) +
+    df['Height Normalized'] = 1-abs(df['Height Normalized']-df['Height Normalized'].mean()) # SUBJECTIVE - normalize height to the mean bc wings are most important
+    #draw_conclusions_on_column(df, "Height Normalized", num_top=15)
+    #get_value_at_column_by_player_name(df, 'Ajay Mitchell', 'MP Normalized')
+    #get_value_at_column_by_player_name(df, 'Ajay Mitchell', 'RSCI Normalized')
+    #get_value_at_column_by_player_name(df, 'Ajay Mitchell', 'Percentile Score Normalized')
+    #get_value_at_column_by_player_name(df, 'Ajay Mitchell', 'Draft Day Age Normalized')
+    #get_value_at_column_by_player_name(df, 'Ajay Mitchell', 'SOS Normalized')
+    df['Draft Score'] = 5.25/(
+        (0.25/(df['MP Normalized']+0.00001)) +
+        (1/(df['RSCI Normalized']+0.00001)) +
+        (2/df['Percentile Score Normalized']) +
         (1/df['Draft Day Age Normalized']) +
-        (0.5/(df['Height Normalized']+0.01)) +
+        (0.5/(df['Height Normalized'])) +
         (0.5/df['SOS Normalized']))
+    #draw_conclusions_on_column(df, "Draft Score", num_top=15)
     return df
 
 def reorder_aux_columns(df):
@@ -294,6 +316,7 @@ def main():
     df = pd.read_csv("data/draft_db.csv")
     df = add_aux_columns(df)
     df = delete_duplicates(df)
+    df.sort_values(by=['Draft Score'])
     df.to_csv("data/draft_db.csv", index=False)
     
 main()

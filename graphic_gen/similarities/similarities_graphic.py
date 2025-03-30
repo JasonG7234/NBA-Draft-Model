@@ -9,7 +9,7 @@ from utils import *
 sys.path.insert(0, './graphic_gen/')
 from graphic_utils import *
 
-TARGET_PLAYER_NAME= "Jaylon Tyson"
+TARGET_PLAYER_NAME = 'Dylan Harper'
 SUMMARY_SCORE_LABELS = ['Finishing Score','Shooting Score','Shot Creation Score','Passing Score','Rebounding Score','Athleticism Score','Defense Score','College Productivity Score']
 NUM_TO_COMPARE = 4
 
@@ -44,7 +44,7 @@ def home(create_graphs: bool = False):
         create_target_summary_graph(target_row)
     
     # Get comparisons
-    top_comparisons = get_player_comparisons(df, TARGET_PLAYER_NAME, num_to_compare=NUM_TO_COMPARE)
+    top_comparisons = get_player_comparisons(df, TARGET_PLAYER_NAME, num_to_compare=NUM_TO_COMPARE, include_draft_score=False)
     
     comparisons = []
     comparisons_scores = []

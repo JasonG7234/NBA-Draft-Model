@@ -85,18 +85,18 @@ def create_summary_graph(
     """
     
     # Change to ideal size
-    plt.figure(figsize=(2.5, 1.25), facecolor='none')
+    plt.figure(figsize=(30, 12.5), facecolor='none')
 
     # Create a bar chart with the custom colormap
     bars = plt.bar(SUMMARY_SCORE_LABELS, y, color=bar_colors)
+    plt.gca().tick_params(labelsize=98)
     
     # Add the values on the bars
     for bar in bars:
         yval = bar.get_height()
         #text_color = __get_a11y_text_color_from_hex(bar.get_facecolor())
-        if (yval != 0):
-            plt.text(bar.get_x() + bar.get_width()/2, __calculate_text_yval(yval, is_negative), int(yval), 
-                    va='bottom' if (yval < 0 and is_negative) else 'top', ha='center', color='black', fontsize=12)
+        plt.text(bar.get_x() + bar.get_width()/2, __calculate_text_yval(yval, is_negative), int(yval), 
+            va='bottom' if (yval < 0 and is_negative) else 'top', ha='center', color='black', fontsize=120)
 
     # Hide the axes
     plt.gca().xaxis.set_visible(False)

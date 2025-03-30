@@ -119,7 +119,7 @@ PER_100_COLUMN_IDS = ['fg_per_poss', 'fga_per_poss', 'fg2_per_poss', 'fg2a_per_p
     'trb_per_poss', 'ast_per_poss', 'stl_per_poss', 'blk_per_poss', 'tov_per_poss', 'pf_per_poss', 'pts_per_poss', 'off_rtg', 'def_rtg']
 
 ADVANCED_COLUMN_IDS = ['games','games_started','mp','per','ts_pct','efg_pct','fg3a_per_fga_pct','fta_per_fga_pct','pprod','orb_pct','drb_pct','trb_pct','ast_pct',
-    'stl_pct','blk_pct','tov_pct','usg_pct','ws-dum','ows','dws','ws','ws_per_40','bpm-dum','obpm','dbpm','bpm']  
+    'stl_pct','blk_pct','tov_pct','usg_pct','ows','dws','ws','ws_per_40','obpm','dbpm','bpm']  
     
 COLUMN_NAMES = ['G','GS','MP','PER','TS%','eFG%','3PAr','FTr','PProd','ORB%','DRB%','TRB%','AST%',
     'STL%','BLK%','TOV%','USG%','OWS','DWS','WS','WS/40','OBPM','DBPM','BPM','FG/40', 'FGA/40', 'FG%', '2FGM/40', '2FGA/40', '2FG%', '3FGM/40', '3FGA/40', '3FG%',
@@ -137,8 +137,7 @@ def find_site(url, max_retry_count=3):
     count = 0
     req_headers = { 'User-Agent': "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36",
                    'referer': "https://www.sports-reference.com/cbb/schools/pepperdine/2022.html",
-                   'accept-language': "en-US,en;q=0.6",
-                   'accept-encoding': "gzip, deflate, br"}
+                   'accept-language': "en-US,en;q=0.6"}
     response = None
     while count < max_retry_count:
         try:
@@ -156,10 +155,7 @@ def find_site(url, max_retry_count=3):
     if not response:
         print('NO RESPONSE')
         return None, None
-    try:
-        html = response.content.decode("utf-8")
-    except UnicodeDecodeError:
-        html = response.content.decode("latin-1")
+    html = response.text
     return BeautifulSoup(re.sub("<!--|-->","", html), "html.parser"), response.url
 
 def read_csv_and_cast_columns(file_name):
@@ -196,7 +192,11 @@ def get_basketball_reference_player_info(soup):
 def is_fuzzy_name_match(data_name, csv_name, name_exception_dict, name_match_percentage=90):
     exception_name = check_value_in_dictionary_of_exceptions(data_name, name_exception_dict, data_name)
     ratio = fuzz.partial_ratio(csv_name, exception_name.replace('.', '').replace("'", ''), )
-    return True if ratio >= name_match_percentage else False
+    if ratio >= name_match_percentage:
+        print(ratio)
+        return True
+    else:
+        return False
         
 def get_basketball_reference_formatted_school(school, exceptions, default):
     return check_value_in_dictionary_of_exceptions(school, exceptions, default)
@@ -249,15 +249,20 @@ def update_position_columns(df):
         df = df.rename(columns = {'Position' : 'Position 1'})
     return df
 
-def normalize(df, col_name, is_inverse_normalization=False):
+def normalize(df, col_name, is_inverse_normalization=False, lower_bound=None):
+    if (df[col_name] == "").all():
+        df[f'{col_name} Normalized'] = 0
+        return df
     max_value = df[col_name].max()
     min_value = df[col_name].min()
     if (is_inverse_normalization):
-        df[f'{col_name} Normalized'] = 1 - (df[col_name] - min_value) / (max_value - min_value)
+        df.loc[:, f'{col_name} Normalized'] = 1 - (df[col_name] - min_value) / (max_value - min_value)
     else:
-        df[f'{col_name} Normalized'] = (df[col_name] - min_value) / (max_value - min_value)
-    df[f'{col_name} Normalized'] = df[f'{col_name} Normalized'].astype(float, errors='ignore')
-    df[f'{col_name} Normalized'] = df[f'{col_name} Normalized'].fillna(f'{col_name} Normalized')
+        df.loc[:, f'{col_name} Normalized'] = (df[col_name] - min_value) / (max_value - min_value)
+    if (lower_bound):
+        df.loc[df[col_name] < 0.05, col_name] = 0.05
+    df.loc[:, f'{col_name} Normalized'] = df[f'{col_name} Normalized'].astype(float, errors='raise')
+    df.loc[:, f'{col_name} Normalized'] = df[f'{col_name} Normalized'].fillna(df[f'{col_name} Normalized'].mean())
     return df
 
 def reorder_final_draft_db_columns(df):
@@ -385,7 +390,7 @@ def get_player_comparisons(df: pd.DataFrame, player_name: str, num_to_compare: i
         if (include_draft_score):
             draft_score_value = row['Draft Score']
             player_summary_score_diff += (abs(target_player['Draft Score'] - draft_score_value)*3) # Magnitude of 3. We want the Draft Score comp to be about 33% of the comparison
-            leaderboard[row['Name']] = (player_summary_score_diff/(summary_score_count*3))
+            leaderboard[row['Name']] = (player_summary_score_diff/(summary_score_count+3))
         else:
             leaderboard[row['Name']] = (player_summary_score_diff/summary_score_count)
         

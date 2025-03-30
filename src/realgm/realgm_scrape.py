@@ -1,3 +1,5 @@
+import traceback
+
 class RealGM:
     
     RELEVANT_TABLES = {key: None for key in [
@@ -8,18 +10,20 @@ class RealGM:
         "Non-FIBA Events Stats",
         "NBA Regular Season Stats - Per Game"
     ]}
+
     RELEVANT_PROFILE_INFO = {key: None for key in [
         "Born:",
         "Height:",
+        "Weight:",
         "Pre-Draft",
         "Drafted:"
     ]}
     
     NBA_MIN_INDEX = 4
-    HOB_INDEX = 10
-    WIN_INDEX = 14
-    LOSS_INDEX = 15
-    PPR_INDEX = 15
+    HOB_INDEX = 11
+    WIN_INDEX = 15
+    LOSS_INDEX = 16
+    PPR_INDEX = 16
 
     def __init__(self, soup, url=""):
         self.reset_relevant_info()
@@ -33,12 +37,16 @@ class RealGM:
             if info_category[0] in self.RELEVANT_PROFILE_INFO.keys():
                 self.RELEVANT_PROFILE_INFO[info_category[0]] = info_category
         self.image = profile_box.find('img')['src']
-        content = soup.find('div', {"class": "profile-wrap"})
-        headers = content.find_all('h2')
-        for i, header in enumerate(headers):
-            if header.text in self.RELEVANT_TABLES.keys():
-                table = content.find_all('table')[i]
-                self.RELEVANT_TABLES[header.text] = table
+        content = soup.find('div', {"class": "profile-wrap"}).find('div', {"class": "section_tabs_content"})
+        for div in content.find_all('div', id=lambda x: x and x.startswith("tabs_profile-")):
+            h3_elements = div.find_all('h3')
+            for i in range(len(h3_elements)):
+                h3_text = h3_elements[i].text
+                if h3_text == "NCAA Season Stats":
+                    self.RELEVANT_TABLES["NCAA Season Stats - Misc Stats"] = div.find('div', {"id": "tabs_ncaa_reg-5"}).find('table')
+                    self.RELEVANT_TABLES["NCAA Season Stats - Advanced Stats"] = div.find('div', {"id": "tabs_ncaa_reg-4"}).find('table')
+                elif h3_text in self.RELEVANT_TABLES:
+                    self.RELEVANT_TABLES[h3_text] = div.find_all('table')[i]
 
     def get_position(self):
         if self.position == 'G':
@@ -61,8 +69,7 @@ class RealGM:
         return self.RELEVANT_PROFILE_INFO.get('Height:')[1]
     
     def get_weight(self):
-        # Because Height/Weight are in one <p> tag, have to get like this
-        return self.RELEVANT_PROFILE_INFO.get('Height:')[4]
+        return self.RELEVANT_PROFILE_INFO.get('Weight:')[1]
     
     def get_class(self):
         grade = self.RELEVANT_PROFILE_INFO.get('Pre-Draft')
@@ -99,7 +106,7 @@ class RealGM:
         loss = row.find_all('td')[self.LOSS_INDEX].text
         try:
             return int(win), int(loss)
-        except Exception:
+        except Exception as e:
             return None, None
     
     def get_ncaa_ppr(self, row_to_get=-1):
@@ -129,19 +136,21 @@ class RealGM:
         return aau_stats
     
     def get_international_stats(self):
-        num_elems = 21
+        num_elems = 22
         table = self.RELEVANT_TABLES.get("FIBA Junior Team Events Stats")
         if not table:
             table = self.RELEVANT_TABLES.get("Non-FIBA Events Stats")
             if not table:
                 return None
         
-        stats_row = table.find('tfoot').find('tr').find_all('td')
+        stats_row = table.find('tfoot').find('tr').find_all('th')
         info_row = table.find('tbody').find('tr').find_all('td')
         international_stats = []
         for i in range(num_elems):
-            if i in [0, 1, 20]:
+            if i in [0, 2, 21]: # Represents year, event name, place
                 international_stats.append(info_row[i].text)
+            elif i == 1:
+                continue
             else:
                 international_stats.append(stats_row[i].text)
         return international_stats
@@ -171,6 +180,7 @@ class RealGM:
         self.RELEVANT_PROFILE_INFO = {key: None for key in [
         "Born:",
         "Height:",
+        "Weight:",
         "Pre-Draft",
         "Drafted:"
     ]}
@@ -216,10 +226,12 @@ def get_realgm_stats(df, need_profile_info=False, realgm_id=None):
                     populate_profile_info(df, player_page, index)
                 is_row_data_populated = True
             except IndexError:
+                traceback.print_exc()
                 print(f"Dropping {row['Name']}")
                 df.drop(index, inplace=True)
                 is_row_data_populated = True
             except Exception as e:
+                traceback.print_exc()
                 print(e)
                 realgm_id = input(f"Cannot find player page for {row['Name']}. Can you try manually inputting the RealGM ID? ")
                 df.loc[index, 'RealGM ID'] = realgm_id
@@ -251,8 +263,8 @@ def populate_stats(df, player_page, index, row):
     event_stats = player_page.get_international_stats()
     if event_stats:
         for i in range(len(event_stats)):
-            df.loc[index, INTERNATIONAL_STATS_TABLE_COLUMNS[i]] = event_stats[i]
-            
+            df.loc[index, INTERNATIONAL_STATS_TABLE_COLUMNS[i]] = event_stats[i]   
+
 def populate_profile_info(df, player_page, index):
     df.loc[index, "Position"] = player_page.get_position()
     df.loc[index, "Height"] = player_page.get_height()

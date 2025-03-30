@@ -5,11 +5,11 @@ from utils import *
 from aux_stats import *
 
 from nbadraftcombine import measurements_fetch
-from nbadraftnet import nbadraftnet_scrape
+#from nbadraftnet import nbadraftnet_scrape
 from hoop_explorer import hoop_explorer_fetch
 from basketballreference import basketballreference_scrape
 from barttorvik import torvik_fetch
-from hoopmath import hoopmath_scrape
+#from hoopmath import hoopmath_scrape
 from rsci import rsci_scrape
 from realgm import realgm_scrape
 
@@ -41,8 +41,10 @@ df = rsci_scrape.add_rsci_rank_as_column(df, True)
 if (not df["RSCI"].all()):
     df['RSCI'] = 400
 df = torvik_fetch.get_torvik_dunks(df)
-df = hoop_explorer_fetch.get_hoop_explorer_plus_minus_single_player(df)
-df = hoopmath_scrape.add_college_stats_from_hoopmath(df)
+df = torvik_fetch.get_torvik_pbp_data(df)
+df = hoop_explorer_fetch.get_hoop_explorer_plus_minus_single_player(df)    
+# Hoop-math stop supported players in 2024-24 season. If before then, hoop-math should be perfectly set up to grab player info
+# df = hoopmath_scrape.add_college_stats_from_hoopmath(df)
 df = update_position_columns(df)
 if (len(lines) == 5 and lines[4] == 'Draft'):
     df = measurements_fetch.get_NBA_Combine_measurements(df)

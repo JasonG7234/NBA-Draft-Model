@@ -77,7 +77,8 @@ BASKETBALL_REFERENCE_PLAYER_NAME_EXCEPTIONS = {
     "craig-porter-jr" : "craig-porterjr",
     "daron-holmes" : "daron-holmesii",
     "tristan-da-silva": "tristan-dasilva",
-    "terrence-shannon-jr": "terrence-shannonjr"
+    "terrence-shannon-jr": "terrence-shannonjr",
+    "ace-bailey": "airious-bailey",
 }
 
 BASKETBALL_REFERENCE_INDEX_EXCEPTIONS = {
@@ -130,15 +131,15 @@ BASKETBALL_REFERENCE_SCHOOL_NAME_EXCEPTIONS = {
     "Southern Miss." : "Southern Miss",
     "Tennessee-Martin" : "UT-Martin",
     "Texas A&M Corpus Christi" : "Texas A&M-Corpus Christi",
-    "UC Santa Barbara" : "UCSB",
-    "Texas Arlington" : "UT Arlington"
+    "Texas Arlington" : "UT Arlington",
+    "USC" : "Southern California",
+    "BYU" : "Brigham Young",
 }
 
 def add_college_stats_from_basketball_reference(df):
     """Get all advanced college stats for each player's most recent year by scraping the relevant table from basketballreference.
     I also add on ORTG, DRTG, and AST/TOV% because I think they are really relevant stats for projecting NBA prospects.
     """
-
     college_stats = []
     for index, row in df.iterrows():
         player_stats = []
@@ -155,7 +156,8 @@ def add_college_stats_from_basketball_reference(df):
             df.drop(index, inplace=True)
             continue
         college_stats.append(player_stats)
-    df = pd.concat([df, pd.DataFrame(college_stats,index=df.index,columns=COLUMN_NAMES)], axis=1)
+    basketball_reference_df = pd.DataFrame(college_stats,index=df.index,columns=COLUMN_NAMES)
+    df = pd.concat([df, basketball_reference_df], axis=1)
     return df
 
 def get_players_basketball_reference_page(row):
@@ -213,7 +215,7 @@ def get_advanced_stats(soup_html):
     """
     player_advanced_stats = [] 
     last_season_stats = get_last_season_stat_row(soup_html, 'players_advanced')
-    stats = last_season_stats.findChildren('td')[3:] # Slicing
+    stats = last_season_stats.findChildren('td')[4:] # Slicing
     stats_index = 0 # Index of which stat we are on in the player's Advanced table
     all_index = 0 # Index of which stat we SHOULD be on, according to all possible stats in the Advanced table
     while all_index in range(0, len(ADVANCED_COLUMN_IDS)):
@@ -231,9 +233,10 @@ def get_advanced_stats(soup_html):
                 else:
                     player_advanced_stats.append("")
                     stats_index = stats_index + 1
-        except IndexError:
-            if (ADVANCED_COLUMN_IDS[all_index] != 'bpm-dum'):
-                player_advanced_stats.append("") 
+        except IndexError: ### As of 2025 this blank dummy column no longer exists, it did from at least 2013 -> 2024
+        #    if (ADVANCED_COLUMN_IDS[all_index] != 'bpm-dum'):
+        #        player_advanced_stats.append("") 
+            continue
         all_index = all_index + 1
     return player_advanced_stats
 

@@ -74,7 +74,9 @@ OVERALL_RSCI_EXCEPTIONS = {
     "Daeqwon Plowden" : 400,
     "Dakota Mathias" : 218,
     "Kevon Harris" : 400,
-    "DeAnthony Melton" : 134
+    "DeAnthony Melton" : 134,
+    "N'Faly Dante" : 14,
+    "Egor Demin": 16
 }
 
 def add_rsci_rank_as_column(df, find_single_player=False, starting_year=FIRST_YEAR_OF_DRAFT_RANKINGS):
